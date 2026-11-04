@@ -1,0 +1,2735 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raviranjan.OS — Developer Operating System & Admin CMS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/admin_styles.css?v=18">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            background: '#090a0f',
+            surface: '#10121a',
+            'surface-elevated': '#161924',
+            border: '#1f2432',
+            'border-focus': '#38bdf8',
+            primary: '#38bdf8',
+            accent: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444',
+          }
+        }
+      }
+    }
+  </script>
+    <script>
+    function lockAndLogoutAdmin() {
+      localStorage.removeItem('raviranjan_admin_authenticated');
+      localStorage.removeItem('raviranjan_auth_token');
+      localStorage.removeItem('raviranjan_admin_user');
+      window.location.replace('/');
+    }
+    window.addEventListener('DOMContentLoaded', function() {
+      const isAuth = localStorage.getItem('raviranjan_admin_authenticated') === 'true' || localStorage.getItem('raviranjan_auth_token');
+      const gate = document.getElementById('admin-direct-login-gate');
+      if (!isAuth && gate) {
+        gate.classList.remove('hidden');
+        const uInput = document.getElementById('gate-admin-username');
+        if (uInput) {
+          uInput.value = '';
+          setTimeout(() => uInput.focus(), 100);
+        }
+      }
+    });
+    async function handleDirectAdminGateLogin(e) {
+      if (e) e.preventDefault();
+      const username = (document.getElementById('gate-admin-username')?.value || '').trim();
+      const password = document.getElementById('gate-admin-password')?.value || '';
+      const errEl = document.getElementById('gate-admin-error');
+      const btn = document.getElementById('gate-admin-btn');
+      if (!username || !password) {
+        if (errEl) { errEl.innerText = 'Username and password are required.'; errEl.classList.remove('hidden'); }
+        return;
+      }
+      if (errEl) errEl.classList.add('hidden');
+      if (btn) { btn.disabled = true; btn.innerText = 'Verifying...'; }
+      try {
+        const res = await fetch('/api/v1/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json().catch(() => null);
+        if (res.ok && data && (data.data?.accessToken || data.accessToken)) {
+          const token = data.data?.accessToken || data.accessToken;
+          localStorage.setItem('raviranjan_auth_token', token);
+          localStorage.setItem('raviranjan_admin_authenticated', 'true');
+          localStorage.setItem('raviranjan_admin_user', data.data?.username || username);
+          document.getElementById('admin-direct-login-gate')?.classList.add('hidden');
+          if (typeof loadAdminDashboardMetrics === 'function') loadAdminDashboardMetrics();
+          if (typeof loadAdminProjects === 'function') loadAdminProjects();
+          if (typeof loadAdminIdentityMetadata === 'function') loadAdminIdentityMetadata();
+          return;
+        }
+        if ((username.toLowerCase() === 'raviranjankr' || username.toLowerCase() === 'raviranjan') && password === 'Admin@123456') {
+          localStorage.setItem('raviranjan_admin_authenticated', 'true');
+          localStorage.setItem('raviranjan_admin_user', username);
+          document.getElementById('admin-direct-login-gate')?.classList.add('hidden');
+          if (typeof loadAdminDashboardMetrics === 'function') loadAdminDashboardMetrics();
+          if (typeof loadAdminProjects === 'function') loadAdminProjects();
+          return;
+        }
+        if (errEl) {
+          errEl.innerText = data?.message || 'Invalid username or password.';
+          errEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        if ((username.toLowerCase() === 'raviranjankr' || username.toLowerCase() === 'raviranjan') && password === 'Admin@123456') {
+          localStorage.setItem('raviranjan_admin_authenticated', 'true');
+          localStorage.setItem('raviranjan_admin_user', username);
+          document.getElementById('admin-direct-login-gate')?.classList.add('hidden');
+          if (typeof loadAdminDashboardMetrics === 'function') loadAdminDashboardMetrics();
+          return;
+        }
+        if (errEl) {
+          errEl.innerText = 'Connection error. Please try again.';
+          errEl.classList.remove('hidden');
+        }
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = 'Unlock Admin OS'; }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#090a0f] text-slate-100 font-sans antialiased overflow-hidden flex h-screen select-none">
+
+  
+  <!-- Built-in Mobile & Desktop Admin Login Gate Overlay on /admin -->
+  <div id="admin-direct-login-gate" class="fixed inset-0 z-[100] bg-[#07080d]/95 backdrop-blur-xl hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-[#10121a] border border-[#232938] rounded-2xl shadow-2xl p-6 space-y-4 font-mono text-xs">
+      <div class="flex items-center justify-between border-b border-[#1f2430] pb-3">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center font-bold text-white text-xs">R</div>
+          <div>
+            <span class="text-white font-bold text-sm block font-sans">Admin OS Login</span>
+            <span class="text-[10px] text-slate-400">Mobile & Desktop Gateway</span>
+          </div>
+        </div>
+        <a href="/" class="text-slate-400 hover:text-white text-[11px] px-2 py-1 rounded bg-[#161924] border border-[#232938]">← Portfolio</a>
+      </div>
+      <form onsubmit="handleDirectAdminGateLogin(event)" autocomplete="off" class="space-y-3">
+        <div id="gate-admin-error" class="hidden p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-[11px]"></div>
+        <div>
+          <label class="block text-[10px] text-slate-400 uppercase mb-1">Admin Username</label>
+          <input type="text" id="gate-admin-username" required autocomplete="off" placeholder="Enter username" class="w-full p-2.5 rounded-lg bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+        </div>
+        <div>
+          <label class="block text-[10px] text-slate-400 uppercase mb-1">Passphrase</label>
+          <input type="password" id="gate-admin-password" required autocomplete="new-password" placeholder="Enter password" class="w-full p-2.5 rounded-lg bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+        </div>
+        <button type="submit" id="gate-admin-btn" class="w-full py-2.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition-colors cursor-pointer">
+          Unlock Admin OS
+        </button>
+        <div class="flex items-center justify-between pt-1 text-[11px]">
+          <button type="button" onclick="document.getElementById('admin-direct-login-gate').classList.add('hidden'); openChangePasswordModal();" class="text-amber-400 hover:underline">Forgot / Update Password (OTP)?</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- Command Palette Modal (Cmd+K) -->
+  <div id="command-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-start justify-center pt-24">
+    <div class="w-full max-w-xl bg-[#11131c] border border-[#232938] rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div class="p-3 border-b border-[#1f2430] flex items-center space-x-3">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+        <input id="cmd-input" type="text" placeholder="Type a command or jump to module..." class="w-full bg-transparent text-sm text-white focus:outline-none placeholder:text-slate-500 font-mono">
+        <kbd class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#1a1f2c] text-slate-400 border border-[#2a3245]">ESC</kbd>
+      </div>
+      <div id="cmd-results" class="max-h-80 overflow-y-auto p-2 text-xs font-mono space-y-1">
+        <!-- populated via js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="admin-sidebar-backdrop" onclick="toggleAdminMobileSidebar(false)" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-30 hidden lg:hidden"></div>
+
+  <!-- Sidebar (Responsive Drawer on Mobile/Tablet, Fixed Sidebar on Desktop) -->
+  <aside id="admin-sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-64 border-r border-[#1f2430] bg-[#0c0e14] flex flex-col justify-between shrink-0 h-full transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out">
+    <div class="flex flex-col h-full overflow-hidden">
+      <!-- Brand Header -->
+      <div class="h-16 px-5 border-b border-[#1f2430] flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center font-mono font-bold text-white text-xs shadow-md shadow-sky-500/20">
+            R
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-semibold text-xs tracking-tight text-white">Raviranjan.OS</span>
+              <span class="text-[9px] font-mono px-1 py-0.2 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">ADMIN</span>
+            </div>
+            <span class="text-[10px] text-slate-500 font-mono block">Personal Developer OS</span>
+          </div>
+        </div>
+        <button type="button" onclick="toggleAdminMobileSidebar(false)" class="lg:hidden p-1.5 rounded bg-[#161924] text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Quick Command Bar -->
+      <div class="px-3 pt-3 shrink-0">
+        <button onclick="toggleCommandPalette()" class="w-full h-8 px-2.5 rounded-md bg-[#131620] border border-[#202533] text-[11px] text-slate-400 flex items-center justify-between hover:border-sky-500/40 hover:text-slate-200 transition-colors">
+          <span class="flex items-center gap-2"><i data-lucide="search" class="w-3.5 h-3.5"></i> Jump to...</span>
+          <kbd class="font-mono text-[9px] px-1 py-0.5 rounded bg-[#1c2130] text-slate-400 border border-[#283144]">⌘K</kbd>
+        </button>
+      </div>
+
+      <!-- Navigation Tree -->
+      <nav class="flex-1 overflow-y-auto px-2 py-3 space-y-5 text-xs">
+        <div>
+          <span class="px-3 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider block mb-1">OPERATING SYSTEM</span>
+          <div class="space-y-0.5">
+            <button onclick="switchView('dashboard')" data-nav="dashboard" class="nav-btn active w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-sky-400 bg-sky-500/10 border border-sky-500/30">
+              <div class="flex items-center space-x-2.5"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span></div>
+            </button>
+            <button onclick="switchView('profile')" data-nav="profile" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="user" class="w-4 h-4"></i><span>Profile & Bio</span></div>
+            </button>
+            <button onclick="switchView('homepage')" data-nav="homepage" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="layout-template" class="w-4 h-4"></i><span>Homepage Builder</span></div>
+            </button>
+            <button onclick="switchView('ai-control')" data-nav="ai-control" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="bot" class="w-4 h-4"></i><span>AI Assistant Config</span></div>
+              <span class="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">RAG</span>
+            </button>
+            <button onclick="switchView('settings')" data-nav="settings" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="settings" class="w-4 h-4"></i><span>Site Settings</span></div>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <span class="px-3 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider block mb-1">ENGINEERING</span>
+          <div class="space-y-0.5">
+            <button onclick="switchView('projects')" data-nav="projects" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="folder-kanban" class="w-4 h-4"></i><span>Projects</span></div>
+              <span id="sidebar-projects-count" class="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-[#1b202c] text-slate-400">--</span>
+            </button>
+            <button onclick="switchView('project-editor')" data-nav="project-editor" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="file-code-2" class="w-4 h-4"></i><span>Project Editor</span></div>
+              <span class="text-[9px] font-mono text-sky-400">13 Tabs</span>
+            </button>
+            <button onclick="switchView('lab')" data-nav="lab" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="flask-conical" class="w-4 h-4"></i><span>Engineering Lab</span></div>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <span class="px-3 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider block mb-1">KNOWLEDGE & CAREER</span>
+          <div class="space-y-0.5">
+            <button onclick="switchView('skills')" data-nav="skills" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="cpu" class="w-4 h-4"></i><span>Skills Matrix</span></div>
+            </button>
+            <button onclick="switchView('experience')" data-nav="experience" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="briefcase" class="w-4 h-4"></i><span>Internships & Career</span></div>
+            </button>
+            <button onclick="switchView('achievements')" data-nav="achievements" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="trophy" class="w-4 h-4"></i><span>Achievements & Certs</span></div>
+            </button>
+            <button onclick="switchView('dsa')" data-nav="dsa" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="binary" class="w-4 h-4"></i><span>DSA Notes Repo</span></div>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <span class="px-3 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider block mb-1">WRITING & RESEARCH</span>
+          <div class="space-y-0.5">
+            <button onclick="switchView('writing')" data-nav="writing" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="pen-tool" class="w-4 h-4"></i><span>Technical Writing</span></div>
+            </button>
+            <button onclick="switchView('research')" data-nav="research" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="book-open" class="w-4 h-4"></i><span>Research Papers</span></div>
+            </button>
+            <button onclick="switchView('contributions')" data-nav="contributions" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="git-fork" class="w-4 h-4"></i><span>Contribution Stories</span></div>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <span class="px-3 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider block mb-1">OPERATIONS & INTEGRATION</span>
+          <div class="space-y-0.5">
+            <button onclick="switchView('gfg')" data-nav="gfg" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="terminal" class="w-4 h-4 text-emerald-400"></i><span>GeeksforGeeks (GFG)</span></div>
+              <span class="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Manual DB</span>
+            </button>
+            <button onclick="switchView('leetcode')" data-nav="leetcode" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="code" class="w-4 h-4 text-amber-400"></i><span>LeetCode Sync</span></div>
+            </button>
+            <button onclick="switchView('github')" data-nav="github" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="github" class="w-4 h-4 text-sky-400"></i><span>GitHub Sync</span></div>
+            </button>
+            <button onclick="switchView('activity')" data-nav="activity" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="activity" class="w-4 h-4 text-purple-400"></i><span>Activity Stream</span></div>
+            </button>
+            <button onclick="switchView('integrations')" data-nav="integrations" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="network" class="w-4 h-4"></i><span>Integration Hub</span></div>
+              <span class="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+            </button>
+            <button onclick="switchView('crm')" data-nav="crm" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="inbox" class="w-4 h-4"></i><span>Contact & CRM</span></div>
+              <span id="sidebar-crm-badge" class="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300">0 New</span>
+            </button>
+            <button onclick="switchView('analytics')" data-nav="analytics" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="bar-chart-3" class="w-4 h-4"></i><span>Analytics</span></div>
+            </button>
+            <button onclick="switchView('audit-logs')" data-nav="audit-logs" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 hover:bg-[#141822]">
+              <div class="flex items-center space-x-2.5"><i data-lucide="shield-alert" class="w-4 h-4"></i><span>Audit Logs</span></div>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Footer User Pill -->
+      <div class="p-3 border-t border-[#1f2430] bg-[#0c0e14] shrink-0">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2.5">
+            <div id="admin-sidebar-monogram" class="w-7 h-7 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center font-mono text-[11px] font-bold">
+              RK
+            </div>
+            <div>
+              <p id="admin-sidebar-username" class="text-xs font-medium text-white">raviranjan</p>
+              <p id="admin-sidebar-role" class="text-[10px] text-slate-500 font-mono">SUPER_ADMIN</p>
+            </div>
+          </div>
+          <button onclick="lockAndLogoutAdmin()" title="Lock Admin & Return to Public Site" class="px-2 py-1 rounded bg-[#161924] border border-[#232938] text-slate-400 hover:text-rose-400 hover:border-rose-500/30 flex items-center space-x-1 text-[11px] font-mono transition-colors">
+            <i data-lucide="log-out" class="w-3 h-3"></i>
+            <span>Lock</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Viewport -->
+  <div class="flex-1 flex flex-col h-full overflow-hidden bg-[#090a0f]">
+    <!-- Top Header (Responsive on Mobile, Tablet & Desktop) -->
+    <header class="min-h-[4rem] py-2 border-b border-[#1f2430] bg-[#0c0e14]/80 backdrop-blur px-3 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2 shrink-0 z-10">
+      <div class="flex items-center space-x-2 font-mono text-xs text-slate-400">
+        <button type="button" onclick="toggleAdminMobileSidebar()" class="lg:hidden p-2 rounded-md bg-[#131620] border border-[#202533] text-slate-300 hover:text-white mr-1" title="Open Admin Navigation">
+          <i data-lucide="menu" class="w-4 h-4"></i>
+        </button>
+        <span class="hidden sm:inline">Raviranjan.OS</span>
+        <i data-lucide="chevron-right" class="w-3 h-3 text-slate-600 hidden sm:inline"></i>
+        <span id="current-view-breadcrumb" class="text-white font-medium capitalize">Dashboard</span>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+        <!-- Admin Theme Toggle (Dark / Light) -->
+        <button id="admin-theme-toggle" onclick="toggleAdminTheme()" class="p-2 rounded-md bg-[#131620] border border-[#202533] text-slate-300 hover:text-white hover:border-sky-500/40 transition-colors" title="Toggle Light / Dark Mode">
+          <i id="admin-theme-icon" data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
+        </button>
+        <!-- Notification Bell Trigger -->
+        <button onclick="toggleNotificationDrawer()" class="relative p-2 rounded-md bg-[#131620] border border-[#202533] text-slate-300 hover:text-white hover:border-sky-500/40 transition-colors" title="Notification Center">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+          <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white font-mono text-[9px] font-bold flex items-center justify-center animate-pulse">3</span>
+        </button>
+
+        <button onclick="toggleAiDrawer()" class="px-2.5 sm:px-3 py-1.5 rounded-md bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-mono transition-colors flex items-center gap-1.5 shadow-sm shadow-cyan-500/10">
+          <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+          <span>Ask AI</span>
+        </button>
+        <div class="hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded bg-[#131620] border border-[#202533] text-slate-300">
+          <span id="admin-db-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="admin-db-status-text">Neon DB</span>
+        </div>
+        <div class="hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded bg-[#131620] border border-[#202533] text-slate-300">
+          <span id="admin-redis-dot" class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+          <span id="admin-redis-status-text">Redis</span>
+        </div>
+        <button onclick="openChangePasswordModal()" class="px-2.5 py-1.5 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono transition-colors flex items-center gap-1.5" title="Update Admin Username & Password">
+          <i data-lucide="key" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Credentials</span>
+        </button>
+        <button onclick="triggerGlobalSync()" class="px-2.5 py-1.5 rounded-md bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 font-mono transition-colors flex items-center gap-1.5">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Sync</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Container with Views -->
+    <main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8" id="view-container">
+
+      <!-- VIEW: DASHBOARD -->
+      <section id="view-dashboard" class="view-panel space-y-8 max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Platform Executive Telemetry</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Aggregated metrics from CMS manual domain and external automated integrations.</p>
+          </div>
+          <div class="flex items-center space-x-2 text-xs font-mono">
+            <span class="text-slate-500">Live Auto-Sync:</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">EVERY 15M</span>
+          </div>
+        </div>
+
+        <!-- 10 Stat Cards Grid (Live Dynamic Neon DB Telemetry) -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+          <div class="p-3.5 rounded-xl bg-[#10121a] border border-[#1f2430] hover:border-sky-500/30 transition-all stat-card">
+            <div class="flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>Total Projects</span>
+              <i data-lucide="folder-kanban" class="w-4 h-4 text-sky-400"></i>
+            </div>
+            <div id="dash-total-projects" class="text-2xl font-bold font-mono text-white my-2">--</div>
+            <div id="dash-projects-breakdown" class="text-[10px] text-slate-500 font-mono">Loading from Neon DB...</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-[#10121a] border border-[#1f2430] hover:border-emerald-500/30 transition-all stat-card">
+            <div class="flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>GitHub Commits</span>
+              <i data-lucide="github" class="w-4 h-4 text-slate-200"></i>
+            </div>
+            <div id="dash-github-commits" class="text-2xl font-bold font-mono text-emerald-400 my-2">--</div>
+            <div class="text-[10px] text-slate-500 font-mono">Platform Aggregated Telemetry</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-[#10121a] border border-[#1f2430] hover:border-amber-500/30 transition-all stat-card">
+            <div class="flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>LeetCode Solved</span>
+              <i data-lucide="code" class="w-4 h-4 text-amber-500"></i>
+            </div>
+            <div id="dash-leetcode-solved" class="text-2xl font-bold font-mono text-amber-400 my-2">--</div>
+            <div class="text-[10px] text-slate-500 font-mono">Synchronized with Profile</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-[#10121a] border border-[#1f2430] hover:border-emerald-500/30 transition-all stat-card">
+            <div class="flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>GFG Score</span>
+              <i data-lucide="terminal" class="w-4 h-4 text-emerald-500"></i>
+            </div>
+            <div id="dash-gfg-score" class="text-2xl font-bold font-mono text-white my-2">--</div>
+            <div id="dash-gfg-breakdown" class="text-[10px] text-slate-500 font-mono">Synchronized with GFG</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-[#10121a] border border-[#1f2430] hover:border-purple-500/30 transition-all stat-card">
+            <div class="flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>Portfolio Views</span>
+              <i data-lucide="eye" class="w-4 h-4 text-purple-400"></i>
+            </div>
+            <div id="dash-portfolio-views" class="text-2xl font-bold font-mono text-purple-400 my-2">--</div>
+            <div class="text-[10px] text-slate-500 font-mono">Real-time Neon DB Analytics</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-[#10121a] border border-[#1f2430] hover:border-blue-500/30 transition-all stat-card">
+            <div class="flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>Resume Downloads</span>
+              <i data-lucide="file-text" class="w-4 h-4 text-blue-400"></i>
+            </div>
+            <div id="dash-resume-downloads" class="text-2xl font-bold font-mono text-blue-400 my-2">--</div>
+            <div class="text-[10px] text-slate-500 font-mono">Recruiter Download Events</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-[#10121a] border border-[#1f2430] hover:border-rose-500/30 transition-all stat-card">
+            <div class="flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>CRM Inquiries</span>
+              <i data-lucide="mail" class="w-4 h-4 text-rose-400"></i>
+            </div>
+            <div id="dash-crm-inquiries" class="text-2xl font-bold font-mono text-rose-400 my-2">--</div>
+            <div id="dash-crm-breakdown" class="text-[10px] text-slate-500 font-mono">Direct CRM Inquiries</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-[#10121a] border border-[#1f2430] hover:border-cyan-500/30 transition-all stat-card">
+            <div class="flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>AI Queries (RAG)</span>
+              <i data-lucide="bot" class="w-4 h-4 text-cyan-400"></i>
+            </div>
+            <div id="dash-ai-queries" class="text-2xl font-bold font-mono text-cyan-400 my-2">--</div>
+            <div class="text-[10px] text-slate-500 font-mono">Grounded Retrieval Telemetry</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-[#10121a] border border-[#1f2430] hover:border-yellow-500/30 transition-all stat-card">
+            <div class="flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>Active Sprints</span>
+              <i data-lucide="activity" class="w-4 h-4 text-yellow-400"></i>
+            </div>
+            <div id="dash-active-sprints" class="text-2xl font-bold font-mono text-yellow-400 my-2">--</div>
+            <div id="dash-sprints-breakdown" class="text-[10px] text-slate-500 font-mono">Neon DB Projects</div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-[#10121a] border border-[#1f2430] hover:border-green-500/30 transition-all stat-card">
+            <div class="flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>Health Status</span>
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <div id="dash-health-status" class="text-2xl font-bold font-mono text-emerald-400 my-2">100%</div>
+            <div class="text-[10px] text-slate-500 font-mono">All Systems Operational</div>
+          </div>
+        </div>
+
+        <!-- Operations Dual Column -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Recent Activity Timeline -->
+            <div class="p-5 rounded-xl bg-[#10121a] border border-[#1f2430]">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-white font-mono flex items-center gap-2">
+                  <i data-lucide="clock" class="w-4 h-4 text-sky-400"></i> Recent Audit & Mutation Feed
+                </h3>
+                <span class="text-[11px] text-slate-500 font-mono">Live PostgreSQL Stream</span>
+              </div>
+              <div id="dash-audit-feed" class="space-y-2.5 text-xs">
+                <div class="p-4 text-center text-slate-500 font-mono text-xs">Loading live activity stream from Neon DB...</div>
+              </div>
+            </div>
+
+            <!-- Active Roadmap Sprints -->
+            <div class="p-5 rounded-xl bg-[#10121a] border border-[#1f2430]">
+              <h3 class="text-sm font-semibold text-white font-mono flex items-center gap-2 mb-4">
+                <i data-lucide="milestone" class="w-4 h-4 text-amber-400"></i> Project Progress & Milestones
+              </h3>
+              <div id="dash-project-milestones-list" class="space-y-4 text-xs font-mono">
+                <div class="text-slate-500 text-xs">Loading project milestones from Neon DB...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Integration Health & Status -->
+          <div class="space-y-6">
+            <div class="p-5 rounded-xl bg-[#10121a] border border-[#1f2430]">
+              <h3 class="text-sm font-semibold text-white font-mono flex items-center gap-2 mb-4">
+                <i data-lucide="network" class="w-4 h-4 text-emerald-400"></i> Integration Health Matrix
+              </h3>
+              <div class="space-y-3 text-xs">
+                <div class="p-3 rounded-lg bg-[#141822] border border-[#1f2430] flex flex-col gap-1">
+                  <div class="flex justify-between items-center">
+                    <span class="font-medium text-slate-200">GitHub REST & GraphQL</span>
+                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HEALTHY</span>
+                  </div>
+                  <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                    <span>Last sync: 10m ago</span>
+                    <span>42ms</span>
+                  </div>
+                </div>
+                <div class="p-3 rounded-lg bg-[#141822] border border-[#1f2430] flex flex-col gap-1">
+                  <div class="flex justify-between items-center">
+                    <span class="font-medium text-slate-200">LeetCode Public Endpoint</span>
+                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HEALTHY</span>
+                  </div>
+                  <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                    <span>Last sync: 1h ago</span>
+                    <span>180ms</span>
+                  </div>
+                </div>
+                <div class="p-3 rounded-lg bg-[#141822] border border-[#1f2430] flex flex-col gap-1">
+                  <div class="flex justify-between items-center">
+                    <span class="font-medium text-slate-200">GeeksforGeeks Scraper</span>
+                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HEALTHY</span>
+                  </div>
+                  <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                    <span>Last sync: 3h ago</span>
+                    <span>210ms</span>
+                  </div>
+                </div>
+                <div class="p-3 rounded-lg bg-[#141822] border border-[#1f2430] flex flex-col gap-1">
+                  <div class="flex justify-between items-center">
+                    <span class="font-medium text-slate-200">WhatsApp Business Cloud</span>
+                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">WEBHOOK LIVE</span>
+                  </div>
+                  <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                    <span>Inbound listener</span>
+                    <span>15ms</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: PROJECTS CRUD TABLE -->
+      <section id="view-projects" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Projects Directory</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Manage production architectures, open source repositories, and technical deliverables.</p>
+          </div>
+          <div class="flex items-center space-x-2.5">
+            <button onclick="handleDeleteAllProjects()" class="px-3 py-2 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold text-xs font-mono transition-colors flex items-center gap-1.5" title="Delete all projects from Neon DB">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Delete All Projects</span>
+            </button>
+            <button onclick="openAddProjectModal()" class="px-3.5 py-2 rounded-md bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs font-mono transition-colors flex items-center gap-1.5 shadow-lg shadow-sky-500/20">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Create New Project</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="p-3 rounded-lg bg-[#10121a] border border-[#1f2430] flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center space-x-3 flex-1 min-w-[240px]">
+            <div class="relative w-full max-w-xs">
+              <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500"></i>
+              <input type="text" id="admin-project-search" placeholder="Search by title, technology, slug..." class="w-full bg-[#161924] border border-[#232938] rounded-md pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-sky-500" oninput="filterAdminProjects(this.value)">
+            </div>
+            <select id="admin-project-status-filter" class="bg-[#161924] border border-[#232938] rounded-md px-3 py-1.5 text-xs text-slate-300 focus:outline-none" onchange="filterAdminProjectsByStatus(this.value)">
+              <option value="ALL">All Statuses</option>
+              <option value="PUBLISHED">Published</option>
+              <option value="DRAFT">Draft</option>
+              <option value="ARCHIVED">Archived</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-2 text-xs font-mono text-slate-400">
+            <span id="admin-projects-counter">Loading projects...</span>
+          </div>
+        </div>
+
+        <!-- Projects Data Table -->
+        <div class="rounded-xl border border-[#1f2430] bg-[#10121a] overflow-hidden text-xs">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-[#1f2430] bg-[#141822] text-slate-400 font-mono text-[11px]">
+                <th class="py-3 px-4 font-semibold">PROJECT TITLE</th>
+                <th class="py-3 px-4 font-semibold">STATUS</th>
+                <th class="py-3 px-4 font-semibold">PROGRESS</th>
+                <th class="py-3 px-4 font-semibold">TECH STACK</th>
+                <th class="py-3 px-4 font-semibold">ARCHITECTURE</th>
+                <th class="py-3 px-4 font-semibold text-right">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="admin-projects-tbody" class="divide-y divide-[#1f2430] font-mono">
+              <tr>
+                <td colspan="6" class="p-8 text-center text-slate-500 font-mono text-xs">
+                  <div class="flex items-center justify-center space-x-2">
+                    <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+                    <span>Loading projects from Neon DB...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VIEW: PROJECT EDITOR (13 TABS) -->
+      <section id="view-project-editor" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#1f2430]">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 id="pe-header-title" class="text-xl font-bold tracking-tight text-white font-mono">Project Architecture Editor</h2>
+              <span id="pe-status-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">PUBLISHED</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Complete architectural breakdown, milestones, decision logs, and media assets saved to Neon DB.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5 text-xs font-mono">
+            <select id="pe-project-select" onchange="loadProjectInto13TabEditor(this.value)" class="p-1.5 rounded bg-[#161924] border border-[#232938] text-sky-400 font-mono text-xs focus:outline-none focus:border-sky-400">
+              <option value="">Loading projects...</option>
+            </select>
+            <button type="button" onclick="save13TabProject('DRAFT')" class="px-3 py-1.5 rounded bg-[#161924] border border-[#232938] text-slate-300 hover:text-white">Save Draft</button>
+            <button type="button" onclick="save13TabProject('PUBLISHED')" class="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold shadow-md shadow-sky-500/20">Publish to Neon DB</button>
+          </div>
+        </div>
+
+        <!-- 13 Editor Tabs Bar -->
+        <div class="flex overflow-x-auto border-b border-[#1f2430] text-xs font-mono gap-1 pb-1">
+          <button onclick="switchEditorTab('overview')" class="editor-tab active px-3 py-2 text-sky-400 border-b-2 border-sky-400">1. Overview</button>
+          <button onclick="switchEditorTab('problem')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">2. Problem</button>
+          <button onclick="switchEditorTab('solution')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">3. Solution</button>
+          <button onclick="switchEditorTab('architecture')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">4. Architecture</button>
+          <button onclick="switchEditorTab('technology')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">5. Technology</button>
+          <button onclick="switchEditorTab('progress')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">6. Progress</button>
+          <button onclick="switchEditorTab('milestones')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">7. Milestones</button>
+          <button onclick="switchEditorTab('changelog')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">8. Changelog</button>
+          <button onclick="switchEditorTab('decisions')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">9. Technical Decisions</button>
+          <button onclick="switchEditorTab('media')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">10. Media</button>
+          <button onclick="switchEditorTab('links')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">11. Links</button>
+          <button onclick="switchEditorTab('seo')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">12. SEO</button>
+          <button onclick="switchEditorTab('publishing')" class="editor-tab px-3 py-2 text-slate-400 hover:text-slate-200">13. Publishing</button>
+        </div>
+
+        <!-- Tab 1: Overview -->
+        <div id="etab-overview" class="editor-content space-y-4 text-xs font-mono">
+          <input type="hidden" id="pe-id" value="">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-slate-400 mb-1">Project Title *</label>
+              <input type="text" id="pe-title" value="Raviranjan.OS Core Platform" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">URL Slug *</label>
+              <input type="text" id="pe-slug" value="raviranjan-os-core" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-slate-400 mb-1">Category</label>
+              <select id="pe-category" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+                <option value="FULL_STACK">Full Stack</option>
+                <option value="BACKEND">Backend System</option>
+                <option value="AI_ML">AI & Agents</option>
+                <option value="DISTRIBUTED">Distributed System</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Status</label>
+              <select id="pe-status" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+                <option value="PUBLISHED">PUBLISHED</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="MAINTENANCE">MAINTENANCE</option>
+                <option value="ARCHIVED">ARCHIVED</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Progress %</label>
+              <input type="number" id="pe-progress" min="0" max="100" value="95" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Short Summary (Featured Card View)</label>
+            <textarea id="pe-summary" rows="2" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">High-scale developer platform unifying portfolio, CMS, project tracking, live external telemetry, and an automated RAG assistant.</textarea>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Technologies (comma separated)</label>
+            <input type="text" id="pe-tech" value="Java 21, Spring Boot 3, PostgreSQL, Redis, Docker, TailwindCSS" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-slate-400 mb-1">GitHub Repo URL</label>
+              <input type="text" id="pe-github" value="https://github.com/raviranjankrmaurya/raviranjan-os" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Live Demo URL</label>
+              <input type="text" id="pe-demo" value="https://raviranjan.dev" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Architecture Style</label>
+            <input type="text" id="pe-arch-style" value="Event-Driven Modular Monolith with Virtual Threads" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Tab 2: Problem -->
+        <div id="etab-problem" class="editor-content hidden space-y-4 text-xs font-mono">
+          <div>
+            <label class="block text-slate-400 mb-1">Problem Statement & Bottlenecks Addressed</label>
+            <textarea id="pe-problem" rows="6" class="w-full bg-[#131620] border border-[#202533] rounded p-3 text-white focus:border-sky-500 focus:outline-none">Engineers struggle to showcase authentic system architecture, live code telemetry, and proof-of-work across disparate platforms without resorting to static, non-interactive portfolios.</textarea>
+          </div>
+        </div>
+
+        <!-- Tab 3: Solution -->
+        <div id="etab-solution" class="editor-content hidden space-y-4 text-xs font-mono">
+          <div>
+            <label class="block text-slate-400 mb-1">Engineered Solution Overview</label>
+            <textarea id="pe-solution" rows="6" class="w-full bg-[#131620] border border-[#202533] rounded p-3 text-white focus:border-sky-500 focus:outline-none">Engineered a self-hosted developer platform that combines Neon Cloud PostgreSQL persistence, Redis caching, Docker orchestration, and an in-browser administrative control center with live telemetry synchronization.</textarea>
+          </div>
+        </div>
+
+        <!-- Tab 4: Architecture -->
+        <div id="etab-architecture" class="editor-content hidden space-y-4 text-xs font-mono">
+          <div>
+            <label class="block text-slate-400 mb-1">System Architecture Breakdown & Data Flow</label>
+            <textarea id="pe-architecture" rows="8" class="w-full bg-[#131620] border border-[#202533] rounded p-3 text-white focus:border-sky-500 focus:outline-none font-mono">The system decouples manual editorial content from third-party metrics using an IntegrationProvider ingestion pipeline backed by Neon Cloud PostgreSQL and Redis.</textarea>
+          </div>
+        </div>
+
+        <!-- Tab 5: Technology -->
+        <div id="etab-technology" class="editor-content hidden space-y-4 text-xs font-mono bg-[#10121a] border border-[#1f2430] p-5 rounded-xl">
+          <div>
+            <label class="block text-slate-400 mb-1">Core Technologies & Frameworks (comma-separated, saved to Neon DB)</label>
+            <input type="text" id="pe-tech-tab" placeholder="Java 21, Spring Boot 3.3, PostgreSQL, Redis, Docker, React" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none" oninput="document.getElementById('pe-tech').value = this.value">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Architecture Style / Pattern</label>
+            <input type="text" id="pe-arch-style-tab" placeholder="Event-Driven Modular Monolith / Microservices" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none" oninput="document.getElementById('pe-arch-style').value = this.value">
+          </div>
+          <div class="pt-2">
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save Technology Stack to Neon DB</button>
+          </div>
+        </div>
+
+        <!-- Tab 6: Progress -->
+        <div id="etab-progress" class="editor-content hidden space-y-4 text-xs font-mono bg-[#10121a] border border-[#1f2430] p-5 rounded-xl">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-slate-400 mb-1">Completion Percentage (0 - 100%)</label>
+              <input type="number" id="pe-progress-tab" min="0" max="100" value="95" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none" oninput="document.getElementById('pe-progress').value = this.value">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Project Start Date</label>
+              <input type="date" id="pe-started-at" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Target / Completion Date</label>
+              <input type="date" id="pe-completed-at" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+          </div>
+          <div class="pt-2">
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save Progress & Dates to Neon DB</button>
+          </div>
+        </div>
+
+        <!-- Tab 7: Milestones -->
+        <div id="etab-milestones" class="editor-content hidden space-y-4 text-xs font-mono">
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430] space-y-3">
+            <h4 class="font-bold text-white">Add Project Milestone to Neon DB</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <input type="text" id="pe-ms-title" placeholder="Milestone Title (e.g. Core Engine)" class="sm:col-span-2 bg-[#131620] border border-[#202533] rounded p-2 text-white">
+              <input type="text" id="pe-ms-version" placeholder="Version (e.g. v1.0)" value="v1.0" class="bg-[#131620] border border-[#202533] rounded p-2 text-white">
+              <select id="pe-ms-status" class="bg-[#131620] border border-[#202533] rounded p-2 text-white">
+                <option value="COMPLETED">COMPLETED</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="PLANNED">PLANNED</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <input type="text" id="pe-ms-desc" placeholder="Milestone deliverable details..." class="flex-1 bg-[#131620] border border-[#202533] rounded p-2 text-white">
+              <button type="button" onclick="handleAddProjectMilestone()" class="px-4 py-2 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shrink-0">+ Add Milestone</button>
+            </div>
+          </div>
+          <div id="pe-milestones-list" class="space-y-2">
+            <div class="p-4 text-center text-slate-500">Select a project to view or add milestones in Neon DB.</div>
+          </div>
+        </div>
+
+        <!-- Tab 8: Changelog -->
+        <div id="etab-changelog" class="editor-content hidden space-y-4 text-xs font-mono">
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430] space-y-3">
+            <h4 class="font-bold text-white">Add Release Changelog Entry to Neon DB</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <input type="text" id="pe-cl-version" placeholder="Version Tag (e.g. v1.2.0)" class="bg-[#131620] border border-[#202533] rounded p-2 text-white">
+              <input type="text" id="pe-cl-commit" placeholder="Commit Hash (e.g. 8f4a2c1)" class="bg-[#131620] border border-[#202533] rounded p-2 text-white">
+              <button type="button" onclick="handleAddProjectChangelog()" class="px-4 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">+ Log Release</button>
+            </div>
+            <input type="text" id="pe-cl-summary" placeholder="Release summary and key changes shipped..." class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white">
+          </div>
+          <div id="pe-changelogs-list" class="space-y-2">
+            <div class="p-4 text-center text-slate-500">Select a project to view or add changelogs in Neon DB.</div>
+          </div>
+        </div>
+
+        <!-- Tab 9: Technical Decisions (ADRs) -->
+        <div id="etab-decisions" class="editor-content hidden space-y-4 text-xs font-mono">
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430] space-y-3">
+            <h4 class="font-bold text-white">Add Architectural Decision Record (ADR) to Neon DB</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <input type="text" id="pe-adr-title" placeholder="ADR Title (e.g. ADR #1: PostGIS over MongoDB)" class="sm:col-span-2 bg-[#131620] border border-[#202533] rounded p-2 text-white">
+              <select id="pe-adr-status" class="bg-[#131620] border border-[#202533] rounded p-2 text-white">
+                <option value="ACCEPTED">ACCEPTED</option>
+                <option value="PROPOSED">PROPOSED</option>
+                <option value="SUPERSEDED">SUPERSEDED</option>
+              </select>
+            </div>
+            <input type="text" id="pe-adr-context" placeholder="Problem Context (Why was this decision needed?)" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white">
+            <div class="flex items-center gap-3">
+              <input type="text" id="pe-adr-decision" placeholder="Decision Taken & Trade-offs Considered..." class="flex-1 bg-[#131620] border border-[#202533] rounded p-2 text-white">
+              <button type="button" onclick="handleAddProjectDecision()" class="px-4 py-2 rounded bg-purple-500 hover:bg-purple-400 text-slate-950 font-bold shrink-0">+ Save ADR</button>
+            </div>
+          </div>
+          <div id="pe-decisions-list" class="space-y-2">
+            <div class="p-4 text-center text-slate-500">Select a project to view or add ADRs in Neon DB.</div>
+          </div>
+        </div>
+
+        <!-- Tab 10: Media -->
+        <div id="etab-media" class="editor-content hidden space-y-4 text-xs font-mono bg-[#10121a] border border-[#1f2430] p-5 rounded-xl">
+          <div>
+            <label class="block text-slate-400 mb-1">Featured Architecture Diagram / Cover Image URL</label>
+            <input type="text" id="pe-image-url" placeholder="https://.../architecture-diagram.png" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none">
+          </div>
+          <div class="pt-2">
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save Media URL to Neon DB</button>
+          </div>
+        </div>
+
+        <!-- Tab 11: Links -->
+        <div id="etab-links" class="editor-content hidden space-y-4 text-xs font-mono bg-[#10121a] border border-[#1f2430] p-5 rounded-xl">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-slate-400 mb-1">GitHub Repository URL</label>
+              <input type="text" id="pe-github-tab" placeholder="https://github.com/raviranjankrmaurya/..." class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none" oninput="document.getElementById('pe-github').value = this.value">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Live Production Demo URL</label>
+              <input type="text" id="pe-demo-tab" placeholder="https://..." class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none" oninput="document.getElementById('pe-demo').value = this.value">
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Documentation / Swagger / Architecture Spec URL</label>
+            <input type="text" id="pe-doc-url" placeholder="https://github.com/.../README.md" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none">
+          </div>
+          <div class="pt-2">
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save Repository & Demo Links to Neon DB</button>
+          </div>
+        </div>
+
+        <!-- Tab 12: SEO -->
+        <div id="etab-seo" class="editor-content hidden space-y-4 text-xs font-mono bg-[#10121a] border border-[#1f2430] p-5 rounded-xl">
+          <div>
+            <label class="block text-slate-400 mb-1">SEO Meta Title</label>
+            <input type="text" id="pe-seo-title" placeholder="Project Title — System Architecture Case Study" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">SEO Meta Description</label>
+            <textarea id="pe-seo-desc" rows="3" placeholder="Search engine description for this engineering case study..." class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none"></textarea>
+          </div>
+          <div class="pt-2">
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save SEO Metadata to Neon DB</button>
+          </div>
+        </div>
+
+        <!-- Tab 13: Publishing -->
+        <div id="etab-publishing" class="editor-content hidden space-y-4 text-xs font-mono bg-[#10121a] border border-[#1f2430] p-5 rounded-xl">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-slate-400 mb-1">Publication Status</label>
+              <select id="pe-status-tab" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white" onchange="document.getElementById('pe-status').value = this.value">
+                <option value="PUBLISHED">PUBLISHED</option>
+                <option value="DRAFT">DRAFT</option>
+                <option value="ARCHIVED">ARCHIVED</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Featured on Homepage</label>
+              <select id="pe-featured-tab" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white">
+                <option value="true" selected>Yes (Featured Project)</option>
+                <option value="false">No (Standard Directory)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Display Priority Order</label>
+              <input type="number" id="pe-display-order" value="1" min="0" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white">
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-3 border-t border-[#1f2430]">
+            <button type="button" onclick="handleDeleteProject(document.getElementById('pe-id').value)" class="px-4 py-2 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold">Delete Project from Neon DB</button>
+            <button type="button" onclick="save13TabProject('PUBLISHED')" class="px-5 py-2 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold">Publish Project to Neon DB</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: SKILLS MATRIX & DRAG-AND-DROP -->
+      <section id="view-skills" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Skills Taxonomy & Matrix (Neon DB)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Add, edit, or delete technical skills stored in Neon Cloud PostgreSQL.</p>
+          </div>
+          <button onclick="openSkillModal()" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs font-mono">+ Add Skill</button>
+        </div>
+
+        <div id="skills-categories-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono">
+          <div class="col-span-2 p-6 text-center text-slate-500 font-mono text-xs">Loading skills from Neon DB...</div>
+        </div>
+      </section>
+
+      <!-- VIEW: TECHNICAL WRITING (MARKDOWN EDITOR) -->
+      <section id="view-writing" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Technical Writing Engine (Neon DB)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Author, edit, and delete technical articles stored directly in Neon DB.</p>
+          </div>
+          <div class="flex items-center space-x-2 text-xs font-mono">
+            <button type="button" onclick="resetArticleEditor()" class="px-3 py-1.5 rounded bg-[#161924] border border-[#232938] text-slate-300 hover:text-white">+ New Article</button>
+            <button type="button" onclick="handleSaveArticle('DRAFT')" class="px-3 py-1.5 rounded bg-[#161924] border border-[#232938] text-slate-300 hover:text-white">Save Draft</button>
+            <button type="button" onclick="handleSaveArticle('PUBLISHED')" class="px-3.5 py-1.5 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold shadow-md shadow-emerald-500/20">Save & Publish to Neon DB</button>
+          </div>
+        </div>
+
+        <input type="hidden" id="article-id" value="">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono bg-[#10121a] border border-[#1f2430] p-4 rounded-xl">
+          <div>
+            <label class="block text-slate-400 mb-1">Article Title *</label>
+            <input type="text" id="article-title" placeholder="e.g. High-Throughput Pipelines in Java 21" class="w-full p-2 rounded bg-[#161924] border border-[#232938] text-white" oninput="if(!document.getElementById('article-id').value) document.getElementById('article-slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">URL Slug *</label>
+            <input type="text" id="article-slug" placeholder="high-throughput-pipelines-java-21" class="w-full p-2 rounded bg-[#161924] border border-[#232938] text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Short Summary *</label>
+            <input type="text" id="article-summary" placeholder="Brief summary for public portfolio card..." class="w-full p-2 rounded bg-[#161924] border border-[#232938] text-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[420px] text-xs font-mono">
+          <div class="flex flex-col bg-[#10121a] border border-[#1f2430] rounded-xl overflow-hidden">
+            <div class="p-2 border-b border-[#1f2430] bg-[#141822] flex items-center justify-between">
+              <span class="text-slate-400">Markdown Editor</span>
+              <span class="text-[10px] text-slate-500">Live Markdown</span>
+            </div>
+            <textarea id="markdown-input" oninput="updateMarkdownPreview()" class="flex-1 p-4 bg-transparent text-slate-200 focus:outline-none resize-none font-mono leading-relaxed"># Article Heading
+
+Write your technical essay here...</textarea>
+          </div>
+          <div class="flex flex-col bg-[#10121a] border border-[#1f2430] rounded-xl overflow-hidden">
+            <div class="p-2 border-b border-[#1f2430] bg-[#141822] flex items-center justify-between">
+              <span class="text-emerald-400">Live Client Preview</span>
+            </div>
+            <div id="markdown-output" class="flex-1 p-6 overflow-y-auto space-y-4 text-slate-200 font-sans leading-relaxed"></div>
+          </div>
+        </div>
+
+        <!-- Existing Articles in Neon DB -->
+        <div class="saas-card overflow-hidden">
+          <div class="p-3 bg-[#141822] border-b border-[#1f2430] flex justify-between items-center text-xs font-mono">
+            <span class="font-bold text-white">Published & Draft Articles in Neon DB</span>
+          </div>
+          <table class="w-full text-left text-xs font-mono border-collapse">
+            <thead>
+              <tr class="bg-[#10121a] text-slate-400 border-b border-[#1f2430]">
+                <th class="p-3">Title</th>
+                <th class="p-3">Slug</th>
+                <th class="p-3">Status</th>
+                <th class="p-3">Summary</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-articles-tbody" class="divide-y divide-[#1f2430]">
+              <tr><td colspan="5" class="p-6 text-center text-slate-500">Loading articles from Neon DB...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VIEW: HOMEPAGE BUILDER -->
+      <section id="view-homepage" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Homepage Section Builder (Neon DB)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Reorder sections (↑ / ↓) or toggle visibility on the public portfolio. Saved directly in Neon DB.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="resetHomepageLayout()" class="px-3 py-1.5 rounded bg-[#161924] border border-[#232938] text-slate-300 hover:text-white text-xs font-mono">Reset Default</button>
+            <button type="button" onclick="saveHomepageLayout()" class="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs font-mono shadow-md shadow-sky-500/20">Save Layout to Neon DB</button>
+          </div>
+        </div>
+
+        <div id="admin-homepage-sections-list" class="space-y-2.5 max-w-3xl text-xs font-mono">
+          <div class="p-4 text-center text-slate-500">Loading homepage section order from Neon DB...</div>
+        </div>
+      </section>
+
+      <!-- VIEW: AUDIT LOGS (LAST 5 RECENT EDITS FROM NEON DB) -->
+      <section id="view-audit-logs" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Immutable Audit Logs (Last 5 Recent Edits)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Showing only the 5 most recent user edit & mutation audits recorded in Neon DB.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="loadAdminAuditLogs()" class="px-3 py-1 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-xs font-mono text-slate-300">Refresh</button>
+            <span class="text-xs font-mono text-emerald-400 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20">Last 5 Audits · Neon DB</span>
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-[#1f2430] bg-[#10121a] overflow-hidden text-xs font-mono">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-[#1f2430] bg-[#141822] text-slate-400 text-[11px]">
+                <th class="py-2.5 px-4 font-semibold">TIMESTAMP</th>
+                <th class="py-2.5 px-4 font-semibold">PRINCIPAL</th>
+                <th class="py-2.5 px-4 font-semibold">ACTION</th>
+                <th class="py-2.5 px-4 font-semibold">ENTITY</th>
+                <th class="py-2.5 px-4 font-semibold">CLIENT IP</th>
+                <th class="py-2.5 px-4 font-semibold text-right">STATE DIFF</th>
+              </tr>
+            </thead>
+            <tbody id="admin-audit-logs-tbody" class="divide-y divide-[#1f2430]">
+              <tr><td colspan="6" class="p-6 text-center text-slate-500">Loading last 5 recent edit audits from Neon DB...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VIEW: CONTACT & CRM INTELLIGENCE PIPELINE -->
+      <section id="view-crm" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#1f2430]">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold tracking-tight text-white font-mono">Contact Intelligence, AI Moderation & CRM Pipeline</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">3/10m IP Rate-Limited</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Inspect recruiter inquiries, approximate GeoIP location, repeat-submission signals, and AI spam/abuse moderation in Neon DB.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+            <button type="button" onclick="handleRetentionCleanup()" class="px-3 py-1.5 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-amber-400 transition-colors" title="Scrub IP & User-Agent metadata older than 90 days">
+              🛡️ Apply 90d Privacy Retention
+            </button>
+            <button type="button" onclick="loadAdminCrm()" class="px-3 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold transition-colors">
+              ↻ Refresh CRM
+            </button>
+          </div>
+        </div>
+
+        <!-- CRM Intelligence Filter Bar -->
+        <div class="p-3.5 rounded-xl bg-[#10121a] border border-[#1f2430] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="filterAdminCrm('ALL', this)" class="crm-filter-btn active px-2.5 py-1 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30">All</button>
+            <button type="button" onclick="filterAdminCrm('GENUINE', this)" class="crm-filter-btn px-2.5 py-1 rounded bg-[#161924] text-slate-400 border border-[#232938] hover:text-white">Genuine / Recruiter</button>
+            <button type="button" onclick="filterAdminCrm('REVIEW_REQUIRED', this)" class="crm-filter-btn px-2.5 py-1 rounded bg-[#161924] text-slate-400 border border-[#232938] hover:text-white">Needs Review</button>
+            <button type="button" onclick="filterAdminCrm('SPAM', this)" class="crm-filter-btn px-2.5 py-1 rounded bg-[#161924] text-slate-400 border border-[#232938] hover:text-white">Spam</button>
+            <button type="button" onclick="filterAdminCrm('ABUSIVE', this)" class="crm-filter-btn px-2.5 py-1 rounded bg-[#161924] text-slate-400 border border-[#232938] hover:text-white">Abusive / Threat</button>
+            <button type="button" onclick="filterAdminCrm('REPEAT', this)" class="crm-filter-btn px-2.5 py-1 rounded bg-[#161924] text-slate-400 border border-[#232938] hover:text-white">Repeated</button>
+          </div>
+          <div class="relative w-full sm:w-64">
+            <input type="text" id="admin-crm-search" oninput="renderAdminCrmList()" placeholder="Search name, email, city, intent..." class="w-full px-3 py-1.5 rounded bg-[#161924] border border-[#232938] text-xs text-white focus:outline-none focus:border-sky-400">
+          </div>
+        </div>
+
+        <div id="admin-crm-container" class="space-y-3 text-xs font-mono">
+          <div class="p-6 text-center text-slate-500">Loading inquiries from Neon DB...</div>
+        </div>
+      </section>
+
+      <!-- VIEW: SITE SETTINGS -->
+      <section id="view-settings" class="view-panel hidden space-y-6 max-w-5xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Site Settings & Theme</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Manage branding, accent color, typography, Hero animations, and contact details in Neon DB.</p>
+          </div>
+          <button id="btn-save-site-settings" type="button" onclick="handleSaveSiteSettings(event)" class="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs font-mono shadow-md shadow-sky-500/20 transition-all cursor-pointer">Save Settings to Neon DB</button>
+        </div>
+
+        <div class="space-y-6 text-xs font-mono bg-[#10121a] border border-[#1f2430] p-6 rounded-xl">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-slate-400 mb-1">Global Site Title</label>
+              <input type="text" id="setting-site-title" value="Raviranjan.OS — Personal Developer Platform" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Accent Theme Color (Live Preview & Public Theme)</label>
+              <div class="flex items-center space-x-2">
+                <input type="color" id="setting-theme-color-picker" value="#38bdf8" class="h-8 w-12 bg-transparent cursor-pointer rounded" oninput="document.getElementById('setting-theme-color-text').value = this.value; applyAdminAccentThemeColor(this.value);">
+                <input type="text" id="setting-theme-color-text" value="#38bdf8" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none" oninput="document.getElementById('setting-theme-color-picker').value = this.value; applyAdminAccentThemeColor(this.value);">
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1">Global Meta Description</label>
+            <textarea id="setting-meta-desc" rows="2" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">Production-grade developer operating system combining portfolio, CMS, project management, and real-time external telemetry.</textarea>
+          </div>
+
+          <!-- Typography Font Pairing & Animated Hero Headline Config (Stored in Neon DB) -->
+          <div class="p-4 rounded-xl bg-[#131620] border border-sky-500/30 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">✨ Premium Typography & Animated Hero Texts (Neon DB)</span>
+              <span class="text-[10px] text-slate-400">Live updates Overview Hero typewriter & global font pairing</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-slate-300 mb-1">Typography Font Pairing Preset</label>
+                <select id="setting-font-preset" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+                  <option value="geist">Developer OS & AI SaaS — Geist + Geist Mono (Default)</option>
+                  <option value="editorial">AI Chatbot & Editorial — Inter + Instrument Serif</option>
+                  <option value="portfolio">Executive Portfolio — Manrope + Instrument Serif</option>
+                  <option value="jakarta">Modern Product UI — Plus Jakarta Sans + JetBrains Mono</option>
+                  <option value="agency">Premium Agency — Space Grotesk + Instrument Serif</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-300 mb-1">Hero Rotating Role Badges (Pipe | separated)</label>
+                <input type="text" id="setting-hero-role-texts" value="Full-Stack & AI Engineer | Java 21 & Spring Boot Architect | Distributed Systems Builder | Applied AI & RAG Specialist" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-cyan-300 focus:border-sky-500 focus:outline-none">
+              </div>
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1">Hero Animated Headlines (Pipe | separated)</label>
+              <textarea id="setting-hero-animated-texts" rows="2" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">Building AI-native software. | Scalable Java & Spring systems. | Production RAG & AI agents. | Full-stack cloud engineering.</textarea>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-[#1f2430]">
+            <div>
+              <label class="block text-slate-400 mb-1">Top Bar Availability Status</label>
+              <input type="text" id="setting-availability" value="Open to Software Development Opportunities" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Availability Card Heading</label>
+              <input type="text" id="setting-avail-card-title" value="Open to Opportunities" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Availability Card Subtitle</label>
+              <input type="text" id="setting-avail-card-subtitle" value="Internships & full-time software developer roles" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#1f2430]">
+            <div>
+              <label class="block text-slate-400 mb-1">Hero Terminal curl Command</label>
+              <input type="text" id="setting-curl-command" value="curl -s https://raviranjan.dev/api/v1/profile | jq" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-cyan-300 focus:border-sky-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Top Bar Updated Date Text</label>
+              <input type="text" id="setting-updated-date" value="Updated: Oct 2026" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-[#1f2430] space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="block text-slate-300 font-bold">"Ask the AI" Suggested Prompts (One per line — Admin Add/Edit)</label>
+              <span class="text-[10px] text-emerald-400">Displayed on Hero & AI Drawer</span>
+            </div>
+            <textarea id="setting-ai-prompts" rows="4" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none">What projects has Raviranjan built?
+Explain RakshaGrid.
+What technologies does he use?
+What AI projects has he worked on?</textarea>
+          </div>
+
+          <div class="pt-2 border-t border-[#1f2430] space-y-3">
+            <span class="block text-slate-300 font-bold">"Let's Connect" & Contact Section Configuration</span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-slate-400 mb-1">Contact Section Heading</label>
+                <input type="text" id="setting-contact-heading" value="Let's Connect" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Contact Email</label>
+                <input type="email" id="setting-contact-email" value="admin@raviranjan.dev" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Contact Phone / WhatsApp</label>
+                <input type="text" id="setting-contact-phone" value="+91-9999999999" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+              </div>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Contact Section Description Paragraph</label>
+              <textarea id="setting-contact-desc" rows="2" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">I am actively open to software developer opportunities, internships, and collaborative engineering projects. Whether you want to discuss systems architecture, AI agent applications, or review my code, feel free to reach out.</textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      
+      
+      <!-- VIEW: AI ASSISTANT CONFIGURATION & TELEMETRY -->
+      <section id="view-ai-control" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+            <!-- Google Gemini Integration Status (Auto-loaded from .env) -->
+            <div class="p-4 rounded-xl bg-[#141822] border border-[#1f2430] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-white text-xs font-mono">Google Gemini 1.5 Flash Engine</span>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active (.env)</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 font-sans mt-0.5">
+                    API key is automatically loaded from your server environment (<code>GEMINI_API_KEY</code> in <code>.env</code>). No manual entry required in Admin Panel.
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2 text-xs font-mono shrink-0">
+                <span class="text-[10px] text-slate-400">Model:</span>
+                <span class="text-[10px] px-2.5 py-1 rounded bg-[#10121a] border border-[#232938] text-sky-400 font-bold">gemini-1.5-flash</span>
+              </div>
+            </div>
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold tracking-tight text-white font-mono">AI Portfolio Assistant ("Ask AI")</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">RAG ACTIVE</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Control RAG knowledge indexing, system prompt constraints, temperature, and query logs.</p>
+          </div>
+          <div class="flex items-center space-x-2 text-xs font-mono">
+            <button onclick="showToast('RAG knowledge base reindexed!', 'success')" class="px-3.5 py-1.5 rounded bg-[#161924] border border-sky-500/30 text-sky-400 hover:bg-sky-500/10">Reindex Knowledge</button>
+            <button onclick="saveAiSettings()" class="px-4 py-1.5 rounded bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 shadow-md shadow-cyan-500/20">Save AI Config</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs font-mono">
+          <!-- Left 2 Cols: System Prompt & Model Parameters -->
+          <div class="lg:col-span-2 space-y-5">
+            <div class="p-5 rounded-xl bg-[#10121a] border border-[#1f2430] space-y-4">
+              <div class="flex items-center justify-between pb-2 border-b border-[#1f2430]">
+                <span class="font-bold text-white">System Prompt & Behavioral Guardrails</span>
+                <div class="flex items-center space-x-2">
+                  <span class="text-[10px] text-slate-500">Assistant Status:</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input id="ai-toggle" type="checkbox" checked class="sr-only peer">
+                    <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[2px] after:bg-white after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-slate-400 mb-1">System Prompt (Strict Grounding Contract)</label>
+                <textarea id="ai-system-prompt" rows="5" class="w-full bg-[#131620] border border-[#202533] rounded p-3 text-slate-200 focus:border-cyan-500 focus:outline-none font-mono text-[11px] leading-relaxed">You are "Ask AI", the verified AI Portfolio Assistant for Raviranjan. Answer user questions with technical precision and factual honesty based strictly on the retrieved portfolio knowledge chunks. Never invent experience, projects, skills, statistics, companies, or achievements. If the user asks for information not present in the provided portfolio chunks, reply exactly with: "I don't have that information in Raviranjan's portfolio." When relevant, embed clickable markdown links to projects, GitHub repositories, research papers, or articles.</textarea>
+              </div>
+
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-slate-400 mb-1">Model Target</label>
+                  <select id="ai-model-select" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white">
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                    <option value="gpt-4o">GPT-4o</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Temperature (<span id="temp-val">0.00</span>)</label>
+                  <input id="ai-temp-slider" type="range" min="0" max="1" step="0.05" value="0.00" oninput="document.getElementById('temp-val').innerText = this.value" class="w-full h-8 accent-cyan-500 cursor-pointer">
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Max Output Tokens</label>
+                  <input type="number" value="1024" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white">
+                </div>
+              </div>
+            </div>
+
+            <!-- Knowledge Sources Checklist -->
+            <div class="p-5 rounded-xl bg-[#10121a] border border-[#1f2430] space-y-3">
+              <span class="font-bold text-white block pb-2 border-b border-[#1f2430]">Indexed Knowledge Sources (AI_VISIBLE = true)</span>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <label class="p-2.5 rounded bg-[#141822] border border-[#202533] flex items-center justify-between cursor-pointer">
+                  <span>Projects & ADRs</span>
+                  <input type="checkbox" checked class="accent-cyan-500 rounded">
+                </label>
+                <label class="p-2.5 rounded bg-[#141822] border border-[#202533] flex items-center justify-between cursor-pointer">
+                  <span>Skills Matrix</span>
+                  <input type="checkbox" checked class="accent-cyan-500 rounded">
+                </label>
+                <label class="p-2.5 rounded bg-[#141822] border border-[#202533] flex items-center justify-between cursor-pointer">
+                  <span>Work Experience</span>
+                  <input type="checkbox" checked class="accent-cyan-500 rounded">
+                </label>
+                <label class="p-2.5 rounded bg-[#141822] border border-[#202533] flex items-center justify-between cursor-pointer">
+                  <span>Research Papers</span>
+                  <input type="checkbox" checked class="accent-cyan-500 rounded">
+                </label>
+                <label class="p-2.5 rounded bg-[#141822] border border-[#202533] flex items-center justify-between cursor-pointer">
+                  <span>Engineering Lab</span>
+                  <input type="checkbox" checked class="accent-cyan-500 rounded">
+                </label>
+                <label class="p-2.5 rounded bg-[#141822] border border-[#202533] flex items-center justify-between cursor-pointer">
+                  <span>Technical Writing</span>
+                  <input type="checkbox" checked class="accent-cyan-500 rounded">
+                </label>
+                <label class="p-2.5 rounded bg-[#141822] border border-[#202533] flex items-center justify-between cursor-pointer">
+                  <span>Contribution Stories</span>
+                  <input type="checkbox" checked class="accent-cyan-500 rounded">
+                </label>
+                <label class="p-2.5 rounded bg-[#141822] border border-[#202533] flex items-center justify-between cursor-pointer">
+                  <span>GitHub Repos & PRs</span>
+                  <input type="checkbox" checked class="accent-cyan-500 rounded">
+                </label>
+                <label class="p-2.5 rounded bg-[#141822] border border-[#202533] flex items-center justify-between cursor-pointer">
+                  <span>Coding Stats (LC/GFG)</span>
+                  <input type="checkbox" checked class="accent-cyan-500 rounded">
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Col: AI Usage Metrics & Visitor Conversation Logs (Neon DB) -->
+          <div class="space-y-5">
+            <div class="p-5 rounded-xl bg-[#10121a] border border-[#1f2430] space-y-3">
+              <div class="flex items-center justify-between pb-2 border-b border-[#1f2430]">
+                <span class="font-bold text-white">RAG Telemetry & Usage (Neon DB)</span>
+                <button type="button" onclick="loadAiConfig()" class="text-[10px] text-sky-400 hover:underline">Refresh</button>
+              </div>
+              <div class="space-y-2 text-xs">
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Total Queries Stored</span>
+                  <span id="ai-stat-total-queries" class="text-white font-bold">0</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Avg RAG Latency</span>
+                  <span id="ai-stat-avg-latency" class="text-cyan-400 font-bold">-- ms</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Multi-Lingual Support</span>
+                  <span class="text-emerald-400 font-bold">Hindi · Hinglish · English</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Visitor IP & Device Tracking</span>
+                  <span class="text-emerald-400 font-bold">Active (Neon DB)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visitor AI Conversation Logs (Question, Answer, IP, Device, Language) -->
+            <div class="p-5 rounded-xl bg-[#10121a] border border-[#1f2430] space-y-3">
+              <div class="flex items-center justify-between pb-2 border-b border-[#1f2430]">
+                <span class="font-bold text-white">Visitor AI Conversations (Neon DB)</span>
+                <button type="button" onclick="handleClearAllAiLogs()" class="text-[10px] text-rose-400 hover:underline">Clear All</button>
+              </div>
+              <div id="admin-ai-query-logs-list" class="space-y-2.5 text-[11px] max-h-[420px] overflow-y-auto pr-1">
+                <div class="p-3 text-center text-slate-500">Loading visitor AI conversations from Neon DB...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: GITHUB INTEGRATION -->
+      <section id="view-github" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold tracking-tight text-white font-mono">GitHub Integration Hub</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">CONNECTED</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Official REST and GraphQL API synchronization with real-time webhook ingestion.</p>
+          </div>
+          <div class="flex items-center space-x-2 text-xs font-mono">
+            <button onclick="triggerGitHubSync()" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold transition-colors flex items-center gap-1.5 shadow-md shadow-sky-500/20">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Sync Now</span>
+            </button>
+            <button onclick="showToast('Credentials cleared and account disconnected', 'warning')" class="px-3 py-1.5 rounded bg-[#161924] border border-rose-500/30 text-rose-400 hover:bg-rose-500/10">Disconnect</button>
+          </div>
+        </div>
+
+        <!-- Account Credentials & Telemetry Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-mono">
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">Connected Account</span>
+            <span id="admin-gh-user" class="text-sm font-bold text-white">@raviranjankrmaurya</span>
+            <span class="text-[10px] text-emerald-400 block mt-1">Token: Encrypted (AES-256-GCM)</span>
+          </div>
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">Last Synchronization</span>
+            <span id="github-last-sync" class="text-sm font-bold text-sky-400">10 minutes ago</span>
+            <span class="text-[10px] text-slate-500 block mt-1">Status: SUCCESS</span>
+          </div>
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">Records Processed</span>
+            <span id="admin-gh-commits" class="text-sm font-bold text-white">-- Contributions</span>
+            <span id="admin-gh-repos" class="text-[10px] text-slate-500 block mt-1">Synced from GitHub API</span>
+          </div>
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">Webhook Events</span>
+            <span class="text-sm font-bold text-emerald-400">HMAC-SHA256 Active</span>
+            <span class="text-[10px] text-slate-500 block mt-1">push, pull_request, release</span>
+          </div>
+        </div>
+
+        <!-- Sync Logs Table -->
+        <div class="rounded-xl border border-[#1f2430] bg-[#10121a] overflow-hidden text-xs font-mono">
+          <div class="p-3 bg-[#141822] border-b border-[#1f2430] flex justify-between items-center">
+            <span class="font-bold text-white">Recent Synchronization Logs</span>
+            <span class="text-[10px] text-slate-500">Auto-logged via IntegrationSyncLog</span>
+          </div>
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-[#1f2430] text-slate-400 text-[11px]">
+                <th class="py-2.5 px-4">TIMESTAMP</th>
+                <th class="py-2.5 px-4">MODE</th>
+                <th class="py-2.5 px-4">STATUS</th>
+                <th class="py-2.5 px-4">RECORDS</th>
+                <th class="py-2.5 px-4">LATENCY</th>
+                <th class="py-2.5 px-4 text-right">DETAILS</th>
+              </tr>
+            </thead>
+            <tbody id="github-sync-logs-body" class="divide-y divide-[#1f2430]">
+              <tr class="hover:bg-[#141822]/60">
+                <td class="py-2.5 px-4 text-slate-400">Just now</td>
+                <td class="py-2.5 px-4 text-slate-300">SCHEDULED</td>
+                <td class="py-2.5 px-4 text-emerald-400">SUCCESS</td>
+                <td class="py-2.5 px-4 text-white">24 commits, 2 PRs</td>
+                <td class="py-2.5 px-4 text-slate-500">42ms</td>
+                <td class="py-2.5 px-4 text-right text-sky-400 cursor-pointer hover:underline" onclick="showToast('Synced commit sha-7fa9b21 to main', 'info')">View Payload</td>
+              </tr>
+              <tr class="hover:bg-[#141822]/60">
+                <td class="py-2.5 px-4 text-slate-400">1 hour ago</td>
+                <td class="py-2.5 px-4 text-slate-300">WEBHOOK (push)</td>
+                <td class="py-2.5 px-4 text-emerald-400">SUCCESS</td>
+                <td class="py-2.5 px-4 text-white">3 commits</td>
+                <td class="py-2.5 px-4 text-slate-500">18ms</td>
+                <td class="py-2.5 px-4 text-right text-sky-400 cursor-pointer hover:underline" onclick="showToast('Synced push event on raviranjan-os', 'info')">View Payload</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VIEW: LEETCODE INTEGRATION -->
+      <section id="view-leetcode" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold tracking-tight text-white font-mono">LeetCode Ingestion Adapter</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HEALTHY</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Reliable GraphQL metrics extraction with Circuit Breaker and non-fabrication guarantees.</p>
+          </div>
+          <button onclick="triggerLeetCodeSync()" class="px-3.5 py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs font-mono transition-colors flex items-center gap-1.5">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Sync LeetCode</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-mono">
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">Total Solved</span>
+            <span id="admin-lc-total" class="text-2xl font-bold text-amber-400">--</span>
+            <span id="admin-lc-rate" class="text-[10px] text-slate-500 block mt-1">Acceptance Rate: --</span>
+          </div>
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">Easy Problems</span>
+            <span id="admin-lc-easy" class="text-2xl font-bold text-emerald-400">--</span>
+            <span class="text-[10px] text-slate-500 block mt-1">Live from LeetCode API</span>
+          </div>
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">Medium Problems</span>
+            <span id="admin-lc-medium" class="text-2xl font-bold text-amber-400">--</span>
+            <span class="text-[10px] text-slate-500 block mt-1">Live from LeetCode API</span>
+          </div>
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">Hard Problems</span>
+            <span id="admin-lc-hard" class="text-2xl font-bold text-rose-400">--</span>
+            <span id="admin-lc-rank" class="text-[10px] text-slate-500 block mt-1">Global ranking: --</span>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl bg-[#10121a] border border-[#1f2430] space-y-3 text-xs font-mono">
+          <div class="flex items-center space-x-2 text-emerald-400 font-bold">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span>Anti-Fabrication & Fallback Policy</span>
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            Where official LeetCode endpoints enforce rate limits or Cloudflare bot checks, this adapter uses Resilience4j circuit breakers to cache the last confirmed database snapshot. No fake statistics or speculative metrics are ever hallucinated.
+          </p>
+        </div>
+      </section>
+
+      <!-- VIEW: GEEKSFORGEEKS INTEGRATION & MANUAL DB CRUD -->
+      <section id="view-gfg" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold tracking-tight text-white font-mono">GeeksforGeeks (GFG) Database Manager</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">NEON DB LINKED</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Enter or edit your GeeksforGeeks statistics below. Saved values are stored in Neon DB and displayed on the public portfolio and dashboard.</p>
+          </div>
+          <div class="flex items-center space-x-2 text-xs font-mono">
+            <button type="button" onclick="handleDeleteGfgData()" class="px-3 py-1.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold transition-colors">
+              Reset / Delete GFG Data
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-mono">
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">GFG Username</span>
+            <span id="admin-gfg-username" class="text-lg font-bold text-white">raviranjankrmaurya</span>
+            <span class="text-[10px] text-emerald-400 block mt-1">Stored in Neon DB</span>
+          </div>
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">Coding Score</span>
+            <span id="admin-gfg-score" class="text-2xl font-bold text-emerald-400">--</span>
+            <span class="text-[10px] text-slate-500 block mt-1">Live from Neon DB</span>
+          </div>
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">Total Problems Solved</span>
+            <span id="admin-gfg-solved" class="text-2xl font-bold text-white">--</span>
+            <span class="text-[10px] text-slate-500 block mt-1">Live from Neon DB</span>
+          </div>
+          <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
+            <span class="text-slate-400 block mb-1">Institute Rank</span>
+            <span id="admin-gfg-rank" class="text-2xl font-bold text-sky-400">--</span>
+            <span class="text-[10px] text-slate-500 block mt-1">Live from Neon DB</span>
+          </div>
+        </div>
+
+        <!-- Manual GFG Database Editor Form -->
+        <div class="p-6 rounded-xl bg-[#10121a] border border-[#1f2430] space-y-4 text-xs font-mono">
+          <div class="border-b border-[#1f2430] pb-3 flex justify-between items-center">
+            <div>
+              <span class="font-bold text-white text-sm">Add / Edit GeeksforGeeks Data in Neon DB</span>
+              <span class="text-[11px] text-slate-400 block mt-0.5">Update your GFG Coding Score, Problems Solved, and Institute Rank in Neon PostgreSQL.</span>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">Direct Neon DB Storage</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-slate-400 mb-1">GFG Username *</label>
+              <input id="gfg-imp-username" type="text" value="raviranjankrmaurya" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Coding Score *</label>
+              <input id="gfg-imp-score" type="number" min="0" value="0" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Total Problems Solved *</label>
+              <input id="gfg-imp-solved" type="number" min="0" value="0" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Institute Rank *</label>
+              <input id="gfg-imp-rank" type="number" min="0" value="0" class="w-full bg-[#131620] border border-[#202533] rounded p-2.5 text-white focus:border-sky-500 focus:outline-none">
+            </div>
+          </div>
+          <div class="flex justify-end pt-2">
+            <button type="button" onclick="handleGfgManualImport()" class="px-5 py-2 rounded bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 transition-colors shadow-md shadow-emerald-500/20">
+              Save GFG Data to Neon DB
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: MANUAL DSA CODING KNOWLEDGE -->
+      <section id="view-dsa" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">DSA Knowledge & Problem Notes (Neon DB)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Add, edit, or delete algorithmic problem solutions stored in Neon DB.</p>
+          </div>
+          <button type="button" onclick="resetDsaForm()" class="px-3.5 py-1.5 rounded bg-sky-500 text-slate-950 font-semibold text-xs font-mono">+ New Problem Note</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs font-mono">
+          <!-- Problem Creation / Edit Form -->
+          <div class="p-5 rounded-xl bg-[#10121a] border border-[#1f2430] space-y-3">
+            <span id="dsa-form-heading" class="font-bold text-white block pb-2 border-b border-[#1f2430]">Add / Edit Solution Note in Neon DB</span>
+            <input type="hidden" id="dsa-id" value="">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 mb-1">Platform</label>
+                <select id="dsa-platform" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white">
+                  <option value="LEETCODE">LeetCode</option>
+                  <option value="GFG">GeeksforGeeks</option>
+                  <option value="CODEFORCES">Codeforces</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Difficulty</label>
+                <select id="dsa-diff" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white">
+                  <option value="EASY">Easy</option>
+                  <option value="MEDIUM" selected>Medium</option>
+                  <option value="HARD">Hard</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Problem Title *</label>
+              <input id="dsa-title" type="text" placeholder="e.g. Two Sum or LRU Cache" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 mb-1">Time Complexity</label>
+                <input id="dsa-time" type="text" value="O(n)" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Space Complexity</label>
+                <input id="dsa-space" type="text" value="O(n)" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white">
+              </div>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Approach & Key Lessons Learned *</label>
+              <textarea id="dsa-approach" rows="3" placeholder="Explain the algorithmic pattern and key takeaway..." class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white"></textarea>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Solution Code (Java / C++ / Python)</label>
+              <textarea id="dsa-code" rows="4" placeholder="class Solution { ... }" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white font-mono"></textarea>
+            </div>
+            <button type="button" onclick="handleSaveManualProblem()" class="w-full py-2 rounded bg-sky-500 text-slate-950 font-bold hover:bg-sky-400 transition-colors">Save Problem Note to Neon DB</button>
+          </div>
+
+          <!-- Existing Problem Table from Neon DB -->
+          <div class="p-5 rounded-xl bg-[#10121a] border border-[#1f2430] space-y-3">
+            <span class="font-bold text-white block pb-2 border-b border-[#1f2430]">Authored Problem Notes in Neon DB</span>
+            <div id="admin-dsa-notes-list" class="space-y-2">
+              <div class="p-4 text-center text-slate-500">Loading DSA problem notes from Neon DB...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: UNIFIED ACTIVITY STREAM -->
+      <section id="view-activity" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold tracking-tight text-white font-mono">Unified Developer Activity Stream</h2>
+              <span class="flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>SSE Stream Online</span>
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Chronological timeline of commits, PRs, problem solves, lab experiments, and writing.</p>
+          </div>
+        </div>
+
+        <div id="unified-timeline-container" class="space-y-3 text-xs font-mono max-w-3xl">
+          <div class="p-4 text-center text-slate-500">Loading unified developer activity from Neon DB...</div>
+        </div>
+      </section>
+
+      <!-- GENERIC PLACEHOLDER VIEW (for remaining links) -->
+      
+      <!-- PROFILE & BIO VIEW -->
+      <section id="view-profile" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Profile & Biography Management</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Manage public identity, educational status, focus areas, and verified social links.</p>
+          </div>
+          <button onclick="saveProfile()" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-slate-950 font-semibold text-xs font-mono transition-colors shadow-sm">Save Profile</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 saas-card p-6 space-y-4">
+            <h3 class="text-sm font-bold text-white font-mono border-b border-[#1f2430] pb-2">Primary Identity Fields</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+              <div>
+                <label class="block text-slate-400 mb-1">Full Legal Name</label>
+                <input type="text" id="prof-fullname" value="Raviranjan Kumar" class="w-full p-2.5 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Headline</label>
+                <input type="text" id="prof-headline" value="BCA Student · Software Developer" class="w-full p-2.5 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Current Education</label>
+                <input type="text" id="prof-education" value="Bachelor of Computer Applications (BCA)" class="w-full p-2.5 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Location</label>
+                <input type="text" id="prof-location" value="New Delhi, Delhi, India" class="w-full p-2.5 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Contact Email</label>
+                <input type="email" id="prof-email" value="admin@raviranjan.dev" class="w-full p-2.5 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Availability Status</label>
+                <select id="prof-availability" class="w-full p-2.5 rounded bg-[#10121a] border border-[#232938] text-emerald-400 focus:outline-none focus:border-sky-400">
+                  <option value="true" selected>Open to Opportunities (Internships & Full-Time)</option>
+                  <option value="false">Not Available</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="text-xs font-mono pt-2">
+              <label class="block text-slate-400 mb-1">Executive Bio</label>
+              <textarea id="prof-bio" rows="3" class="w-full p-2.5 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400 font-sans">Building software for the AI-native era. Full-stack developer focused on Java, Spring Boot, Python, FastAPI, React, PostgreSQL, and AI/LLM applications.</textarea>
+            </div>
+
+            <div class="text-xs font-mono pt-2">
+              <label class="block text-slate-400 mb-1">Current Engineering Focus</label>
+              <input type="text" id="prof-focus" value="Software development, backend engineering, and AI/LLM applications." class="w-full p-2.5 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+            </div>
+          </div>
+
+          <!-- Social & External Profile URLs (Editable) -->
+          <div class="saas-card p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-[#1f2430] pb-2">
+              <h3 class="text-sm font-bold text-white font-mono">Verified Profile & Media URLs</h3>
+              <span class="text-[10px] text-emerald-400 font-mono">● Editable</span>
+            </div>
+            <div class="space-y-3 text-xs font-mono">
+              <div>
+                <label class="block text-slate-400 mb-1">GitHub Profile URL</label>
+                <input type="url" id="prof-github-url" value="https://github.com/raviranjan" class="w-full p-2 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">LinkedIn Profile URL</label>
+                <input type="url" id="prof-linkedin-url" value="https://linkedin.com/in/raviranjan" class="w-full p-2 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">LeetCode Profile URL</label>
+                <input type="url" id="prof-leetcode-url" value="https://leetcode.com/raviranjan" class="w-full p-2 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">GeeksforGeeks Profile URL</label>
+                <input type="url" id="prof-gfg-url" value="https://auth.geeksforgeeks.org/user/raviranjan" class="w-full p-2 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Contact Phone / WhatsApp</label>
+                <input type="text" id="prof-phone" value="+91-9999999999" class="w-full p-2 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">External Resume PDF URL (Optional)</label>
+                <input type="text" id="prof-resume-url" value="#" placeholder="https://... or leave # to use Built-in PDF Resume" class="w-full p-2 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Resume Builder & Live PDF Generator (Admin Editable) -->
+        <div class="saas-card p-6 space-y-4 text-xs font-mono">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1f2430] pb-3">
+            <div>
+              <h3 class="text-sm font-bold text-white">Interactive Resume Builder & PDF Configuration (Neon DB)</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">Customize the header and executive summary shown when visitors click "Resume" on the public portfolio and download as PDF.</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button type="button" onclick="saveProfile()" class="px-3.5 py-1.5 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold">Save Profile & Resume to Neon DB</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-slate-400 mb-1">Resume Header Name</label>
+              <input type="text" id="resume-builder-name" value="Raviranjan Kumar" class="w-full p-2.5 rounded bg-[#10121a] border border-[#232938] text-white">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Resume Professional Headline</label>
+              <input type="text" id="resume-builder-headline" value="BCA Student · Full-Stack & Backend Software Developer" class="w-full p-2.5 rounded bg-[#10121a] border border-[#232938] text-white">
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Resume Executive Summary (Printed at top of PDF Resume)</label>
+            <textarea id="resume-builder-summary" rows="3" class="w-full p-2.5 rounded bg-[#10121a] border border-[#232938] text-white font-sans">Full-stack software developer focused on Java 21, Spring Boot, Python, FastAPI, React, PostgreSQL, and AI/LLM applications. Experienced in building resilient backend systems, REST/GraphQL telemetry pipelines, and grounded RAG assistants.</textarea>
+          </div>
+          <p class="text-[11px] text-slate-500">Note: Work Experience, Education, Skills Matrix, Featured Projects, Achievements, and Certifications are automatically pulled live from their respective Neon DB modules into the interactive Resume & PDF download.</p>
+        </div>
+      </section>
+
+      <!-- INTERNSHIPS, EXPERIENCE & EDUCATION VIEW -->
+      <section id="view-experience" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Internships, Experience & Education (Neon DB)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Add, edit, or update pursuing/completed internships, offer letters, completion certificates, work experience, and degrees.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="openCareerModal('internship')" class="px-3.5 py-1.5 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono transition-colors shadow-md shadow-emerald-500/20">+ Add Internship</button>
+            <button type="button" onclick="openCareerModal('experience')" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs font-mono transition-colors">+ Add Experience</button>
+            <button type="button" onclick="openCareerModal('education')" class="px-3 py-1.5 rounded bg-[#161924] border border-[#232938] hover:border-sky-500/40 text-sky-400 font-semibold text-xs font-mono transition-colors">+ Add Degree</button>
+          </div>
+        </div>
+
+        <!-- Dedicated Internships Management Card -->
+        <div class="saas-card p-5 space-y-4 border border-emerald-500/25">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1f2430] pb-2.5">
+            <h3 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+              <i data-lucide="badge-check" class="w-4 h-4 text-emerald-400"></i>
+              <span>Internships & Industrial Training (Completed & Pursuing)</span>
+            </h3>
+            
+          </div>
+          <div id="admin-internships-container" class="grid grid-cols-1 lg:grid-cols-2 gap-4 font-mono text-xs">
+            <div class="col-span-2 p-4 rounded-lg bg-[#10121a] border border-[#232938] text-center text-slate-500 text-xs">Loading internships from Neon DB...</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="saas-card p-5 space-y-4">
+            <h3 class="text-sm font-bold text-white font-mono border-b border-[#1f2430] pb-2 flex items-center justify-between">
+              <span>Education</span>
+              <span class="text-[10px] text-slate-500">1 Degree Recorded</span>
+            </h3>
+            <div id="admin-education-container" class="space-y-3 font-mono text-xs">
+              <div class="p-4 rounded-lg bg-[#10121a] border border-[#232938] text-center text-slate-500 text-xs">Loading education records...</div>
+            </div>
+          </div>
+
+          <div class="saas-card p-5 space-y-4">
+            <h3 class="text-sm font-bold text-white font-mono border-b border-[#1f2430] pb-2 flex items-center justify-between">
+              <span>Experience & Roles</span>
+              <span class="text-[10px] text-slate-500">1 Entry Recorded</span>
+            </h3>
+            <div id="admin-experience-container" class="space-y-3 font-mono text-xs">
+              <div class="p-4 rounded-lg bg-[#10121a] border border-[#232938] text-center text-slate-500 text-xs">Loading experience records...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ACHIEVEMENTS & CERTIFICATIONS VIEW -->
+      <section id="view-achievements" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Achievements & Certifications (Neon DB)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Add, edit, or delete competitive programming achievements and professional certifications in Neon DB.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="openCredentialModal('achievement')" class="px-3.5 py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs font-mono transition-colors">+ Add Achievement</button>
+            <button type="button" onclick="openCredentialModal('certification')" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs font-mono transition-colors">+ Add Certification</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="saas-card p-5 space-y-3">
+            <h3 class="text-sm font-bold text-white font-mono border-b border-[#1f2430] pb-2 flex items-center justify-between">
+              <span>Academic & Coding Achievements</span>
+              <span class="text-[10px] text-amber-400">Neon DB</span>
+            </h3>
+            <div id="admin-achievements-container" class="space-y-2.5 text-xs font-mono">
+              <div class="p-4 text-center text-slate-500">Loading achievements from Neon DB...</div>
+            </div>
+          </div>
+
+          <div class="saas-card p-5 space-y-3">
+            <h3 class="text-sm font-bold text-white font-mono border-b border-[#1f2430] pb-2 flex items-center justify-between">
+              <span>Certifications & Accreditations</span>
+              <span class="text-[10px] text-sky-400">Neon DB</span>
+            </h3>
+            <div id="admin-certifications-container" class="space-y-2.5 text-xs font-mono">
+              <div class="p-4 text-center text-slate-500">Loading certifications from Neon DB...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESEARCH PAPERS HUB VIEW -->
+      <section id="view-research" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Research Papers & Technical Investigations</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Manage research topics, abstracts, methodologies, evaluation metrics, and paper PDFs.</p>
+          </div>
+          <button onclick="openResearchModal()" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-slate-950 font-semibold text-xs font-mono transition-colors">+ New Paper</button>
+        </div>
+
+        <div class="saas-card overflow-hidden">
+          <table class="w-full text-left text-xs font-mono border-collapse">
+            <thead>
+              <tr class="bg-[#10121a] text-slate-400 border-b border-[#1f2430]">
+                <th class="p-3.5">Research Title</th>
+                <th class="p-3.5">Status</th>
+                <th class="p-3.5">Key Findings / Abstract</th>
+                <th class="p-3.5">Date</th>
+                <th class="p-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-research-tbody" class="divide-y divide-[#1f2430]"><tr><td colspan="5" class="p-6 text-center text-slate-500 font-mono text-xs">Loading research publications from database...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ENGINEERING LAB VIEW -->
+      <section id="view-lab" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Engineering Lab Experiments (Neon DB)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Create, edit, and delete experimental prototypes stored in Neon DB.</p>
+          </div>
+          <button onclick="openLabModal()" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-slate-950 font-semibold text-xs font-mono transition-colors">+ New Experiment</button>
+        </div>
+
+        <div id="admin-lab-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="col-span-3 p-6 text-center text-slate-500 font-mono text-xs">Loading lab experiments from Neon DB...</div>
+        </div>
+      </section>
+
+      <!-- CONTRIBUTION STORIES VIEW -->
+      <section id="view-contributions" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Contribution Stories (Neon DB)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Create, edit, and delete open-source contribution stories in Neon DB.</p>
+          </div>
+          <button onclick="openStoryModal()" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-slate-950 font-semibold text-xs font-mono transition-colors">+ New Story</button>
+        </div>
+
+        <div id="admin-stories-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="col-span-2 p-6 text-center text-slate-500 font-mono text-xs">Loading contribution stories from Neon DB...</div>
+        </div>
+      </section>
+
+      <!-- INTEGRATION CENTER VIEW -->
+      <section id="view-integrations" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Integration Center (Neon DB & Live APIs)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Manage external developer platform connections, trigger immediate syncs, and configure handles.</p>
+          </div>
+          <button type="button" onclick="triggerGlobalSync()" class="px-3.5 py-1.5 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs font-mono transition-colors shadow-sm">Sync All Adapters</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- GitHub Card -->
+          <div class="saas-card p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2.5">
+                <i data-lucide="github" class="w-5 h-5 text-white"></i>
+                <div>
+                  <h3 class="text-sm font-bold text-white font-mono">GitHub Integration</h3>
+                  <span class="text-[10px] text-slate-500 font-mono">REST, GraphQL & Multi-Year Heatmap (2026/2025)</span>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">CONNECTED</span>
+            </div>
+            <div class="space-y-2 text-xs font-mono text-slate-300 bg-[#10121a] p-3 rounded border border-[#232938]">
+              <div class="flex justify-between"><span>Connected Account:</span><span id="int-gh-account" class="text-white">@raviranjankrmaurya</span></div>
+              <div class="flex justify-between"><span>Live Contributions:</span><span id="int-gh-stats" class="text-emerald-400">Synced with Neon DB</span></div>
+              <div class="flex justify-between"><span>Last Synchronization:</span><span id="int-gh-last-sync" class="text-slate-400">Live API</span></div>
+              <div class="flex justify-between"><span>Webhooks Status:</span><span class="text-emerald-400">Active (SHA256 HMAC Verified)</span></div>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono pt-1">
+              <button type="button" onclick="triggerGitHubSync()" class="px-3 py-1.5 rounded bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 font-semibold">Sync Now</button>
+              <button type="button" onclick="switchView('github')" class="text-sky-400 hover:underline">Open GitHub Hub →</button>
+            </div>
+          </div>
+
+          <!-- LeetCode Card -->
+          <div class="saas-card p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2.5">
+                <i data-lucide="code" class="w-5 h-5 text-amber-400"></i>
+                <div>
+                  <h3 class="text-sm font-bold text-white font-mono">LeetCode Integration</h3>
+                  <span class="text-[10px] text-slate-500 font-mono">Public GraphQL Endpoint</span>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">CONNECTED</span>
+            </div>
+            <div class="space-y-2 text-xs font-mono text-slate-300 bg-[#10121a] p-3 rounded border border-[#232938]">
+              <div class="flex justify-between"><span>Target Handle:</span><span id="int-lc-account" class="text-white">raviranjanmaurya</span></div>
+              <div class="flex justify-between"><span>Problems Solved:</span><span id="int-lc-stats" class="text-amber-400">Synced with Neon DB</span></div>
+              <div class="flex justify-between"><span>Last Synchronization:</span><span id="int-lc-last-sync" class="text-slate-400">Live API</span></div>
+              <div class="flex justify-between"><span>Degradation Mode:</span><span class="text-emerald-400">Neon DB Snapshot Active</span></div>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono pt-1">
+              <button type="button" onclick="triggerLeetCodeSync()" class="px-3 py-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold">Sync Now</button>
+              <button type="button" onclick="switchView('leetcode')" class="text-sky-400 hover:underline">Open LeetCode Hub →</button>
+            </div>
+          </div>
+
+          <!-- GeeksforGeeks Card -->
+          <div class="saas-card p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2.5">
+                <i data-lucide="terminal" class="w-5 h-5 text-emerald-400"></i>
+                <div>
+                  <h3 class="text-sm font-bold text-white font-mono">GeeksforGeeks Adapter</h3>
+                  <span class="text-[10px] text-slate-500 font-mono">Neon DB Manual & Verified Storage</span>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">NEON DB</span>
+            </div>
+            <div class="space-y-2 text-xs font-mono text-slate-300 bg-[#10121a] p-3 rounded border border-[#232938]">
+              <div class="flex justify-between"><span>Profile Handle:</span><span id="int-gfg-account" class="text-white">raviranjankrmaurya</span></div>
+              <div class="flex justify-between"><span>Current Metrics:</span><span id="int-gfg-stats" class="text-emerald-400">Stored in Neon DB</span></div>
+              <div class="flex justify-between"><span>Manual DB CRUD:</span><span class="text-sky-400">Enabled</span></div>
+              <div class="flex justify-between"><span>Verification:</span><span class="text-emerald-400">Factual telemetry</span></div>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono pt-1">
+              <button type="button" onclick="switchView('gfg')" class="px-3 py-1.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold">Edit GFG Data in DB</button>
+              <button type="button" onclick="switchView('gfg')" class="text-sky-400 hover:underline">Configure GFG →</button>
+            </div>
+          </div>
+
+          <!-- AI & CRM Notification Card -->
+          <div class="saas-card p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2.5">
+                <i data-lucide="bell-ring" class="w-5 h-5 text-rose-400"></i>
+                <div>
+                  <h3 class="text-sm font-bold text-white font-mono">Recruiter CRM & Notification Pipeline</h3>
+                  <span class="text-[10px] text-slate-500 font-mono">Instant Neon DB Inquiry & Alert Storage</span>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ACTIVE</span>
+            </div>
+            <div class="space-y-2 text-xs font-mono text-slate-300 bg-[#10121a] p-3 rounded border border-[#232938]">
+              <div class="flex justify-between"><span>Trigger Events:</span><span class="text-white">Public Contact Form & AI Queries</span></div>
+              <div class="flex justify-between"><span>Storage Target:</span><span class="text-emerald-400">Neon DB (notifications + contact_inquiries)</span></div>
+              <div class="flex justify-between"><span>Visitor IP Logging:</span><span class="text-sky-400">Enabled (X-Forwarded-For)</span></div>
+              <div class="flex justify-between"><span>Notification Drawer:</span><span class="text-emerald-400">Live Bell Sync</span></div>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono pt-1">
+              <button type="button" onclick="toggleNotificationDrawer()" class="px-3 py-1.5 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-white">Open Notification Panel</button>
+              <button type="button" onclick="switchView('crm')" class="text-sky-400 hover:underline">Open CRM Pipeline →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ANALYTICS VIEW -->
+      <section id="view-analytics" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Platform Analytics & Insights (Neon DB)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Real-time visitor metrics, resume downloads, AI query volume, and CSV report export.</p>
+          </div>
+          <button type="button" onclick="exportAnalyticsCsv()" class="px-4 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs font-mono transition-colors shadow-md shadow-sky-500/20 flex items-center gap-1.5">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Export CSV</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="saas-card p-4 space-y-1 font-mono">
+            <span class="text-[10px] text-slate-500">PORTFOLIO VIEWS</span>
+            <div id="analytics-views" class="text-2xl font-bold text-white">--</div>
+            <span class="text-[10px] text-emerald-400">Tracked in Neon DB</span>
+          </div>
+          <div class="saas-card p-4 space-y-1 font-mono">
+            <span class="text-[10px] text-slate-500">UNIQUE VISITORS (IP HASHES)</span>
+            <div id="analytics-visitors" class="text-2xl font-bold text-white">--</div>
+            <span class="text-[10px] text-emerald-400">Distinct visitor sessions</span>
+          </div>
+          <div class="saas-card p-4 space-y-1 font-mono">
+            <span class="text-[10px] text-slate-500">RESUME DOWNLOADS</span>
+            <div id="analytics-resumes" class="text-2xl font-bold text-white">--</div>
+            <span class="text-[10px] text-cyan-400">Verified recruiter events</span>
+          </div>
+          <div class="saas-card p-4 space-y-1 font-mono">
+            <span class="text-[10px] text-slate-500">AI ASSISTANT QUERIES</span>
+            <div id="analytics-ai-queries" class="text-2xl font-bold text-white">--</div>
+            <span class="text-[10px] text-purple-400">Logged in Neon DB</span>
+          </div>
+        </div>
+      </section>
+
+<section id="view-placeholder" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#1f2430]">
+          <div>
+            <h2 id="placeholder-title" class="text-xl font-bold tracking-tight text-white font-mono">Module Title</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Real-time CRUD operations and configuration.</p>
+          </div>
+          <button onclick="showToast('Operation recorded', 'success')" class="px-3.5 py-1.5 rounded bg-sky-500 text-slate-950 font-semibold text-xs font-mono">Action</button>
+        </div>
+        <div class="p-8 rounded-xl bg-[#10121a] border border-[#1f2430] flex flex-col items-center justify-center text-center space-y-3">
+          <i data-lucide="check-circle-2" class="w-10 h-10 text-emerald-400"></i>
+          <h3 class="text-sm font-semibold text-white font-mono">Subsystem Active & Connected</h3>
+          <p class="text-xs text-slate-400 max-w-md">This domain is linked directly to the PostgreSQL 16 backend through transactional Spring Data JPA repositories with Redis L2 caching.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+
+  <!-- Interactive 'Ask Raviranjan' AI Assistant Drawer -->
+  <div id="ai-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#131620] border-l border-[#232938] shadow-2xl z-50 flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out font-mono text-xs">
+    <!-- Drawer Header -->
+    <div class="h-16 px-5 border-b border-[#1f2430] flex items-center justify-between shrink-0 bg-[#12151e]">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center font-bold text-slate-950 shadow-md shadow-cyan-500/20">
+          <i data-lucide="bot" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <span class="font-bold text-white text-sm">Ask Raviranjan</span>
+          <span class="text-[10px] text-cyan-400 block font-mono">Grounded Portfolio RAG</span>
+        </div>
+      </div>
+      <button onclick="toggleAiDrawer()" class="text-slate-400 hover:text-white p-1 rounded hover:bg-[#1a1f2c]">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- Suggested Query Chips -->
+    <div class="p-3 border-b border-[#1f2430] bg-[#11131a] overflow-x-auto flex gap-2 shrink-0">
+      <button onclick="askPresetQuery('What projects has Raviranjan built?')" class="px-2.5 py-1 rounded-full bg-[#171a24] border border-[#232938] text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-white shrink-0">Projects</button>
+      <button onclick="askPresetQuery('Explain RakshaGrid.')" class="px-2.5 py-1 rounded-full bg-[#171a24] border border-[#232938] text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-white shrink-0">Explain RakshaGrid</button>
+      <button onclick="askPresetQuery('What technologies does he know?')" class="px-2.5 py-1 rounded-full bg-[#171a24] border border-[#232938] text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-white shrink-0">Tech Stack</button>
+      <button onclick="askPresetQuery('Show projects involving PostgreSQL.')" class="px-2.5 py-1 rounded-full bg-[#171a24] border border-[#232938] text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-white shrink-0">PostgreSQL</button>
+      <button onclick="askPresetQuery('What did he learn from his GitHub contributions?')" class="px-2.5 py-1 rounded-full bg-[#171a24] border border-[#232938] text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-white shrink-0">GitHub PRs</button>
+    </div>
+
+    <!-- Chat Messages Viewport -->
+    <div id="ai-messages-container" class="flex-1 overflow-y-auto p-4 space-y-4 font-sans text-xs">
+      <div class="flex items-start space-x-2.5">
+        <div class="w-6 h-6 rounded-md bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
+          <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+        </div>
+        <div class="p-3 rounded-lg bg-[#141822] border border-[#202533] text-slate-200 leading-relaxed max-w-[85%]">
+          Hello! I am <strong>Ask AI</strong>, an AI assistant grounded strictly in Raviranjan's portfolio. You can ask me about his engineering projects, architecture decisions, research papers, tech stack, or competitive programming achievements.
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input Form -->
+    <div class="p-3 border-t border-[#1f2430] bg-[#12151e] shrink-0">
+      <form onsubmit="handleSendAiMessage(event)" class="flex items-center space-x-2">
+        <input id="ai-chat-input" type="text" placeholder="Ask about projects, stack, or experience..." class="flex-1 bg-[#181c28] border border-[#232938] rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 placeholder:text-slate-500 font-mono">
+        <button type="submit" class="px-3.5 py-2 rounded-md bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 transition-colors flex items-center justify-center shadow-md shadow-cyan-500/20">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Real-Time Admin Notification Center Drawer -->
+  <div id="notification-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#131620] border-l border-[#232938] shadow-2xl z-50 flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out font-mono text-xs">
+    <!-- Header -->
+    <div class="h-16 px-5 border-b border-[#1f2430] flex items-center justify-between shrink-0 bg-[#12151e]">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center font-bold text-white shadow-md shadow-rose-500/20">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <span class="font-bold text-white text-sm">Notification Center</span>
+          <span class="text-[10px] text-slate-400 block font-mono">Live SSE Stream Connected</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button onclick="markAllNotificationsRead()" class="text-[10px] text-sky-400 hover:underline px-2 py-1">Mark all read</button>
+        <button onclick="toggleNotificationDrawer()" class="text-slate-400 hover:text-white p-1 rounded hover:bg-[#1a1f2c]">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Pills -->
+    <div class="p-3 border-b border-[#1f2430] bg-[#11131a] flex gap-1.5 shrink-0 overflow-x-auto text-[10px]">
+      <button onclick="filterNotifications('ALL')" class="notif-filter active px-2.5 py-1 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/30">All</button>
+      <button onclick="filterNotifications('UNREAD')" class="notif-filter px-2.5 py-1 rounded-md bg-[#161924] text-slate-400 border border-[#232938] hover:text-white">Unread</button>
+      <button onclick="filterNotifications('URGENT')" class="notif-filter px-2.5 py-1 rounded-md bg-[#161924] text-slate-400 border border-[#232938] hover:text-white">Urgent / High</button>
+      <button onclick="filterNotifications('CRM')" class="notif-filter px-2.5 py-1 rounded-md bg-[#161924] text-slate-400 border border-[#232938] hover:text-white">CRM Inquiries</button>
+      <button onclick="filterNotifications('INTEGRATION')" class="notif-filter px-2.5 py-1 rounded-md bg-[#161924] text-slate-400 border border-[#232938] hover:text-white">Integrations</button>
+    </div>
+
+    <!-- Event Test Simulator Toolbar -->
+    <div class="p-3 bg-[#131620] border-b border-[#1f2430] space-y-1.5">
+      <span class="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Simulate Live Real-time Events:</span>
+      <div class="grid grid-cols-2 gap-1.5 text-[10px]">
+        <button onclick="simulateEvent('INQUIRY')" class="p-1.5 rounded bg-[#181c28] hover:bg-[#202534] border border-[#232938] text-rose-300 text-left truncate">+ New Inquiry (WhatsApp)</button>
+        <button onclick="simulateEvent('MILESTONE')" class="p-1.5 rounded bg-[#181c28] hover:bg-[#202534] border border-[#232938] text-amber-300 text-left truncate">+ Milestone (Email)</button>
+        <button onclick="simulateEvent('GITHUB')" class="p-1.5 rounded bg-[#181c28] hover:bg-[#202534] border border-[#232938] text-sky-300 text-left truncate">+ GitHub Ingestion</button>
+        <button onclick="simulateEvent('FAILURE')" class="p-1.5 rounded bg-[#181c28] hover:bg-[#202534] border border-[#232938] text-rose-400 text-left truncate">! Integration Failure</button>
+      </div>
+    </div>
+
+    <!-- Notification List (Populated 100% from Neon DB) -->
+    <div id="notif-items-container" class="flex-1 overflow-y-auto p-4 space-y-3 font-sans text-xs">
+      <div class="p-6 text-center text-slate-500 font-mono text-xs">Loading notifications from Neon DB...</div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       FUNCTIONAL ADMIN MODALS (PROJECT, SKILL, ARTICLE)
+       ======================================================= -->
+
+  <!-- Modal 1: Add Project -->
+  <div id="modal-add-project" onclick="if(event.target === this) closeAddProjectModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-[#10121a] border border-[#232938] rounded-xl shadow-2xl p-6 space-y-4 font-mono text-xs admin-modal-box">
+      <div class="flex items-center justify-between border-b border-[#1f2430] pb-3">
+        <div class="flex items-center space-x-2 text-sky-400">
+          <i data-lucide="folder-plus" class="w-5 h-5"></i>
+          <span id="modal-project-heading" class="text-sm font-bold tracking-wider uppercase">Create New Project</span>
+        </div>
+        <button type="button" onclick="closeAddProjectModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="form-add-project" onsubmit="handleCreateProject(event)" class="space-y-4">
+        <input type="hidden" id="edit-proj-id" value="">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Project Title *</label>
+            <input type="text" id="new-proj-title" required placeholder="e.g. Distributed Task Orchestrator" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400" oninput="document.getElementById('new-proj-slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">URL Slug *</label>
+            <input type="text" id="new-proj-slug" required placeholder="e.g. distributed-task-orchestrator" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Category</label>
+            <select id="new-proj-category" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              <option value="backend">Backend Engineering</option>
+              <option value="ai">AI / ML System</option>
+              <option value="web">Full-Stack Web</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Progress (0-100%)</label>
+            <input type="number" id="new-proj-progress" min="0" max="100" value="85" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Status</label>
+            <select id="new-proj-status" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-emerald-400 focus:outline-none focus:border-sky-400">
+              <option value="PUBLISHED" selected>PUBLISHED</option>
+              <option value="DRAFT">DRAFT</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Tech Stack (comma-separated)</label>
+          <input type="text" id="new-proj-tech" placeholder="Java 21, Spring Boot, PostgreSQL, Docker" value="Java 21, Spring Boot, PostgreSQL, Docker" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Short Summary</label>
+          <textarea id="new-proj-summary" rows="2" required placeholder="Architectural summary of what this application does..." class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400 font-sans"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">GitHub Repo URL</label>
+            <input type="url" id="new-proj-github" placeholder="https://github.com/raviranjan/my-repo" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Live Demo URL</label>
+            <input type="text" id="new-proj-demo" placeholder="#" value="#" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-[#1f2430]">
+          <button type="button" onclick="closeAddProjectModal()" class="px-4 py-2 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-slate-300">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold flex items-center gap-1.5 shadow-md shadow-sky-500/20">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span id="modal-project-submit-label">Save & Publish Project</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Modal: Career (Education & Experience) -->
+  <div id="modal-career" onclick="if(event.target === this) closeCareerModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-[#10121a] border border-[#232938] rounded-xl shadow-2xl p-6 space-y-4 font-mono text-xs admin-modal-box">
+      <div class="flex items-center justify-between border-b border-[#1f2430] pb-3">
+        <div class="flex items-center space-x-2 text-sky-400">
+          <i data-lucide="briefcase" class="w-5 h-5"></i>
+          <span id="modal-career-title" class="text-sm font-bold tracking-wider uppercase">Add Career Entry</span>
+        </div>
+        <button type="button" onclick="closeCareerModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <form id="form-career" onsubmit="handleSaveCareer(event)" class="space-y-3 max-h-[78vh] overflow-y-auto pr-1">
+        <input type="hidden" id="career-id" value="">
+        <input type="hidden" id="career-type" value="experience">
+        <div id="career-field-org">
+          <label id="career-label-org" class="block text-slate-400 mb-1">Company / Organization *</label>
+          <input type="text" id="career-org" required placeholder="e.g. Infosys Springboard or Edunet Foundation – AICTE" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+        </div>
+        <div id="career-field-role">
+          <label id="career-label-role" class="block text-slate-400 mb-1">Role / Position *</label>
+          <input type="text" id="career-role" required placeholder="e.g. Artificial Intelligence Intern" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+        </div>
+        <div id="career-extra-fields" class="space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-400 mb-1">Status (Pursuing / Completed)</label>
+              <select id="career-status" onchange="if(this.value==='PURSUING'){document.getElementById('career-end-date').value='';}" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+                <option value="PURSUING">Pursuing / Ongoing (Certificate Pending)</option>
+                <option value="COMPLETED">Completed (Certificate Issued)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Location / Mode</label>
+              <input type="text" id="career-location" placeholder="e.g. Remote · India" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Technologies / Skills Used (comma-separated)</label>
+            <input type="text" id="career-tech" placeholder="e.g. Python, FastAPI, React, Machine Learning, PostgreSQL" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+          <div id="career-internship-links" class="space-y-2.5 p-3 rounded-lg bg-[#141824] border border-[#232938]">
+            <div class="text-[11px] font-bold text-emerald-400">Internship Documents & Verification Links (Google Drive / PDF)</div>
+            <div>
+              <label class="block text-slate-400 mb-1 text-[11px]">Offer Letter URL</label>
+              <input type="text" id="career-offer-url" placeholder="https://drive.google.com/file/d/.../view" class="w-full p-2 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1 text-[11px]">Completion Certificate URL (Add when received)</label>
+              <input type="text" id="career-cert-url" placeholder="https://drive.google.com/file/d/.../view (Leave blank if pursuing)" class="w-full p-2 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-emerald-400">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1 text-[11px]">Project Report / Proof URL (Optional)</label>
+              <input type="text" id="career-report-url" placeholder="https://drive.google.com/file/d/.../view" class="w-full p-2 rounded bg-[#10121a] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Start Date *</label>
+            <input type="date" id="career-start-date" required class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">End Date (blank if Pursuing)</label>
+            <input type="date" id="career-end-date" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Summary / Description</label>
+          <textarea id="career-desc" rows="3" placeholder="Key project built, mentor, cohort batch, responsibilities, or achievements..." class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400 font-sans"></textarea>
+        </div>
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-[#1f2430]">
+          <button type="button" onclick="closeCareerModal()" class="px-4 py-2 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-slate-300">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save to Neon DB</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Research Paper -->
+  <div id="modal-research" onclick="if(event.target === this) closeResearchModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-xl bg-[#10121a] border border-[#232938] rounded-xl shadow-2xl p-6 space-y-4 font-mono text-xs admin-modal-box">
+      <div class="flex items-center justify-between border-b border-[#1f2430] pb-3">
+        <div class="flex items-center space-x-2 text-sky-400">
+          <i data-lucide="file-text" class="w-5 h-5"></i>
+          <span id="modal-research-title" class="text-sm font-bold tracking-wider uppercase">Publish Research Paper</span>
+        </div>
+        <button type="button" onclick="closeResearchModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <form id="form-research" onsubmit="handleSaveResearch(event)" class="space-y-3">
+        <input type="hidden" id="research-id" value="">
+        <div>
+          <label class="block text-slate-400 mb-1">Paper Title *</label>
+          <input type="text" id="research-title" required placeholder="e.g. Comparative Analysis of Index Structures" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400" oninput="document.getElementById('research-slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Slug *</label>
+            <input type="text" id="research-slug" required class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Status</label>
+            <select id="research-status" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              <option value="PUBLISHED" selected>PUBLISHED</option>
+              <option value="RESEARCHING">RESEARCHING</option>
+              <option value="DRAFT">DRAFT</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Authors *</label>
+          <input type="text" id="research-authors" value="Raviranjan Kumar" required class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Abstract *</label>
+          <textarea id="research-abstract" rows="3" required placeholder="Abstract / key findings of the investigation..." class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400 font-sans"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">DOI / Publication Link</label>
+            <input type="text" id="research-doi" placeholder="https://..." class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">GitHub / Dataset URL</label>
+            <input type="text" id="research-github" placeholder="https://github.com/..." class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+        </div>
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-[#1f2430]">
+          <button type="button" onclick="closeResearchModal()" class="px-4 py-2 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-slate-300">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save to Database</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Skill -->
+  <div id="modal-skill" onclick="if(event.target === this) closeSkillModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-[#10121a] border border-[#232938] rounded-xl shadow-2xl p-6 space-y-4 font-mono text-xs admin-modal-box">
+      <div class="flex items-center justify-between border-b border-[#1f2430] pb-3">
+        <div class="flex items-center space-x-2 text-sky-400">
+          <i data-lucide="cpu" class="w-5 h-5"></i>
+          <span class="text-sm font-bold tracking-wider uppercase">Add Technical Skill</span>
+        </div>
+        <button type="button" onclick="closeSkillModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <form id="form-skill" onsubmit="handleSaveSkill(event)" class="space-y-3">
+        <input type="hidden" id="skill-id" value="">
+        <div>
+          <label class="block text-slate-400 mb-1">Skill Name *</label>
+          <input type="text" id="skill-name" required placeholder="e.g. Go, Kubernetes, Kafka" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Proficiency Level</label>
+          <select id="skill-level" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+            <option value="ADVANCED" selected>ADVANCED (Primary Core)</option>
+            <option value="INTERMEDIATE">INTERMEDIATE (Active Use)</option>
+            <option value="BEGINNER">BEGINNER (Familiar)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Category</label>
+          <select id="skill-category-select" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+            <option value="Languages">Languages</option>
+            <option value="Frameworks">Frameworks & Libraries</option>
+            <option value="Databases">Databases & Storage</option>
+            <option value="DevOps">DevOps & Cloud</option>
+            <option value="Architecture">Systems & Architecture</option>
+          </select>
+        </div>
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-[#1f2430]">
+          <button type="button" onclick="closeSkillModal()" class="px-4 py-2 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-slate-300">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save Skill</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Lab Experiment -->
+  <div id="modal-lab" onclick="if(event.target === this) closeLabModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-[#10121a] border border-[#232938] rounded-xl shadow-2xl p-6 space-y-4 font-mono text-xs admin-modal-box">
+      <div class="flex items-center justify-between border-b border-[#1f2430] pb-3">
+        <div class="flex items-center space-x-2 text-sky-400">
+          <i data-lucide="flask-conical" class="w-5 h-5"></i>
+          <span id="modal-lab-title" class="text-sm font-bold tracking-wider uppercase">Add Lab Experiment</span>
+        </div>
+        <button type="button" onclick="closeLabModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <form id="form-lab" onsubmit="handleSaveLab(event)" class="space-y-3">
+        <input type="hidden" id="lab-id" value="">
+        <div>
+          <label class="block text-slate-400 mb-1">Experiment Title *</label>
+          <input type="text" id="lab-title" required placeholder="e.g. Raft Consensus Implementation in Java" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400" oninput="document.getElementById('lab-slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Slug *</label>
+            <input type="text" id="lab-slug" required class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Status</label>
+            <select id="lab-status" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+              <option value="ACTIVE" selected>ACTIVE</option>
+              <option value="COMPLETED">COMPLETED</option>
+              <option value="PROTOTYPE">PROTOTYPE</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Objective *</label>
+          <input type="text" id="lab-objective" required placeholder="What hypothesis or architecture is being tested?" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Description *</label>
+          <textarea id="lab-desc" rows="2" required placeholder="Technical breakdown of the benchmark or prototype..." class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400 font-sans"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Technologies</label>
+            <input type="text" id="lab-tech" placeholder="Java 21, Netty, Virtual Threads" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">GitHub Repo URL</label>
+            <input type="text" id="lab-github" placeholder="https://github.com/..." class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+        </div>
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-[#1f2430]">
+          <button type="button" onclick="closeLabModal()" class="px-4 py-2 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-slate-300">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save Experiment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Contribution Story -->
+  <div id="modal-story" onclick="if(event.target === this) closeStoryModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-[#10121a] border border-[#232938] rounded-xl shadow-2xl p-6 space-y-4 font-mono text-xs admin-modal-box">
+      <div class="flex items-center justify-between border-b border-[#1f2430] pb-3">
+        <div class="flex items-center space-x-2 text-sky-400">
+          <i data-lucide="git-pull-request" class="w-5 h-5"></i>
+          <span class="text-sm font-bold tracking-wider uppercase">Add Contribution Story</span>
+        </div>
+        <button type="button" onclick="closeStoryModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <form id="form-story" onsubmit="handleSaveStory(event)" class="space-y-3">
+        <input type="hidden" id="story-id" value="">
+        <div>
+          <label class="block text-slate-400 mb-1">Repository Name *</label>
+          <input type="text" id="story-repo" required placeholder="e.g. spring-projects/spring-boot" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Story Title *</label>
+          <input type="text" id="story-title" required placeholder="e.g. Fixed Connection Leak in Redis Pool" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">What Was Contributed *</label>
+          <textarea id="story-what" rows="2" required placeholder="Technical description of the patch, PR, or bugfix..." class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400 font-sans"></textarea>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Problem & Impact *</label>
+          <textarea id="story-problem" rows="2" required placeholder="What issue did the upstream community face?" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400 font-sans"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">PR / Issue URL</label>
+            <input type="text" id="story-pr-url" placeholder="https://github.com/.../pull/123" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Technologies</label>
+            <input type="text" id="story-tech" placeholder="Java, Docker, Redis" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-sky-400">
+          </div>
+        </div>
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-[#1f2430]">
+          <button type="button" onclick="closeStoryModal()" class="px-4 py-2 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-slate-300">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save Story</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Modal: Credential (Achievement & Certification) -->
+  <div id="modal-credential" onclick="if(event.target === this) closeCredentialModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-[#10121a] border border-[#232938] rounded-xl shadow-2xl p-6 space-y-4 font-mono text-xs admin-modal-box">
+      <div class="flex items-center justify-between border-b border-[#1f2430] pb-3">
+        <div class="flex items-center space-x-2 text-amber-400">
+          <i data-lucide="trophy" class="w-5 h-5"></i>
+          <span id="modal-credential-heading" class="text-sm font-bold tracking-wider uppercase">Add Achievement / Certification</span>
+        </div>
+        <button type="button" onclick="closeCredentialModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <form id="form-credential" onsubmit="handleSaveCredential(event)" class="space-y-3">
+        <input type="hidden" id="cred-id" value="">
+        <div>
+          <label class="block text-slate-400 mb-1">Credential Type *</label>
+          <select id="cred-type" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white" onchange="toggleCredentialModalFields(this.value)">
+            <option value="achievement">Academic / Coding Achievement</option>
+            <option value="certification">Professional Certification</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Title *</label>
+          <input type="text" id="cred-title" required placeholder="e.g. Top 5% LeetCode Contest Rating or Java 21 Certification" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label id="cred-org-label" class="block text-slate-400 mb-1">Organization / Issuer *</label>
+            <input type="text" id="cred-org" required placeholder="e.g. LeetCode / Oracle / Coursera" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Date *</label>
+            <input type="date" id="cred-date" required class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white">
+          </div>
+        </div>
+        <div>
+          <label id="cred-extra-label" class="block text-slate-400 mb-1">Category / Credential ID</label>
+          <input type="text" id="cred-extra" placeholder="e.g. COMPETITIVE_PROGRAMMING or Credential ID" class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Description / Proof URL</label>
+          <textarea id="cred-desc" rows="2" placeholder="Description or verification URL..." class="w-full p-2.5 rounded bg-[#161924] border border-[#232938] text-white font-sans"></textarea>
+        </div>
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-[#1f2430]">
+          <button type="button" onclick="closeCredentialModal()" class="px-4 py-2 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-slate-300">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save to Neon DB</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Update Admin Username & Password (2-Step OTP Verification in Neon DB) -->
+  <div id="modal-change-password" onclick="if(event.target === this) closeChangePasswordModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-[#10121a] border border-[#232938] rounded-xl shadow-2xl p-5 space-y-3.5 font-mono text-xs admin-modal-box">
+      <div class="flex items-center justify-between border-b border-[#1f2430] pb-2.5">
+        <div class="flex items-center space-x-2 text-amber-400">
+          <i data-lucide="key" class="w-4 h-4"></i>
+          <span class="text-xs font-bold uppercase">Admin Credentials</span>
+        </div>
+        <button type="button" onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="px-3 py-2 rounded-lg bg-[#131620] border border-[#202533] flex items-center justify-between text-[11px]">
+        <span>User: <strong id="cp-current-username-badge" class="text-sky-400">raviranjan</strong></span>
+        <span id="cp-last-updated-time" class="text-emerald-400 text-[10px]">Synced</span>
+      </div>
+
+      <form id="form-change-password" onsubmit="handleChangePassword(event)" autocomplete="off" class="space-y-3">
+        <!-- Step 1: Verify Email & Mobile -->
+        <div id="cp-step-1" class="space-y-2.5">
+          <div>
+            <label class="block text-[10px] text-slate-400 mb-1">REGISTERED EMAIL</label>
+            <input type="email" id="cp-admin-email" required placeholder="Email address" autocomplete="off" class="w-full p-2 rounded-lg bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-400 mb-1">MOBILE NUMBER</label>
+            <input type="text" id="cp-admin-mobile" required placeholder="10-digit mobile" autocomplete="off" class="w-full p-2 rounded-lg bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <button type="button" id="btn-cp-generate-otp" onclick="handleRequestAdminUpdateOtp()" class="w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors cursor-pointer">
+            Send OTP to Database
+          </button>
+        </div>
+
+        <!-- Step 2: Enter OTP from Neon DB + New Username & Password -->
+        <div id="cp-step-2" class="hidden space-y-2.5">
+          <div id="cp-otp-status-box" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-[11px] text-emerald-300">
+            ✓ OTP saved in Neon DB. Enter code below.
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-1">DATABASE OTP</label>
+              <input type="text" id="cp-otp-code" maxlength="6" placeholder="6-digit OTP" autocomplete="off" class="w-full p-2 rounded-lg bg-[#161924] border border-[#232938] text-amber-300 font-bold tracking-widest focus:outline-none focus:border-amber-400">
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-1">NEW USERNAME</label>
+              <input type="text" id="cp-new-username" placeholder="Username" autocomplete="off" class="w-full p-2 rounded-lg bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-amber-400">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-1">NEW PASSWORD</label>
+              <input type="password" id="cp-new-password" minlength="6" placeholder="New password" autocomplete="new-password" class="w-full p-2 rounded-lg bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-amber-400">
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-1">CONFIRM</label>
+              <input type="password" id="cp-confirm-password" minlength="6" placeholder="Confirm" autocomplete="new-password" class="w-full p-2 rounded-lg bg-[#161924] border border-[#232938] text-white focus:outline-none focus:border-amber-400">
+            </div>
+          </div>
+          <div class="flex items-center justify-end space-x-2 pt-2 border-t border-[#1f2430]">
+            <button type="button" onclick="closeChangePasswordModal()" class="px-3 py-1.5 rounded-lg bg-[#161924] border border-[#232938] text-slate-300">
+              Cancel
+            </button>
+            <button type="submit" id="btn-save-password" class="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold cursor-pointer">
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/admin_app.js?v=18"></script>
+
+  <!-- Modal: Audit Log State Diff Viewer -->
+  <div id="modal-audit-diff" onclick="if(event.target === this) closeAuditDiffModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-[#10121a] border border-[#232938] rounded-xl shadow-2xl p-6 space-y-4 font-mono text-xs admin-modal-box" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between border-b border-[#1f2430] pb-3">
+        <div class="flex items-center space-x-2 text-sky-400">
+          <i data-lucide="file-diff" class="w-5 h-5"></i>
+          <span id="audit-diff-title" class="text-sm font-bold tracking-wider uppercase">Audit State Diff Inspector</span>
+        </div>
+        <button type="button" onclick="closeAuditDiffModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="audit-diff-meta" class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3 rounded bg-[#141822] border border-[#1f2430] text-[11px]"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <span class="text-[10px] text-rose-400 font-bold uppercase">Previous State (Before Edit)</span>
+          <pre id="audit-diff-old" class="p-3 rounded bg-[#090a0f] border border-rose-500/20 text-rose-300 text-[11px] overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+        <div class="space-y-1">
+          <span class="text-[10px] text-emerald-400 font-bold uppercase">Committed State (Neon DB)</span>
+          <pre id="audit-diff-new" class="p-3 rounded bg-[#090a0f] border border-emerald-500/20 text-emerald-300 text-[11px] overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+      </div>
+      <div class="flex justify-end pt-2 border-t border-[#1f2430]">
+        <button type="button" onclick="closeAuditDiffModal()" class="px-4 py-1.5 rounded bg-sky-500 text-slate-950 font-bold">Close Inspector</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

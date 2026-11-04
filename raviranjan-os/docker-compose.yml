@@ -1,0 +1,115 @@
+services:
+  # -------------------------------------------------------------
+  # PostgreSQL 16 Database (Fallback if Neon DB is offline)
+  # -------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: raviranjan-os-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-raviranjan_os}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgrespassword}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d raviranjan_os"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - raviranjan-network
+
+  # -------------------------------------------------------------
+  # Redis 7 In-Memory Event Bus
+  # -------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: raviranjan-os-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - raviranjan-network
+
+  # -------------------------------------------------------------
+  # Java 21 / Spring Boot 3.3 Backend API & Integration Subsystem
+  # Connects to Neon Cloud PostgreSQL (via config.env / .env)
+  # -------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: raviranjan-os-backend
+    restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: false
+      - path: ../config.env
+        required: false
+      - path: .env
+        required: false
+      - path: config.env
+        required: false
+    volumes:
+      - .:/workspace_env:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      raviranjan-network:
+        aliases:
+          - backend
+          - raviranjan-os-backend
+
+  # -------------------------------------------------------------
+  # Node.js Frontend, Public OS & Reverse Proxy
+  # -------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: raviranjan-os-frontend
+    restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: false
+      - path: ../config.env
+        required: false
+      - path: .env
+        required: false
+      - path: config.env
+        required: false
+    environment:
+      BACKEND_INTERNAL_URL: http://backend:8080
+      NEXT_PUBLIC_API_URL: http://backend:8080
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    networks:
+      - raviranjan-network
+
+networks:
+  raviranjan-network:
+    name: raviranjan-network
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
