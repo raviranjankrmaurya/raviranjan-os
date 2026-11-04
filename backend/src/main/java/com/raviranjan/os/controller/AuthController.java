@@ -41,6 +41,27 @@ public class AuthController {
     }
 
 
+    @GetMapping("/me")
+    @Operation(summary = "Get current authenticated admin user info from Neon DB")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getCurrentAdmin(org.springframework.security.core.Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Unauthorized"));
+        }
+        Object principal = authentication.getPrincipal();
+        Map<String, Object> data = new java.util.LinkedHashMap<>();
+        if (principal instanceof com.raviranjan.os.security.UserPrincipal) {
+            com.raviranjan.os.security.UserPrincipal userPrincipal = (com.raviranjan.os.security.UserPrincipal) principal;
+            data.put("id", userPrincipal.getId());
+            data.put("username", userPrincipal.getUsername());
+            data.put("email", userPrincipal.getEmail());
+            data.put("role", "SUPER_ADMIN");
+        } else {
+            data.put("username", authentication.getName());
+            data.put("role", "SUPER_ADMIN");
+        }
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
     @GetMapping("/credential-metadata")
     @Operation(summary = "Get admin credential update timestamp and verification metadata from Neon DB")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getCredentialMetadata() {

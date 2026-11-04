@@ -4244,31 +4244,47 @@ async function deleteNotificationById(id) {
 // ==========================================
 async function loadAdminIdentityMetadata() {
   try {
-    const res = await fetch('/api/v1/auth/credential-metadata');
-    if (!res.ok) return;
-    const json = await res.json();
-    const d = json?.data || {};
-    if (d.username) {
-      localStorage.setItem('raviranjan_admin_user', d.username);
+    const cachedUser = localStorage.getItem('raviranjan_admin_user');
+    if (cachedUser) {
       const userEl = document.getElementById('admin-sidebar-username');
-      if (userEl) userEl.innerText = d.username;
+      if (userEl) userEl.innerText = cachedUser;
       const monoEl = document.getElementById('admin-sidebar-monogram');
-      if (monoEl) {
-        monoEl.innerText = String(d.username).substring(0, 2).toUpperCase();
+      if (monoEl) monoEl.innerText = String(cachedUser).substring(0, 2).toUpperCase();
+    }
+
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/v1/auth/me', { headers });
+    if (res.ok) {
+      const json = await res.json();
+      const d = json?.data || {};
+      if (d.username) {
+        localStorage.setItem('raviranjan_admin_user', d.username);
+        const userEl = document.getElementById('admin-sidebar-username');
+        if (userEl) userEl.innerText = d.username;
+        const monoEl = document.getElementById('admin-sidebar-monogram');
+        if (monoEl) {
+          monoEl.innerText = String(d.username).substring(0, 2).toUpperCase();
+        }
+        const badgeEl = document.getElementById('cp-current-username-badge');
+        if (badgeEl) badgeEl.innerText = d.username;
       }
-      const badgeEl = document.getElementById('cp-current-username-badge');
-      if (badgeEl) badgeEl.innerText = d.username;
+      if (d.role) {
+        const roleEl = document.getElementById('admin-sidebar-role');
+        if (roleEl) roleEl.innerText = d.role;
+      }
     }
-    if (d.role) {
-      const roleEl = document.getElementById('admin-sidebar-role');
-      if (roleEl) roleEl.innerText = d.role;
-    }
-    if (d.credentialsUpdatedAt) {
-      const updatedEl = document.getElementById('cp-last-updated-time');
-      if (updatedEl) {
-        updatedEl.innerText = new Date(d.credentialsUpdatedAt).toLocaleString([], {
-          month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
+
+    const metaRes = await fetch('/api/v1/auth/credential-metadata');
+    if (metaRes.ok) {
+      const metaJson = await metaRes.json();
+      const md = metaJson?.data || {};
+      if (md.credentialsUpdatedAt) {
+        const updatedEl = document.getElementById('cp-last-updated-time');
+        if (updatedEl) {
+          updatedEl.innerText = new Date(md.credentialsUpdatedAt).toLocaleString([], {
+            month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+          });
+        }
       }
     }
   } catch (_) {}

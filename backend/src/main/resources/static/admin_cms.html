@@ -47,6 +47,13 @@
       return Boolean(isAuth && token);
     }
     function enforceAdminGate() {
+      const savedUser = localStorage.getItem('raviranjan_admin_user');
+      if (savedUser) {
+        const uEl = document.getElementById('admin-sidebar-username');
+        if (uEl) uEl.innerText = savedUser;
+        const mEl = document.getElementById('admin-sidebar-monogram');
+        if (mEl) mEl.innerText = String(savedUser).substring(0, 2).toUpperCase();
+      }
       const gate = document.getElementById('admin-direct-login-gate');
       if (!gate) return;
       if (isSessionValid()) {
@@ -310,7 +317,7 @@
               RK
             </div>
             <div>
-              <p id="admin-sidebar-username" class="text-xs font-medium text-white">raviranjan</p>
+              <p id="admin-sidebar-username" class="text-xs font-medium text-white">Admin</p>
               <p id="admin-sidebar-role" class="text-[10px] text-slate-500 font-mono">SUPER_ADMIN</p>
             </div>
           </div>
