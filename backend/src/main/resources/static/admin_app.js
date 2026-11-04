@@ -691,12 +691,15 @@ function prependUnifiedActivity(type, title, desc) {
 document.addEventListener('DOMContentLoaded', () => {
   initAdminTheme();
   updateMarkdownPreview();
-  loadAdminIdentityMetadata();
-  loadAdminDashboardMetrics();
-  loadAdminProjects();
-  loadAdminNotifications();
-  loadSiteSettings();
-  loadAiConfig();
+  const isAuth = localStorage.getItem('raviranjan_admin_authenticated') === 'true' && Boolean(localStorage.getItem('raviranjan_auth_token'));
+  if (isAuth) {
+    loadAdminIdentityMetadata();
+    loadAdminDashboardMetrics();
+    loadAdminProjects();
+    loadAdminNotifications();
+    loadSiteSettings();
+    loadAiConfig();
+  }
   initDynamicAdminCommandPalette();
 });
 
@@ -1258,33 +1261,20 @@ async function getAdminToken(forceRefresh = false) {
   let token = localStorage.getItem("raviranjan_auth_token");
   if (forceRefresh || isJwtExpiredOrInvalid(token)) {
     token = null;
+    localStorage.removeItem("raviranjan_auth_token");
+    localStorage.removeItem("raviranjan_admin_authenticated");
   }
-  if (!token) {
-    try {
-      const res = await fetch("/api/v1/auth/session-token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        token = data?.data?.accessToken || data?.accessToken;
-        if (token) {
-          localStorage.setItem("raviranjan_auth_token", token);
-          localStorage.setItem("raviranjan_admin_authenticated", "true");
-          if (data?.data?.username) {
-            localStorage.setItem("raviranjan_admin_user", data.data.username);
-          }
-        }
-      }
-    } catch (e) {
-      console.warn("Session token refresh note:", e);
-    }
-  }
-  return token || localStorage.getItem("raviranjan_auth_token");
+  return token;
 }
 
 async function getAuthHeaders(forceRefresh = false) {
-  return { "Content-Type": "application/json" };
+  const token = await getAdminToken(forceRefresh);
+  const headers = { "Content-Type": "application/json" };
+  if (token) {
+    headers["Authorization"] = "Bearer " + token;
+    headers["X-Admin-Token"] = token;
+  }
+  return headers;
 }
 
 // 1. Projects Management (100% Neon DB, Zero Hardcoded Fallbacks)
@@ -3309,9 +3299,8 @@ async function openChangePasswordModal() {
     if (res.ok) {
       const json = await res.json();
       const d = json?.data || {};
-      const curUserBadge = document.getElementById('cp-current-username-badge');
-      if (curUserBadge && d.username) curUserBadge.innerText = d.username;
-      if (newUsernameEl && d.username) newUsernameEl.value = d.username;
+      // Username is kept hidden for security
+      if (newUsernameEl && d.username) newUsernameEl.placeholder = 'Enter new username';
       const updatedEl = document.getElementById('cp-last-updated-time');
       if (updatedEl && d.credentialsUpdatedAt) {
         updatedEl.innerText = new Date(d.credentialsUpdatedAt).toLocaleString([], {
@@ -3327,6 +3316,13 @@ async function openChangePasswordModal() {
 function closeChangePasswordModal() {
   const modal = document.getElementById('modal-change-password');
   if (modal) modal.classList.add('hidden');
+  if (typeof enforceAdminGate === 'function') {
+    enforceAdminGate();
+  } else {
+    const isAuth = localStorage.getItem('raviranjan_admin_authenticated') === 'true' && Boolean(localStorage.getItem('raviranjan_auth_token'));
+    const gate = document.getElementById('admin-direct-login-gate');
+    if (!isAuth && gate) gate.classList.remove('hidden');
+  }
 }
 
 async function handleRequestAdminUpdateOtp() {

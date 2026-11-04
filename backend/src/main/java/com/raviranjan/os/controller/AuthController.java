@@ -40,11 +40,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", response));
     }
 
-    @PostMapping("/session-token")
-    @Operation(summary = "Issue a fresh JWT token for an active admin session against the current database AdminUser")
-    public ResponseEntity<ApiResponse<AuthResponse>> issueSessionToken() {
-        return ResponseEntity.ok(ApiResponse.success("Session token issued", authService.issueAdminSessionToken()));
-    }
 
     @GetMapping("/credential-metadata")
     @Operation(summary = "Get admin credential update timestamp and verification metadata from Neon DB")

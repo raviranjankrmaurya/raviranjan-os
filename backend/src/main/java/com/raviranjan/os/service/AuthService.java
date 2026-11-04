@@ -13,5 +13,4 @@ public interface AuthService {
     Map<String, Object> requestCredentialOtp(String email, String mobileNumber, String purpose);
     Map<String, Object> verifyOtpAndUpdateCredentials(String email, String mobileNumber, String otpCode, String newUsername, String newPassword);
     Map<String, Object> getCredentialMetadata();
-    AuthResponse issueAdminSessionToken();
 }

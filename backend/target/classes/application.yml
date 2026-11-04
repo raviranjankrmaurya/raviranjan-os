@@ -1,0 +1,77 @@
+server:
+  port: ${PORT:8080}
+  max-http-request-header-size: 65536
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: raviranjan-os-backend
+  profiles:
+    active: dev
+  threads:
+    virtual:
+      enabled: true
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/raviranjan_os}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgrespassword}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+
+  flyway:
+    enabled: false
+
+  data:
+    redis:
+      repositories:
+        enabled: false
+      host: ${SPRING_DATA_REDIS_HOST:${SPRING_REDIS_HOST:redis}}
+      port: ${SPRING_DATA_REDIS_PORT:${SPRING_REDIS_PORT:6379}}
+      username: ${SPRING_DATA_REDIS_USERNAME:${SPRING_REDIS_USERNAME:default}}
+      password: ${SPRING_DATA_REDIS_PASSWORD:${SPRING_REDIS_PASSWORD:}}
+      ssl:
+        enabled: ${SPRING_DATA_REDIS_SSL_ENABLED:${SPRING_REDIS_SSL_ENABLED:false}}
+      timeout: 5000ms
+
+  cache:
+    type: simple
+
+# App Configuration
+app:
+  jwt:
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+  security:
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
+    proxy:
+      trust-internal-proxies: ${TRUST_INTERNAL_PROXIES:true}
+      trusted-ips: ${TRUSTED_PROXY_IPS:}
+    geoip:
+      external-enabled: ${GEOIP_EXTERNAL_ENABLED:false}
+  contact:
+    rate-limit:
+      max-submissions: ${CONTACT_RATE_LIMIT_MAX:3}
+      window-seconds: ${CONTACT_RATE_LIMIT_WINDOW_SECONDS:600}
+    retention-days: ${CONTACT_METADATA_RETENTION_DAYS:90}
+  integrations:
+    github:
+      api-token: ${GITHUB_API_TOKEN:}
+      username: ${GITHUB_USERNAME:raviranjankrmaurya}
+    leetcode:
+      username: ${LEETCODE_USERNAME:raviranjanmaurya}
+    gfg:
+      username: ${GFG_USERNAME:raviranjankrmaurya}
+    ai:
+      gemini-api-key: ${GEMINI_API_KEY:}

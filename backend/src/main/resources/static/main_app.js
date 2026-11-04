@@ -1976,27 +1976,14 @@ async function handleAdminLogin(event) {
       return;
     }
 
-    if (res.status >= 500 && (username.toLowerCase() === 'raviranjan' || username.toLowerCase() === 'raviranjankr') && password === 'Admin@123456') {
-      localStorage.setItem('raviranjan_admin_authenticated', 'true');
-      localStorage.setItem('raviranjan_admin_user', 'raviranjan');
-      showToast('Launching Admin OS...', 'success');
-      setTimeout(() => {
-        window.location.href = '/admin';
-      }, 250);
-      return;
-    }
+
 
     if (errorBox && errorMsg) {
       errorBox.classList.remove('hidden');
       errorMsg.innerText = data?.message || 'Access Denied: Invalid username or passphrase.';
     }
   } catch (err) {
-    if ((username.toLowerCase() === 'raviranjan' || username.toLowerCase() === 'raviranjankr') && password === 'Admin@123456') {
-      localStorage.setItem('raviranjan_admin_authenticated', 'true');
-      localStorage.setItem('raviranjan_admin_user', 'raviranjan');
-      window.location.href = '/admin';
-      return;
-    }
+
     if (errorBox && errorMsg) {
       errorBox.classList.remove('hidden');
       errorMsg.innerText = 'Authentication error. Please check your credentials.';

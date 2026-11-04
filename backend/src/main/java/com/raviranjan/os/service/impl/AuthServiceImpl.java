@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
@@ -64,6 +65,87 @@ public class AuthServiceImpl implements AuthService {
         this.tokenProvider = tokenProvider;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    // In-memory rate limiting to protect against brute-force attacks
+    private static final int MAX_FAILED_ATTEMPTS = 5;
+    private static final long LOCKOUT_DURATION_MS = 15 * 60 * 1000L; // 15 minutes lockout
+    private static final Map<String, LoginAttemptInfo> LOGIN_ATTEMPTS = new ConcurrentHashMap<>();
+
+    private static final int MAX_OTP_REQUESTS = 3;
+    private static final long OTP_WINDOW_MS = 10 * 60 * 1000L; // 10 minutes window
+    private static final Map<String, OtpAttemptInfo> OTP_ATTEMPTS = new ConcurrentHashMap<>();
+
+    private static class LoginAttemptInfo {
+        int attempts;
+        long lastAttemptTime;
+        LoginAttemptInfo(int attempts, long lastAttemptTime) {
+            this.attempts = attempts;
+            this.lastAttemptTime = lastAttemptTime;
+        }
+    }
+
+    private static class OtpAttemptInfo {
+        int requests;
+        long windowStartTime;
+        OtpAttemptInfo(int requests, long windowStartTime) {
+            this.requests = requests;
+            this.windowStartTime = windowStartTime;
+        }
+    }
+
+    private void checkLoginRateLimit(String key) {
+        if (key == null || key.isBlank()) key = "default";
+        String normalizedKey = key.trim().toLowerCase();
+        LoginAttemptInfo info = LOGIN_ATTEMPTS.get(normalizedKey);
+        if (info != null) {
+            long elapsed = System.currentTimeMillis() - info.lastAttemptTime;
+            if (elapsed < LOCKOUT_DURATION_MS && info.attempts >= MAX_FAILED_ATTEMPTS) {
+                long minutesLeft = Math.max(1, (LOCKOUT_DURATION_MS - elapsed) / 60000L);
+                throw new BadRequestException("Too many failed login attempts. Account temporarily locked for " + minutesLeft + " more minute(s) to protect against brute-force attacks.");
+            } else if (elapsed >= LOCKOUT_DURATION_MS) {
+                LOGIN_ATTEMPTS.remove(normalizedKey);
+            }
+        }
+    }
+
+    private void recordFailedLogin(String key) {
+        if (key == null || key.isBlank()) key = "default";
+        String normalizedKey = key.trim().toLowerCase();
+        long now = System.currentTimeMillis();
+        LOGIN_ATTEMPTS.compute(normalizedKey, (k, existing) -> {
+            if (existing == null || (now - existing.lastAttemptTime) >= LOCKOUT_DURATION_MS) {
+                return new LoginAttemptInfo(1, now);
+            } else {
+                return new LoginAttemptInfo(existing.attempts + 1, now);
+            }
+        });
+    }
+
+    private void recordSuccessfulLogin(String key) {
+        if (key != null && !key.isBlank()) {
+            LOGIN_ATTEMPTS.remove(key.trim().toLowerCase());
+        }
+    }
+
+    private void checkAndRecordOtpRateLimit(String email) {
+        String key = email != null ? email.trim().toLowerCase() : "default";
+        long now = System.currentTimeMillis();
+        OtpAttemptInfo info = OTP_ATTEMPTS.get(key);
+        if (info != null) {
+            long elapsed = now - info.windowStartTime;
+            if (elapsed < OTP_WINDOW_MS) {
+                if (info.requests >= MAX_OTP_REQUESTS) {
+                    long minutesLeft = Math.max(1, (OTP_WINDOW_MS - elapsed) / 60000L);
+                    throw new BadRequestException("Too many OTP requests. Please wait " + minutesLeft + " minute(s) before requesting another OTP.");
+                }
+                info.requests++;
+            } else {
+                OTP_ATTEMPTS.put(key, new OtpAttemptInfo(1, now));
+            }
+        } else {
+            OTP_ATTEMPTS.put(key, new OtpAttemptInfo(1, now));
+        }
     }
 
     private String normalizeMobile(String rawMobile) {
@@ -105,7 +187,7 @@ public class AuthServiceImpl implements AuthService {
         boolean emailOk = dbEmail.equalsIgnoreCase(cleanEmail) || REQUIRED_ADMIN_EMAIL.equalsIgnoreCase(cleanEmail);
         boolean mobileOk = dbMobile.equals(cleanMobile) || REQUIRED_ADMIN_MOBILE.equals(cleanMobile);
         if (!emailOk || !mobileOk) {
-            throw new BadRequestException("Verification failed: Registered Admin Email (" + dbEmail + ") and Mobile (" + dbMobile + ") are required.");
+            throw new BadRequestException("Verification failed: Provided email and mobile number do not match registered administrator records.");
         }
     }
 
@@ -120,6 +202,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(LoginRequest request) {
         String inputUser = request.getUsername() != null ? request.getUsername().trim() : "";
         String inputPass = request.getPassword() != null ? request.getPassword().trim() : "";
+        checkLoginRateLimit(inputUser);
 
         List<AdminUser> allAdmins = userRepository.findAll().stream()
                 .filter(u -> u.getDeletedAt() == null)
@@ -152,6 +235,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (user == null) {
+            recordFailedLogin(inputUser);
             throw new org.springframework.security.authentication.BadCredentialsException("Invalid username or password");
         }
 
@@ -171,8 +255,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (!passwordValid) {
+            recordFailedLogin(inputUser);
             throw new org.springframework.security.authentication.BadCredentialsException("Invalid username or password");
         }
+
+        recordSuccessfulLogin(inputUser);
 
         user.setActive(true);
         user.setLastLoginAt(Instant.now());
@@ -231,6 +318,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Map<String, Object> requestCredentialOtp(String email, String mobileNumber, String purpose) {
+        checkAndRecordOtpRateLimit(email);
         validateAdminIdentity(email, mobileNumber);
         String cleanEmail = REQUIRED_ADMIN_EMAIL;
         String cleanMobile = REQUIRED_ADMIN_MOBILE;
@@ -353,36 +441,16 @@ public class AuthServiceImpl implements AuthService {
         return result;
     }
 
-    @Override
-    public AuthResponse issueAdminSessionToken() {
-        AdminUser user = getPrimaryAdminUser();
-        UserPrincipal principal = UserPrincipal.create(user);
-        Authentication auth = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
-        String newAccessToken = tokenProvider.generateAccessToken(auth);
-        String newRefreshToken = tokenProvider.generateRefreshToken(principal);
-        List<String> roles = principal.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-        return new AuthResponse(
-                newAccessToken,
-                newRefreshToken,
-                user.getUsername(),
-                user.getEmail(),
-                roles
-        );
-    }
 
     @Override
     public Map<String, Object> getCredentialMetadata() {
         AdminUser user = getPrimaryAdminUser();
         Map<String, Object> meta = new LinkedHashMap<>();
-        meta.put("username", user.getUsername());
-        meta.put("requiredEmail", getDynamicAdminRecoveryEmail());
-        meta.put("requiredMobile", getDynamicAdminMobile());
+        meta.put("verified", true);
+        meta.put("status", "PROTECTED");
         meta.put("role", "SUPER_ADMIN");
         Instant updated = user.getCredentialsUpdatedAt() != null ? user.getCredentialsUpdatedAt() : user.getUpdatedAt();
         meta.put("credentialsUpdatedAt", updated != null ? updated.toString() : Instant.now().toString());
-        meta.put("lastLoginAt", user.getLastLoginAt() != null ? user.getLastLoginAt().toString() : null);
         return meta;
     }
 

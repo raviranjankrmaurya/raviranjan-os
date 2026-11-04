@@ -41,10 +41,17 @@
       localStorage.removeItem('raviranjan_admin_user');
       window.location.replace('/');
     }
-    window.addEventListener('DOMContentLoaded', function() {
-      const isAuth = localStorage.getItem('raviranjan_admin_authenticated') === 'true' || localStorage.getItem('raviranjan_auth_token');
+    function isSessionValid() {
+      const isAuth = localStorage.getItem('raviranjan_admin_authenticated') === 'true';
+      const token = localStorage.getItem('raviranjan_auth_token');
+      return Boolean(isAuth && token);
+    }
+    function enforceAdminGate() {
       const gate = document.getElementById('admin-direct-login-gate');
-      if (!isAuth && gate) {
+      if (!gate) return;
+      if (isSessionValid()) {
+        gate.classList.add('hidden');
+      } else {
         gate.classList.remove('hidden');
         const uInput = document.getElementById('gate-admin-username');
         if (uInput) {
@@ -52,7 +59,8 @@
           setTimeout(() => uInput.focus(), 100);
         }
       }
-    });
+    }
+    window.addEventListener('DOMContentLoaded', enforceAdminGate);
     async function handleDirectAdminGateLogin(e) {
       if (e) e.preventDefault();
       const username = (document.getElementById('gate-admin-username')?.value || '').trim();
@@ -83,26 +91,13 @@
           if (typeof loadAdminIdentityMetadata === 'function') loadAdminIdentityMetadata();
           return;
         }
-        if ((username.toLowerCase() === 'raviranjankr' || username.toLowerCase() === 'raviranjan') && password === 'Admin@123456') {
-          localStorage.setItem('raviranjan_admin_authenticated', 'true');
-          localStorage.setItem('raviranjan_admin_user', username);
-          document.getElementById('admin-direct-login-gate')?.classList.add('hidden');
-          if (typeof loadAdminDashboardMetrics === 'function') loadAdminDashboardMetrics();
-          if (typeof loadAdminProjects === 'function') loadAdminProjects();
-          return;
-        }
+
         if (errEl) {
           errEl.innerText = data?.message || 'Invalid username or password.';
           errEl.classList.remove('hidden');
         }
       } catch (err) {
-        if ((username.toLowerCase() === 'raviranjankr' || username.toLowerCase() === 'raviranjan') && password === 'Admin@123456') {
-          localStorage.setItem('raviranjan_admin_authenticated', 'true');
-          localStorage.setItem('raviranjan_admin_user', username);
-          document.getElementById('admin-direct-login-gate')?.classList.add('hidden');
-          if (typeof loadAdminDashboardMetrics === 'function') loadAdminDashboardMetrics();
-          return;
-        }
+
         if (errEl) {
           errEl.innerText = 'Connection error. Please try again.';
           errEl.classList.remove('hidden');
@@ -117,7 +112,7 @@
 
   
   <!-- Built-in Mobile & Desktop Admin Login Gate Overlay on /admin -->
-  <div id="admin-direct-login-gate" class="fixed inset-0 z-[100] bg-[#07080d]/95 backdrop-blur-xl hidden flex items-center justify-center p-4">
+  <div id="admin-direct-login-gate" class="fixed inset-0 z-[100] bg-[#07080d]/98 backdrop-blur-2xl flex items-center justify-center p-4">
     <div class="w-full max-w-sm bg-[#10121a] border border-[#232938] rounded-2xl shadow-2xl p-6 space-y-4 font-mono text-xs">
       <div class="flex items-center justify-between border-b border-[#1f2430] pb-3">
         <div class="flex items-center space-x-2.5">
@@ -143,7 +138,7 @@
           Unlock Admin OS
         </button>
         <div class="flex items-center justify-between pt-1 text-[11px]">
-          <button type="button" onclick="document.getElementById('admin-direct-login-gate').classList.add('hidden'); openChangePasswordModal();" class="text-amber-400 hover:underline">Forgot / Update Password (OTP)?</button>
+          <button type="button" onclick="openChangePasswordModal();" class="text-amber-400 hover:underline">Forgot / Update Password (OTP)?</button>
         </div>
       </form>
     </div>
@@ -2629,7 +2624,7 @@ What AI projects has he worked on?</textarea>
   </div>
 
   <!-- Modal: Update Admin Username & Password (2-Step OTP Verification in Neon DB) -->
-  <div id="modal-change-password" onclick="if(event.target === this) closeChangePasswordModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div id="modal-change-password" onclick="if(event.target === this) closeChangePasswordModal()" class="fixed inset-0 z-[110] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="w-full max-w-sm bg-[#10121a] border border-[#232938] rounded-xl shadow-2xl p-5 space-y-3.5 font-mono text-xs admin-modal-box">
       <div class="flex items-center justify-between border-b border-[#1f2430] pb-2.5">
         <div class="flex items-center space-x-2 text-amber-400">
@@ -2642,8 +2637,8 @@ What AI projects has he worked on?</textarea>
       </div>
 
       <div class="px-3 py-2 rounded-lg bg-[#131620] border border-[#202533] flex items-center justify-between text-[11px]">
-        <span>User: <strong id="cp-current-username-badge" class="text-sky-400">raviranjan</strong></span>
-        <span id="cp-last-updated-time" class="text-emerald-400 text-[10px]">Synced</span>
+        <span class="text-slate-300">Identity & OTP Verification</span>
+        <span class="text-emerald-400 text-[10px] font-mono">Neon DB Protected</span>
       </div>
 
       <form id="form-change-password" onsubmit="handleChangePassword(event)" autocomplete="off" class="space-y-3">

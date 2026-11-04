@@ -1,1 +1,0 @@
-{"version": 2, "outputDirectory": "frontend/public", "cleanUrls": true, "rewrites": [{"source": "/api/:path*", "destination": "/api/[...path]"}, {"source": "/admin", "destination": "/admin_cms.html"}, {"source": "/admin/", "destination": "/admin_cms.html"}]}
