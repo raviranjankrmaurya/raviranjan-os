@@ -1012,11 +1012,55 @@
       }
     }
 
-    function downloadResume() {
-      showToast('Generating official Raviranjan Kumar Resume PDF...', 'success');
-    }
-
-    // 7. AI Assistant Drawer
+        function downloadResume() {
+      showToast("Downloading Raviranjan Kumar Resume...", "success");
+      try {
+        var lines = [
+          "RAVIRANJAN KUMAR",
+          "Software Engineer · BCA Student (Final Year, 2026)",
+          "Location: New Delhi / Bihar, India",
+          "Email: raviranjanmaurya@zohomail.in | Mobile: +91 8271190619",
+          "GitHub: https://github.com/raviranjankrmaurya (144 contributions in the last year)",
+          "LeetCode: https://leetcode.com/u/raviranjankrmaurya (31 Solved, 11-Day Streak)",
+          "GeeksforGeeks: Institute Rank #234 (Score: 234, 68 Solved)",
+          "",
+          "TECHNICAL COMPETENCIES",
+          "--------------------------------------------------------------------------------",
+          "• Backend: Java 21, Spring Boot 3, Spring Security, Hibernate / JPA, Flyway, Maven",
+          "• AI & Retrieval: Python, FastAPI, RAG, pgvector, LangChain, Embeddings",
+          "• Databases: PostgreSQL, Neon Cloud Serverless Postgres, Redis, HikariCP",
+          "• DevOps: Docker, Linux, CI/CD, Git, GitHub Actions, Vercel, Render",
+          "",
+          "FEATURED PROJECTS",
+          "--------------------------------------------------------------------------------",
+          "1. Raviranjan.OS — Developer Operating System & Platform",
+          "   • Hexagonal modular architecture built with Spring Boot 3 & Neon PostgreSQL.",
+          "   • JWT authentication, 2-step database OTP reset, and SSE telemetry streaming.",
+          "   • URL: https://raviranjanos.vercel.app",
+          "",
+          "2. Autonomous RAG Knowledge Kernel",
+          "   • Hybrid dense-sparse retrieval pipeline with BM25 reranking & pgvector search.",
+          "   • Achieves sub-120ms token streaming responses for grounded technical queries.",
+          "",
+          "EDUCATION",
+          "--------------------------------------------------------------------------------",
+          "• Bachelor of Computer Applications (BCA), 2023 – 2026",
+          "  Core: DSA, Operating Systems, RDBMS, Software Engineering, Networks"
+        ];
+        var text = lines.join(String.fromCharCode(10));
+        var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "Raviranjan_Kumar_Resume.txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        window.open("https://github.com/raviranjankrmaurya", "_blank");
+      }
+    }// 7. AI Assistant Drawer
     function toggleAiDrawer(open) {
       const drawer = document.getElementById('ai-drawer');
       if (open) {
