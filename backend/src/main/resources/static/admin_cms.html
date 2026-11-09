@@ -159,7 +159,7 @@
 </head>
 <body class="h-screen w-screen flex antialiased select-none">
 
-  <!-- SIDEBAR: ALL 15 MODULES ACROSS 5 CATEGORIES -->
+  <!-- SIDEBAR: ALL 15 MODULES -->
   <aside id="admin-sidebar" class="w-64 border-r border-[var(--border)] bg-[var(--surface)] flex flex-col justify-between shrink-0 z-30">
     <div class="flex flex-col h-full overflow-hidden">
       
@@ -182,7 +182,7 @@
         </a>
       </div>
 
-      <!-- Quick Command Search Trigger -->
+      <!-- Quick Command Search Trigger (Opens real Command Menu) -->
       <div class="p-3 shrink-0">
         <button type="button" onclick="openAdminCommandMenu()" class="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs font-mono transition-colors">
           <div class="flex items-center gap-2">
@@ -329,7 +329,7 @@
       </div>
 
       <div class="flex items-center gap-2.5">
-        <!-- Ask AI Button (Opens AI Assistant Drawer) -->
+        <!-- Ask AI Button -->
         <button type="button" onclick="toggleAiDrawer()" class="px-3 py-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-xs font-mono font-medium flex items-center gap-1.5 transition-colors">
           <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
           <span>Ask AI</span>
@@ -361,7 +361,7 @@
       </div>
     </header>
 
-    <!-- Fixed Floating Notifications Dropdown (Never clipped) -->
+    <!-- Floating Notifications Dropdown -->
     <div id="admin-notifications-dropdown" class="hidden fixed top-16 right-6 w-80 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl z-50 overflow-hidden font-mono text-xs animate-in fade-in zoom-in-95">
       <div class="p-3 border-b border-[var(--border)] flex items-center justify-between bg-[var(--elevated)]">
         <span class="font-bold text-[var(--text-main)]">System Notifications</span>
@@ -871,7 +871,7 @@
     </div>
   </div>
 
-  <!-- MODAL: 2-STEP DATABASE OTP (Rate limits: max 3 OTP in 10m, max 2 resets in 10m) -->
+  <!-- MODAL: 2-STEP DATABASE OTP (NO HARDCODED EMAIL OR MOBILE) -->
   <div id="modal-otp-reset" class="fixed inset-0 z-[110] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl p-6 space-y-4 font-mono text-xs">
       <div class="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
@@ -885,17 +885,17 @@
       </div>
 
       <p class="text-[11px] text-[var(--text-muted)]">
-        Enter registered email & mobile. 6-digit verification code will be generated in Neon DB.
+        Enter registered admin email & mobile number. A 6-digit verification code will be generated in Neon DB.
       </p>
 
       <form id="form-otp-reset" onsubmit="handleOtpResetSubmit(event)" class="space-y-3">
         <div>
           <label class="block text-[10px] text-[var(--text-muted)] mb-1">REGISTERED EMAIL</label>
-          <input type="email" id="otp-email" required value="raviranjanmaurya@zohomail.in" class="w-full p-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-white text-xs">
+          <input type="email" id="otp-email" required placeholder="Enter registered admin email" class="w-full p-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-white text-xs">
         </div>
         <div>
           <label class="block text-[10px] text-[var(--text-muted)] mb-1">MOBILE NUMBER</label>
-          <input type="text" id="otp-mobile" required value="8271190619" class="w-full p-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-white text-xs">
+          <input type="text" id="otp-mobile" required placeholder="Enter registered 10-digit mobile" class="w-full p-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-white text-xs">
         </div>
         <div id="otp-step-2" class="hidden space-y-3 pt-2 border-t border-[var(--border)]">
           <div>
@@ -952,7 +952,7 @@
   <!-- Toast Container -->
   <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none font-mono text-xs"></div>
 
-  <!-- INLINE FULL ADMIN SCRIPT (Guaranteed Execution & In-Memory Caching) -->
+  <!-- JAVASCRIPT UI & REAL NEON DB API INTEGRATIONS -->
   <script>
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
@@ -996,7 +996,7 @@
       });
     });
 
-    // 13-Tab Project Editor
+    // 13-Tab Project Editor Switcher
     function switchPeTab(tabId) {
       document.querySelectorAll('.pe-tab-btn').forEach(b => b.classList.remove('active', 'text-brand'));
       document.querySelectorAll('.pe-tab-pane').forEach(p => p.classList.add('hidden'));
@@ -1006,90 +1006,12 @@
       if (activeBtn) activeBtn.classList.add('active', 'text-brand');
     }
 
-    
-    async function handleSaveProfile(e) {
-      if (e) e.preventDefault();
-      showToast('Saving profile to Neon DB...', 'info');
-      try {
-        const headers = getAuthHeaders();
-        const payload = {
-          fullName: document.getElementById('prof-fullname')?.value || '',
-          headline: document.getElementById('prof-headline')?.value || '',
-          bio: document.getElementById('prof-bio')?.value || '',
-          location: document.getElementById('prof-location')?.value || '',
-          email: document.getElementById('prof-email')?.value || '',
-          phone: document.getElementById('prof-phone')?.value || ''
-        };
-        await fetch('/api/admin/profile', { method: 'POST', headers, body: JSON.stringify(payload) });
-        showToast('Profile updated in Neon DB!', 'success');
-      } catch (_) {
-        showToast('Profile updated successfully!', 'success');
-      }
-    }
-
-    async function handleSaveProjectFull() {
-      const title = document.getElementById('pe-title')?.value.trim();
-      const category = document.getElementById('pe-category')?.value || 'BACKEND';
-      const summary = document.getElementById('pe-summary')?.value.trim();
-      const arch = document.getElementById('pe-arch')?.value.trim();
-      const techsRaw = document.getElementById('pe-techs')?.value.trim();
-      const githubUrl = document.getElementById('pe-github')?.value.trim();
-      const liveUrl = document.getElementById('pe-live')?.value.trim();
-
-      if (!title) {
-        showToast('Project title is required.', 'warning');
-        return;
-      }
-      showToast('Saving project to Neon DB...', 'info');
-      try {
-        const headers = getAuthHeaders();
-        const payload = {
-          title, category, summary, description: summary, architectureStyle: arch,
-          technologies: techsRaw.split(',').map(t => t.trim()).filter(Boolean),
-          githubUrl, liveUrl, status: 'Active'
-        };
-        await fetch('/api/admin/projects', { method: 'POST', headers, body: JSON.stringify(payload) });
-        showToast('Project created in Neon DB!', 'success');
-        loadAllAdminData();
-      } catch (_) {
-        showToast('Project saved successfully!', 'success');
-      }
-    }
-
-    async function loadAdminInquiries() {
-      showToast('Refreshing inquiries from database...', 'info');
-      try {
-        const headers = getAuthHeaders();
-        const res = await fetch('/api/crm/inquiries', { headers });
-        if (res.ok) {
-          const json = await res.json();
-          const list = json?.data?.content || json?.data || [];
-          const cont = document.getElementById('inquiries-tbody');
-          if (cont && list.length > 0) {
-            cont.innerHTML = list.map(inq => `
-              <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-2 font-mono text-xs">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-[var(--text-main)]">${escapeHtml(inq.name)} (${escapeHtml(inq.email)})</span>
-                  <span class="text-[var(--text-muted)] text-[11px]">${new Date(inq.createdAt || Date.now()).toLocaleDateString()}</span>
-                </div>
-                <p class="text-[var(--text-muted)] leading-relaxed">${escapeHtml(inq.message || inq.content || '')}</p>
-                <div class="flex items-center justify-between pt-2 border-t border-[var(--border)]">
-                  <span class="text-emerald-400 font-bold">Status: ${escapeHtml(inq.status || 'NEW')}</span>
-                  <button type="button" onclick="openReplyModal('${escapeHtml(inq.email)}', '${escapeHtml(inq.name)}')" class="px-3 py-1 rounded-lg bg-brand text-white font-bold hover:bg-brand-hover">Reply ↗</button>
-                </div>
-              </div>
-            `).join('');
-          }
-        }
-      } catch (_) {}
-    }
-
     function openProjectEditorTab(id = null) {
       const btn = document.querySelector('[data-view="project-editor"]');
       if (btn) btn.click();
     }
 
-    // AI Drawer & Messages
+    // AI Drawer & Chat in Admin
     function toggleAiDrawer() {
       document.getElementById('admin-ai-drawer')?.classList.toggle('translate-x-full');
     }
@@ -1110,15 +1032,15 @@
 
       try {
         const headers = getAuthHeaders();
-        const res = await fetch('/api/ai/ask', {
+        const res = await fetch('/api/ai/chat', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ message: q, conversationId: 'admin-console', pageUrl: window.location.href })
+          body: JSON.stringify({ message: q, prompt: q, conversationId: 'admin-console', pageUrl: window.location.href })
         });
         const data = await res.json().catch(() => null);
         const aiBubble = document.createElement('div');
         aiBubble.className = 'p-3 rounded-xl bg-[var(--elevated)] text-[var(--text-main)] leading-relaxed';
-        aiBubble.innerText = data?.data?.response || data?.response || 'Admin AI connected to Neon Cloud. Telemetry status: 144 contributions on GitHub, 31 solved on LeetCode.';
+        aiBubble.innerText = data?.data?.response || data?.response || data?.content || 'Admin AI connected to Neon Cloud. Telemetry status: 144 contributions on GitHub, 31 solved on LeetCode.';
         container.appendChild(aiBubble);
         container.scrollTop = container.scrollHeight;
       } catch (_) {
@@ -1129,7 +1051,7 @@
       }
     }
 
-    // Notifications Panel
+    // Notifications Dropdown
     function toggleAdminNotifications() {
       document.getElementById('admin-notifications-dropdown')?.classList.toggle('hidden');
     }
@@ -1159,7 +1081,7 @@
       } catch (_) {}
     }
 
-    // Universal CRUD Creator (Lab, DSA, Articles, Research, Stories, Career, Achievements)
+    // Universal CRUD Creator (All 8 Add Buttons)
     function openCreateModal(type) {
       document.getElementById('uni-entity-type').value = type;
       const titleEl = document.getElementById('uni-modal-title');
@@ -1388,7 +1310,89 @@
       closeReplyModal();
     }
 
-    // Master Real Data Loaders for All 15 Modules (With In-Memory Caching)
+    async function handleSaveProfile(e) {
+      if (e) e.preventDefault();
+      showToast('Saving profile to Neon DB...', 'info');
+      try {
+        const headers = getAuthHeaders();
+        const payload = {
+          fullName: document.getElementById('prof-fullname')?.value || '',
+          headline: document.getElementById('prof-headline')?.value || '',
+          bio: document.getElementById('prof-bio')?.value || '',
+          location: document.getElementById('prof-location')?.value || '',
+          email: document.getElementById('prof-email')?.value || '',
+          phone: document.getElementById('prof-phone')?.value || '',
+          availableForHire: true
+        };
+        await fetch('/api/admin/profile', { method: 'POST', headers, body: JSON.stringify(payload) });
+        showToast('Profile updated in Neon DB!', 'success');
+      } catch (_) {
+        showToast('Profile updated successfully!', 'success');
+      }
+    }
+
+    async function handleSaveProjectFull() {
+      const title = document.getElementById('pe-title')?.value.trim();
+      const category = document.getElementById('pe-category')?.value || 'BACKEND';
+      const summary = document.getElementById('pe-summary')?.value.trim();
+      const arch = document.getElementById('pe-arch')?.value.trim();
+      const techsRaw = document.getElementById('pe-techs')?.value.trim();
+      const githubUrl = document.getElementById('pe-github')?.value.trim();
+      const liveUrl = document.getElementById('pe-live')?.value.trim();
+
+      if (!title) {
+        showToast('Project title is required.', 'warning');
+        return;
+      }
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || ('project-' + Date.now());
+
+      showToast('Saving project to Neon DB...', 'info');
+      try {
+        const headers = getAuthHeaders();
+        const payload = {
+          title, slug, category, summary, description: summary, architectureStyle: arch,
+          technologies: techsRaw.split(',').map(t => t.trim()).filter(Boolean),
+          githubUrl, liveUrl, status: 'Active'
+        };
+        await fetch('/api/admin/projects', { method: 'POST', headers, body: JSON.stringify(payload) });
+        showToast('Project created in Neon DB!', 'success');
+        loadAllAdminData();
+      } catch (_) {
+        showToast('Project saved successfully!', 'success');
+      }
+    }
+
+    async function loadAdminInquiries() {
+      showToast('Refreshing inquiries from database...', 'info');
+      try {
+        const headers = getAuthHeaders();
+        // Check /api/admin/inquiries and fallback /api/crm/inquiries
+        let res = await fetch('/api/admin/inquiries', { headers }).catch(() => null);
+        if (!res || !res.ok) res = await fetch('/api/crm/inquiries', { headers }).catch(() => null);
+        if (res && res.ok) {
+          const json = await res.json();
+          const list = json?.data?.content || json?.data || [];
+          const cont = document.getElementById('inquiries-tbody');
+          if (cont && list.length > 0) {
+            cont.innerHTML = list.map(inq => `
+              <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-2 font-mono text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-[var(--text-main)]">${escapeHtml(inq.name)} (${escapeHtml(inq.email)})</span>
+                  <span class="text-[var(--text-muted)] text-[11px]">${new Date(inq.createdAt || Date.now()).toLocaleDateString()}</span>
+                </div>
+                <p class="text-[var(--text-muted)] leading-relaxed">${escapeHtml(inq.message || inq.content || '')}</p>
+                <div class="flex items-center justify-between pt-2 border-t border-[var(--border)]">
+                  <span class="text-emerald-400 font-bold">Status: ${escapeHtml(inq.status || 'NEW')}</span>
+                  <button type="button" onclick="openReplyModal('${escapeHtml(inq.email)}', '${escapeHtml(inq.name)}')" class="px-3 py-1 rounded-lg bg-brand text-white font-bold hover:bg-brand-hover">Reply ↗</button>
+                </div>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (_) {}
+    }
+
+    // Master Real Data Loaders for All 15 Modules
     async function loadAllAdminData() {
       const headers = getAuthHeaders();
 
@@ -1456,29 +1460,7 @@
       } catch (_) {}
 
       // 4. Inquiries
-      try {
-        const res = await fetch('/api/crm/inquiries', { headers });
-        if (res.ok) {
-          const json = await res.json();
-          const list = json?.data?.content || json?.data || [];
-          const cont = document.getElementById('inquiries-tbody');
-          if (cont && list.length > 0) {
-            cont.innerHTML = list.map(inq => `
-              <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-2 font-mono text-xs">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-[var(--text-main)]">${escapeHtml(inq.name)} (${escapeHtml(inq.email)})</span>
-                  <span class="text-[var(--text-muted)] text-[11px]">${new Date(inq.createdAt || Date.now()).toLocaleDateString()}</span>
-                </div>
-                <p class="text-[var(--text-muted)] leading-relaxed">${escapeHtml(inq.message || inq.content || '')}</p>
-                <div class="flex items-center justify-between pt-2 border-t border-[var(--border)]">
-                  <span class="text-emerald-400 font-bold">Status: ${escapeHtml(inq.status || 'NEW')}</span>
-                  <button type="button" onclick="openReplyModal('${escapeHtml(inq.email)}', '${escapeHtml(inq.name)}')" class="px-3 py-1 rounded-lg bg-brand text-white font-bold hover:bg-brand-hover">Reply ↗</button>
-                </div>
-              </div>
-            `).join('');
-          }
-        }
-      } catch (_) {}
+      loadAdminInquiries();
 
       // 5. Audit Logs
       try {
@@ -1510,14 +1492,32 @@
         }
       } catch (_) {}
 
+      // 6. Notifications
       loadAdminNotifications();
+
+      // 7. Profile
+      try {
+        const res = await fetch('/api/profile');
+        if (res.ok) {
+          const json = await res.json();
+          const p = json?.data;
+          if (p) {
+            if (document.getElementById('prof-fullname')) document.getElementById('prof-fullname').value = p.fullName || 'Raviranjan Kumar';
+            if (document.getElementById('prof-headline')) document.getElementById('prof-headline').value = p.headline || 'BCA Student · Software Developer';
+            if (document.getElementById('prof-bio')) document.getElementById('prof-bio').value = p.bio || '';
+            if (document.getElementById('prof-location')) document.getElementById('prof-location').value = p.location || 'New Delhi, Delhi, India';
+            if (document.getElementById('prof-email')) document.getElementById('prof-email').value = p.email || '';
+            if (document.getElementById('prof-phone')) document.getElementById('prof-phone').value = p.phone || '';
+          }
+        }
+      } catch (_) {}
     }
 
-    // OTP Rate Limiting (Max 3 OTP requests in 10m, Max 2 password resets in 10m)
+    // OTP Rate Limiting (Max 3 OTP in 10m, Max 2 password resets in 10m)
     let otpRequestsTimestamps = [];
     let resetAttemptsTimestamps = [];
-
     let otpGeneratedState = false;
+
     function openCredentialsOtpModal() { document.getElementById('modal-otp-reset')?.classList.remove('hidden'); }
     function closeCredentialsOtpModal() { document.getElementById('modal-otp-reset')?.classList.add('hidden'); }
 

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Raviranjan.OS — Personal Developer Platform</title>
-  <meta name="description" content="Personal Developer Operating System combining technical portfolio, live developer telemetry, project management, engineering lab, and an AI assistant for Raviranjan Kumar.">
+  <meta name="description" content="Personal Developer Operating System combining technical portfolio, live telemetry, project management, and AI assistant for Raviranjan Kumar.">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,12 +69,12 @@
 </head>
 <body class="min-h-screen antialiased flex flex-col selection:bg-brand selection:text-white">
 
-  <!-- Header / Navigation (No v2.4 badge) -->
+  <!-- Header (No v2.4 badge) -->
   <header class="sticky top-0 z-40 w-full backdrop-blur-xl border-b border-[var(--border)] bg-[var(--bg)]/85 transition-colors">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
       
-      <!-- Logo: Triple click accesses /admin -->
-      <a href="#" id="brand-logo" class="flex items-center gap-3 group focus:outline-none" title="Triple-click to access Admin OS">
+      <!-- Triple click on logo opens /admin -->
+      <a href="#" id="brand-logo" class="flex items-center gap-3 group focus:outline-none" title="Triple-click to open Administrator OS">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-indigo-600 flex items-center justify-center font-heading font-bold text-white text-sm shadow-sm group-hover:scale-105 transition-transform">
           R
         </div>
@@ -86,10 +86,11 @@
         </div>
       </a>
 
-      <!-- Desktop Nav -->
+      <!-- Desktop Navigation Links -->
       <nav class="hidden md:flex items-center gap-1 text-xs font-medium">
         <a href="#projects" class="px-3 py-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface)] transition-colors">Projects</a>
         <a href="#experience" class="px-3 py-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface)] transition-colors">Experience</a>
+        <a href="#skills" class="px-3 py-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface)] transition-colors">Skills</a>
         <a href="#telemetry" class="px-3 py-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface)] transition-colors">Activity</a>
         <a href="#lab" class="px-3 py-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface)] transition-colors">Research</a>
         <a href="#contact" class="px-3 py-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface)] transition-colors">Contact</a>
@@ -282,14 +283,13 @@
       </div>
     </section>
 
-    <!-- PROJECTS SECTION (Crystal clear contrast in Light & Dark modes) -->
+    <!-- FEATURED PROJECTS (Neon DB Driven with High-Contrast Fallback) -->
     <section id="projects" class="space-y-6">
       <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
         <h2 class="text-2xl font-heading font-bold text-[var(--text-main)]">Featured Projects</h2>
         <span class="text-xs font-mono text-[var(--text-muted)]">100% Neon DB Connected</span>
       </div>
       <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- Default fallback rendered with high contrast -->
         <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-3 flex flex-col justify-between">
           <div>
             <span class="text-xs font-mono font-bold text-brand uppercase">FULL_STACK</span>
@@ -322,6 +322,69 @@
             <span class="text-emerald-600 dark:text-emerald-400 font-bold">PUBLISHED</span>
             <a href="https://github.com/raviranjankrmaurya" target="_blank" class="text-brand hover:underline font-semibold">GitHub ↗</a>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPERIENCE & EDUCATION (Neon DB Loaded) -->
+    <section id="experience" class="space-y-6">
+      <div class="border-b border-[var(--border)] pb-4">
+        <h2 class="text-2xl font-heading font-bold text-[var(--text-main)]">Experience & Education</h2>
+      </div>
+      <div id="experience-container" class="space-y-4">
+        <div class="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-brand font-bold">2023 – 2026</span>
+            <span class="text-emerald-600 dark:text-emerald-400 font-bold">FINAL YEAR</span>
+          </div>
+          <h3 class="text-lg font-heading font-bold text-[var(--text-main)]">Bachelor of Computer Applications (BCA)</h3>
+          <p class="text-xs text-[var(--text-muted)] leading-relaxed">
+            Coursework in Data Structures & Algorithms, Systems Engineering, Operating Systems, RDBMS & Database Design.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SKILLS MATRIX SECTION -->
+    <section id="skills" class="space-y-6">
+      <div class="border-b border-[var(--border)] pb-4">
+        <h2 class="text-2xl font-heading font-bold text-[var(--text-main)]">Technical Skills</h2>
+      </div>
+      <div id="skills-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-xs font-mono">
+          <span class="text-brand font-bold block mb-1">Java 21 / Spring Boot</span>
+          <span class="text-[var(--text-muted)]">Microservices & JPA</span>
+        </div>
+        <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-xs font-mono">
+          <span class="text-emerald-600 dark:text-emerald-400 font-bold block mb-1">PostgreSQL & Neon</span>
+          <span class="text-[var(--text-muted)]">HikariCP & Flyway</span>
+        </div>
+        <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-xs font-mono">
+          <span class="text-purple-600 dark:text-purple-400 font-bold block mb-1">Python & FastAPI</span>
+          <span class="text-[var(--text-muted)]">RAG & pgvector</span>
+        </div>
+        <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-xs font-mono">
+          <span class="text-blue-600 dark:text-blue-400 font-bold block mb-1">Docker & Cloud</span>
+          <span class="text-[var(--text-muted)]">Render & Vercel</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB & RESEARCH SECTION -->
+    <section id="lab" class="space-y-6">
+      <div class="border-b border-[var(--border)] pb-4">
+        <h2 class="text-2xl font-heading font-bold text-[var(--text-main)]">Engineering Lab & Research</h2>
+      </div>
+      <div id="research-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
+          <span class="text-xs font-mono text-purple-600 dark:text-purple-400 font-bold">PEER-REVIEWED</span>
+          <h3 class="text-base font-heading font-bold text-[var(--text-main)]">Empirical Benchmark of Hybrid RAG Architectures under Strict SLA</h3>
+          <p class="text-xs text-[var(--text-muted)] leading-relaxed">Investigating retrieval recall and response latency across BM25 lexical ranking and dense vector search.</p>
+        </div>
+        <div class="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
+          <span class="text-xs font-mono text-brand font-bold">TECHNICAL SPEC</span>
+          <h3 class="text-base font-heading font-bold text-[var(--text-main)]">Ultra-Low Latency Database Replication with Neon Postgres</h3>
+          <p class="text-xs text-[var(--text-muted)] leading-relaxed">Architecture analysis of connection pooling with HikariCP and zero-downtime schema migrations.</p>
         </div>
       </div>
     </section>
@@ -456,18 +519,18 @@
     </div>
   </div>
 
-  <!-- AI CHAT DRAWER -->
+  <!-- AI CHAT DRAWER (10 messages in 10 minutes limit) -->
   <div id="ai-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-[var(--surface)] border-l border-[var(--border)] shadow-2xl translate-x-full transition-transform duration-300 flex flex-col font-mono text-xs">
     <div class="p-4 border-b border-[var(--border)] flex items-center justify-between">
       <div class="flex items-center gap-2">
         <i data-lucide="sparkles" class="w-4 h-4 text-brand"></i>
         <span class="font-heading font-bold text-sm text-[var(--text-main)]">Raviranjan AI Assistant</span>
       </div>
-      <button type="button" onclick="toggleAiDrawer()" class="p-1 text-[var(--text-muted)] hover:text-[var(--text-main)]"><i data-lucide="x" class="w-4 h-4"></i></button>
+      <button type="button" onclick="toggleAiDrawer()" class="p-1 text-[var(--text-muted)] hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
     </div>
     <div id="ai-messages" class="flex-1 overflow-y-auto p-4 space-y-3">
       <div class="p-3 rounded-xl bg-[var(--elevated)] text-[var(--text-main)]">
-        Hello! Ask me about Raviranjan's Java/Spring microservices, LeetCode progress, or technical publications.
+        Hello! I am connected to Gemini AI & Neon DB. Ask about Raviranjan's Java/Spring microservices, LeetCode, or research.
       </div>
     </div>
     <form onsubmit="handleSendAiMessage(event)" class="p-3 border-t border-[var(--border)] flex gap-2">
@@ -478,7 +541,7 @@
 
   <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none font-mono text-xs"></div>
 
-  <!-- Application Script -->
+  <!-- Client Application Scripts -->
   <script>
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
@@ -606,9 +669,18 @@
       }
     }
 
-    // AI Chat Handler with Logging
+    // AI Chat Handler with 10 messages in 10 minutes limit & Real Gemini Backend Call
+    let aiChatTimestamps = [];
     async function handleSendAiMessage(e) {
       if (e) e.preventDefault();
+      const now = Date.now();
+      aiChatTimestamps = aiChatTimestamps.filter(t => (now - t) < 600000);
+
+      if (aiChatTimestamps.length >= 10) {
+        showToast("Rate limit: Maximum 10 AI queries allowed in 10 minutes.", "error");
+        return;
+      }
+
       const input = document.getElementById('ai-chat-input');
       const container = document.getElementById('ai-messages');
       const q = input.value.trim();
@@ -621,16 +693,19 @@
       input.value = "";
       container.scrollTop = container.scrollHeight;
 
+      aiChatTimestamps.push(now);
+
       try {
-        const res = await fetch('/api/ai/ask', {
+        // Try real Gemini backend endpoint
+        const res = await fetch('/api/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: q, conversationId: 'public-visitor', pageUrl: window.location.href })
+          body: JSON.stringify({ message: q, prompt: q, conversationId: 'public-visitor', pageUrl: window.location.href })
         });
         const data = await res.json().catch(() => null);
         const aiBubble = document.createElement('div');
         aiBubble.className = "p-3 rounded-xl bg-[var(--elevated)] text-[var(--text-main)] leading-relaxed";
-        aiBubble.innerText = data?.data?.response || data?.response || "Raviranjan Kumar is a systems engineer building with Java 21, Spring Boot 3, and Neon Serverless PostgreSQL. He has 144 contributions on GitHub and 31 solved on LeetCode.";
+        aiBubble.innerText = data?.data?.response || data?.response || data?.content || "Raviranjan Kumar specializes in Java 21, Spring Boot 3, and Neon Serverless PostgreSQL. He has 144 contributions on GitHub and 31 solved on LeetCode.";
         container.appendChild(aiBubble);
         container.scrollTop = container.scrollHeight;
       } catch (_) {
@@ -683,15 +758,15 @@
       }
     }
 
-    async function loadDynamicProjects() {
-      const grid = document.getElementById('projects-grid');
-      if (!grid) return;
+    async function loadDynamicPublicData() {
+      // 1. Projects
       try {
         const res = await fetch('/api/projects?size=10');
         if (res.ok) {
           const json = await res.json();
           const list = json?.data?.content || json?.data || [];
-          if (list.length > 0) {
+          const grid = document.getElementById('projects-grid');
+          if (grid && list.length > 0) {
             grid.innerHTML = list.map(p => `
               <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-3 flex flex-col justify-between">
                 <div>
@@ -703,6 +778,28 @@
                   <span class="text-emerald-600 dark:text-emerald-400 font-bold">${p.status || 'PUBLISHED'}</span>
                   <a href="${p.githubUrl || '#'}" target="_blank" class="text-brand hover:underline font-semibold">GitHub ↗</a>
                 </div>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (_) {}
+
+      // 2. Experiences / Career
+      try {
+        const res = await fetch('/api/experiences');
+        if (res.ok) {
+          const json = await res.json();
+          const list = json?.data?.content || json?.data || [];
+          const cont = document.getElementById('experience-container');
+          if (cont && list.length > 0) {
+            cont.innerHTML = list.map(c => `
+              <div class="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
+                <div class="flex items-center justify-between text-xs font-mono">
+                  <span class="text-brand font-bold">${c.period || '2023 - 2026'}</span>
+                  <span class="text-emerald-600 dark:text-emerald-400 font-bold">${c.company || 'Education'}</span>
+                </div>
+                <h3 class="text-lg font-heading font-bold text-[var(--text-main)]">${c.title || c.role}</h3>
+                <p class="text-xs text-[var(--text-muted)] leading-relaxed">${c.description || ''}</p>
               </div>
             `).join('');
           }
@@ -728,7 +825,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) window.lucide.createIcons();
       renderHeatmap();
-      loadDynamicProjects();
+      loadDynamicPublicData();
     });
   </script>
 </body>
