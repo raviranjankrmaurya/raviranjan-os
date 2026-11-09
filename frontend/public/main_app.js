@@ -2069,7 +2069,7 @@ function fetchDynamicSkills() {
 function initTheme() {
   const savedAccent = localStorage.getItem("raviranjan_accent_color");
   if (savedAccent) applyAccentThemeColor(savedAccent);
-  const saved = localStorage.getItem('theme') || 'dark';
+  const saved = localStorage.getItem('theme') || 'light';
   if (saved === 'light') {
     document.documentElement.classList.remove('dark');
     document.documentElement.classList.add('light');

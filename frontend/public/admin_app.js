@@ -3555,7 +3555,7 @@ async function exportAnalyticsCsv() {
 // ADMIN THEME TOGGLE (DARK / LIGHT MODE)
 // ==========================================
 function initAdminTheme() {
-  const saved = localStorage.getItem('admin_theme') || 'dark';
+  const saved = localStorage.getItem('admin_theme') || 'light';
   applyAdminTheme(saved);
 }
 

@@ -201,12 +201,42 @@ html.light {
   --bg-hover: #e2e8f0;
   --border-subtle: #e2e8f0;
   --border-focus: #0284c7;
+  --hero-glow: rgba(14, 116, 144, 0.1);
+  --surface-shine: rgba(14, 116, 144, 0.035);
 }
 
 html.light body {
   background-color: #f8fafc !important;
   color: #0f172a !important;
+  background-image: radial-gradient(circle at 75% 0%, var(--hero-glow), transparent 34rem) !important;
 }
+
+html.light .saas-card {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: #d7e0ea !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05), inset 0 1px 0 #fff !important;
+}
+
+html.light .saas-card:hover {
+  border-color: #7dd3fc !important;
+  transform: translateY(-2px);
+}
+
+html.light header nav a,
+html.light header button {
+  color: #475569 !important;
+}
+
+html.light header nav a:hover,
+html.light header button:hover {
+  color: #0369a1 !important;
+}
+
+html.light .gh-level-0 { background-color: #e2e8f0; }
+html.light .gh-level-1 { background-color: #bbf7d0; }
+html.light .gh-level-2 { background-color: #4ade80; }
+html.light .gh-level-3 { background-color: #16a34a; }
+html.light .gh-level-4 { background-color: #166534; }
 
 /* Headings & Text Color Overrides for Light Mode */
 html.light h1, 
