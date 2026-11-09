@@ -3,6 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Instant Cloud Backend Wake-Up (Starts Render cold boot in 0.1ms) -->
+  <script>
+    (function wakeUpBackend() {
+      try {
+        fetch('/api', { cache: 'no-store' }).catch(function() {});
+        fetch('https://raviranjan-os-backend.onrender.com/api', { mode: 'no-cors', cache: 'no-store' }).catch(function() {});
+      } catch (e) {}
+    })();
+  </script>
+
   <title>Raviranjan.OS — Developer Operating System & Admin CMS</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">

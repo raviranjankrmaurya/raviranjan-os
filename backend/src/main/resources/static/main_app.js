@@ -141,6 +141,62 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
+// Global Backend Cold-Start Auto-Warmup & Live Hydration Engine
+let backendIsAwake = false;
+let backendWarmupInterval = null;
+
+function triggerAllDynamicFetches() {
+  if (typeof fetchDynamicProfile === 'function') fetchDynamicProfile();
+  if (typeof fetchDynamicDsaNotes === 'function') fetchDynamicDsaNotes();
+  if (typeof fetchDynamicCareerAndCredentials === 'function') fetchDynamicCareerAndCredentials();
+  if (typeof fetchDynamicSkills === 'function') fetchDynamicSkills();
+  if (typeof fetchDynamicProjects === 'function') fetchDynamicProjects();
+  if (typeof fetchDynamicActivity === 'function') fetchDynamicActivity();
+  if (typeof fetchDynamicContributions === 'function') fetchDynamicContributions();
+  if (typeof fetchDirectGitHubContributions === 'function') fetchDirectGitHubContributions();
+  if (typeof fetchDynamicResearch === 'function') fetchDynamicResearch();
+  if (typeof fetchDynamicLab === 'function') fetchDynamicLab();
+  if (typeof fetchDynamicArticles === 'function') fetchDynamicArticles();
+  if (typeof fetchDynamicIntegrations === 'function') fetchDynamicIntegrations();
+  if (typeof loadPublicBrandingSettings === 'function') loadPublicBrandingSettings();
+}
+
+function startBackendWarmupAndHydrationLoop() {
+  // 1. Instant pings directly to Render and through Vercel reverse proxy
+  fetch('/api', { cache: 'no-store' }).then(r => {
+    if (r && r.ok) {
+      backendIsAwake = true;
+      triggerAllDynamicFetches();
+    }
+  }).catch(() => {});
+
+  fetch('https://raviranjan-os-backend.onrender.com/api', { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
+
+  // 2. Continuous cold-start polling every 2.5s until 200 OK received
+  let attempts = 0;
+  if (backendWarmupInterval) clearInterval(backendWarmupInterval);
+  backendWarmupInterval = setInterval(async () => {
+    attempts++;
+    if (backendIsAwake || attempts > 30) {
+      clearInterval(backendWarmupInterval);
+      backendWarmupInterval = null;
+      return;
+    }
+    try {
+      const res = await fetch('/api', { cache: 'no-store' });
+      if (res && res.ok) {
+        backendIsAwake = true;
+        clearInterval(backendWarmupInterval);
+        backendWarmupInterval = null;
+        console.info('[Cloud Backend Awake] Live server responded. Hydrating all Neon DB data...');
+        triggerAllDynamicFetches();
+      }
+    } catch (e) {
+      // Server still booting up on Render cold start
+    }
+  }, 2500);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Wipe any legacy localStorage portfolio data so 100% comes from Neon DB
   localStorage.removeItem("customProjects");
@@ -157,21 +213,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof initHeroTextAnimator === "function") initHeroTextAnimator();
   if (typeof prefetchVisitorGeo === "function") prefetchVisitorGeo();
 
-  // 2. Dynamic Fetch from REST API (Zero Hardcoding - 100% Dynamic Ingestion from Neon DB)
-  fetchDynamicProfile();
-  fetchDynamicDsaNotes();
-  fetchDynamicCareerAndCredentials();
-  fetchDynamicSkills();
-  fetchDynamicProjects();
-  fetchDynamicActivity();
-  fetchDynamicContributions();
-  fetchDirectGitHubContributions();
-  fetchDynamicResearch();
-  fetchDynamicLab();
-  fetchDynamicArticles();
-  fetchDynamicIntegrations();
+  // 2. Dynamic Fetch from REST API + Instant Backend Cold-Start Auto-Warmup
+  triggerAllDynamicFetches();
+  startBackendWarmupAndHydrationLoop();
   trackAnalyticsEvent("PAGE_VIEW");
-  loadPublicBrandingSettings();
 
   // 3. Check for Recruiter Route
   if (window.location.hash === "#recruiter" || window.location.pathname === "/recruiter") {
