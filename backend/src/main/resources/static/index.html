@@ -38,12 +38,12 @@
       --text-muted: #A1A1AA;
     }
     html.light {
-      --bg: #FAFAFA;
-      --surface: #F4F4F5;
-      --elevated: #FFFFFF;
-      --border: #E4E4E7;
-      --text-main: #18181B;
-      --text-muted: #71717A;
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --elevated: #F1F5F9;
+      --border: #E2E8F0;
+      --text-main: #0F172A;
+      --text-muted: #475569;
     }
     body {
       background-color: var(--bg);
@@ -58,28 +58,29 @@
     .dark .gh-level-2 { background-color: #006D32; }
     .dark .gh-level-3 { background-color: #26A641; }
     .dark .gh-level-4 { background-color: #39D353; }
-    html.light .gh-level-0 { background-color: #E4E4E7; }
+    html.light .gh-level-0 { background-color: #E2E8F0; }
     html.light .gh-level-1 { background-color: #9BE9A8; }
     html.light .gh-level-2 { background-color: #40C463; }
     html.light .gh-level-3 { background-color: #30A14E; }
     html.light .gh-level-4 { background-color: #216E39; }
     ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-thumb { background: #3F3F46; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb { background: #64748B; border-radius: 999px; }
   </style>
 </head>
 <body class="min-h-screen antialiased flex flex-col selection:bg-brand selection:text-white">
 
-  <!-- Header / Navigation -->
+  <!-- Header / Navigation (No v2.4 badge) -->
   <header class="sticky top-0 z-40 w-full backdrop-blur-xl border-b border-[var(--border)] bg-[var(--bg)]/85 transition-colors">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-      <a href="#" id="brand-logo" class="flex items-center gap-3 group">
+      
+      <!-- Logo: Triple click accesses /admin -->
+      <a href="#" id="brand-logo" class="flex items-center gap-3 group focus:outline-none" title="Triple-click to access Admin OS">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-indigo-600 flex items-center justify-center font-heading font-bold text-white text-sm shadow-sm group-hover:scale-105 transition-transform">
           R
         </div>
         <div class="flex flex-col">
-          <span class="font-heading font-bold text-sm tracking-tight text-[var(--text-main)] flex items-center gap-1.5">
+          <span class="font-heading font-bold text-sm tracking-tight text-[var(--text-main)]">
             Raviranjan.OS
-            
           </span>
           <span class="text-[11px] text-[var(--text-muted)] font-mono leading-none">Developer Operating System</span>
         </div>
@@ -96,8 +97,12 @@
 
       <!-- Action Controls -->
       <div class="flex items-center gap-2">
-        <button type="button" id="btn-client-sync" onclick="triggerClientPlatformSync(this)" class="px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs font-mono flex items-center gap-1.5 transition-colors" title="Sync live telemetry"><i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-brand"></i></button>
-        <button type="button" onclick="openRecruiterModal()" class="px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-medium flex items-center gap-1.5 transition-colors">
+        <!-- Live Sync with Round Circle Spinner -->
+        <button type="button" id="btn-client-sync" onclick="triggerClientPlatformSync(this)" class="p-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs font-mono flex items-center gap-1.5 transition-colors" title="Sync live telemetry">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-brand"></i>
+        </button>
+
+        <button type="button" onclick="openRecruiterModal()" class="px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-1.5 transition-colors">
           <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
           <span>Recruiter</span>
         </button>
@@ -107,7 +112,7 @@
           <span>Resume</span>
         </button>
 
-        <button type="button" onclick="toggleAiDrawer()" class="px-3 py-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-xs font-medium flex items-center gap-1.5 transition-colors">
+        <button type="button" onclick="toggleAiDrawer()" class="px-3 py-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-medium flex items-center gap-1.5 transition-colors">
           <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
           <span>Ask AI</span>
         </button>
@@ -125,20 +130,20 @@
     <!-- Top Status Bar -->
     <div class="flex items-center justify-between text-xs font-mono text-[var(--text-muted)] border-b border-[var(--border)] pb-3">
       <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         <span class="text-[var(--text-main)] font-semibold">Open to Software Development Opportunities</span>
       </div>
       <span>Updated: Nov 2026 · New Delhi, Delhi, India</span>
     </div>
 
     <!-- HERO SECTION (Exact Match to image_105780.jpg) -->
-    <section id="experience" class="space-y-6 pt-4">
+    <section class="space-y-6 pt-4">
       <div class="flex items-center gap-2">
-        <span class="px-3 py-1 rounded-full text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <span class="px-3 py-1 rounded-full text-xs font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
           Raviranjan Kumar
         </span>
-        <span class="px-3 py-1 rounded-full text-xs font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold flex items-center gap-1.5">
+        <span class="px-3 py-1 rounded-full text-xs font-mono bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 font-semibold flex items-center gap-1.5">
           <i data-lucide="sparkles" class="w-3 h-3"></i>
           AI & RAG Builder
         </span>
@@ -163,14 +168,14 @@
           <span>GitHub</span>
         </a>
         <button type="button" onclick="openResumeModal()" class="px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-main)] hover:bg-[var(--elevated)] font-semibold flex items-center gap-2 transition-colors">
-          <i data-lucide="file-text" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <i data-lucide="file-text" class="w-3.5 h-3.5 text-cyan-500"></i>
           <span>Resume</span>
         </button>
         <a href="#contact" class="px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-main)] hover:bg-[var(--elevated)] font-semibold flex items-center gap-2 transition-colors">
-          <i data-lucide="mail" class="w-3.5 h-3.5 text-amber-400"></i>
+          <i data-lucide="mail" class="w-3.5 h-3.5 text-amber-500"></i>
           <span>Contact</span>
         </a>
-        <button type="button" onclick="toggleAiDrawer()" class="px-4 py-2.5 rounded-xl border border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 font-semibold flex items-center gap-2 transition-colors">
+        <button type="button" onclick="toggleAiDrawer()" class="px-4 py-2.5 rounded-xl border border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 font-semibold flex items-center gap-2 transition-colors">
           <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
           <span>Ask AI</span>
         </button>
@@ -180,10 +185,10 @@
       <div class="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] font-mono text-xs flex items-center justify-between max-w-xl">
         <div class="flex items-center gap-2 text-[var(--text-muted)]">
           <span class="flex gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span></span>
-          <span class="text-emerald-400">$</span>
+          <span class="text-emerald-500 font-bold">$</span>
           <span>curl -s https://raviranjan.dev/api/v1/profile | jq</span>
         </div>
-        <button type="button" onclick="copyTerminalText()" class="text-[var(--text-muted)] hover:text-white" title="Copy"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+        <button type="button" onclick="copyTerminalText()" class="text-[var(--text-muted)] hover:text-[var(--text-main)]" title="Copy"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
       </div>
 
       <!-- Prompt Chips -->
@@ -204,7 +209,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-4">
         <!-- 01 IDENTITY -->
         <div class="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-4">
-          <div class="flex items-center justify-between text-xs font-mono text-cyan-400">
+          <div class="flex items-center justify-between text-xs font-mono text-cyan-600 dark:text-cyan-400">
             <span>01 - IDENTITY</span>
             <i data-lucide="user" class="w-4 h-4"></i>
           </div>
@@ -219,25 +224,25 @@
 
         <!-- 02 CORE TECH MATRIX -->
         <div class="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-4">
-          <div class="flex items-center justify-between text-xs font-mono text-cyan-400">
+          <div class="flex items-center justify-between text-xs font-mono text-cyan-600 dark:text-cyan-400">
             <span>02 - CORE TECH MATRIX</span>
             <i data-lucide="cpu" class="w-4 h-4"></i>
           </div>
           <div class="flex flex-wrap gap-2 text-xs font-mono">
-            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-sky-400">Java 21 / Spring Boot</span>
-            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-emerald-400">Python / FastAPI</span>
-            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-purple-400">PostgreSQL</span>
-            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-blue-400">Docker</span>
-            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-teal-400">React & TypeScript</span>
-            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-indigo-400">PostgreSQL & PostGIS</span>
-            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-pink-400">AI & RAG Applications</span>
-            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-amber-400">Docker & Git</span>
+            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-sky-600 dark:text-sky-400 font-medium">Java 21 / Spring Boot</span>
+            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-emerald-600 dark:text-emerald-400 font-medium">Python / FastAPI</span>
+            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-purple-600 dark:text-purple-400 font-medium">PostgreSQL</span>
+            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-blue-600 dark:text-blue-400 font-medium">Docker</span>
+            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-teal-600 dark:text-teal-400 font-medium">React & TypeScript</span>
+            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-indigo-600 dark:text-indigo-400 font-medium">PostgreSQL & PostGIS</span>
+            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-pink-600 dark:text-pink-400 font-medium">AI & RAG Applications</span>
+            <span class="px-2.5 py-1 rounded-md bg-[var(--elevated)] border border-[var(--border)] text-amber-600 dark:text-amber-400 font-medium">Docker & Git</span>
           </div>
         </div>
 
         <!-- 03 AVAILABILITY -->
         <div class="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-4">
-          <div class="flex items-center justify-between text-xs font-mono text-emerald-400">
+          <div class="flex items-center justify-between text-xs font-mono text-emerald-600 dark:text-emerald-400">
             <span>03 - AVAILABILITY</span>
             <i data-lucide="check-circle" class="w-4 h-4"></i>
           </div>
@@ -253,7 +258,6 @@
     </section>
 
     <!-- 100% REAL GITHUB CONTRIBUTION HEATMAP (144 Contributions) -->
-    <section id="lab" class="hidden"></section>
     <section id="telemetry" class="space-y-4">
       <div class="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -268,8 +272,8 @@
           </div>
           <div class="flex items-center gap-1 font-mono text-xs bg-[var(--elevated)] p-1 rounded-lg border border-[var(--border)]">
             <button id="btn-year-last" type="button" class="px-2.5 py-1 rounded-md bg-brand text-white font-medium">Last Year</button>
-            <button id="btn-year-2026" type="button" class="px-2.5 py-1 rounded-md text-[var(--text-muted)]">2026</button>
-            <button id="btn-year-2025" type="button" class="px-2.5 py-1 rounded-md text-[var(--text-muted)]">2025</button>
+            <button id="btn-year-2026" type="button" class="px-2.5 py-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)]">2026</button>
+            <button id="btn-year-2025" type="button" class="px-2.5 py-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)]">2025</button>
           </div>
         </div>
         <div class="overflow-x-auto py-2">
@@ -278,16 +282,51 @@
       </div>
     </section>
 
-    <!-- PROJECTS SECTION -->
+    <!-- PROJECTS SECTION (Crystal clear contrast in Light & Dark modes) -->
     <section id="projects" class="space-y-6">
       <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
         <h2 class="text-2xl font-heading font-bold text-[var(--text-main)]">Featured Projects</h2>
         <span class="text-xs font-mono text-[var(--text-muted)]">100% Neon DB Connected</span>
       </div>
-      <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Default fallback rendered with high contrast -->
+        <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-3 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-mono font-bold text-brand uppercase">FULL_STACK</span>
+            <h3 class="text-base font-heading font-bold text-slate-900 dark:text-white mt-1">RakshaGrid: Resilient Grid Protection Architecture</h3>
+            <p class="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">Critical infrastructure monitoring and automated failure isolation using Java 21 and Spring Boot.</p>
+          </div>
+          <div class="pt-3 border-t border-[var(--border)] flex justify-between text-xs font-mono">
+            <span class="text-emerald-600 dark:text-emerald-400 font-bold">PUBLISHED</span>
+            <a href="https://github.com/raviranjankrmaurya" target="_blank" class="text-brand hover:underline font-semibold">GitHub ↗</a>
+          </div>
+        </div>
+        <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-3 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-mono font-bold text-brand uppercase">FULL_STACK</span>
+            <h3 class="text-base font-heading font-bold text-slate-900 dark:text-white mt-1">Raviranjan.OS: Developer Operating System</h3>
+            <p class="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">Unified developer platform with live telemetry, Neon DB migrations, and JWT authentication.</p>
+          </div>
+          <div class="pt-3 border-t border-[var(--border)] flex justify-between text-xs font-mono">
+            <span class="text-emerald-600 dark:text-emerald-400 font-bold">PUBLISHED</span>
+            <a href="https://github.com/raviranjankrmaurya" target="_blank" class="text-brand hover:underline font-semibold">GitHub ↗</a>
+          </div>
+        </div>
+        <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-3 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-mono font-bold text-brand uppercase">FULL_STACK</span>
+            <h3 class="text-base font-heading font-bold text-slate-900 dark:text-white mt-1">Distributed Kafka Ingestion Engine</h3>
+            <p class="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">High-throughput event streaming architecture processing over 50k events/sec with zero loss.</p>
+          </div>
+          <div class="pt-3 border-t border-[var(--border)] flex justify-between text-xs font-mono">
+            <span class="text-emerald-600 dark:text-emerald-400 font-bold">PUBLISHED</span>
+            <a href="https://github.com/raviranjankrmaurya" target="_blank" class="text-brand hover:underline font-semibold">GitHub ↗</a>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- CONTACT FORM (With IP & Browser History Logging & 3 messages/10 min limit) -->
+    <!-- CONTACT FORM (Max 3 messages in 10 minutes) -->
     <section id="contact" class="max-w-3xl mx-auto space-y-6">
       <div class="text-center space-y-2">
         <h2 class="text-3xl font-heading font-bold text-[var(--text-main)]">Contact & Recruiter Outreach</h2>
@@ -300,36 +339,34 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-mono text-[var(--text-muted)] mb-1">YOUR NAME *</label>
-            <input type="text" id="contact-name" required placeholder="Name" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-xs text-[var(--text-main)]">
+            <input type="text" id="contact-name" required placeholder="Name" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand">
           </div>
           <div>
             <label class="block text-xs font-mono text-[var(--text-muted)] mb-1">EMAIL ADDRESS *</label>
-            <input type="email" id="contact-email" required placeholder="name@company.com" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-xs text-[var(--text-main)]">
+            <input type="email" id="contact-email" required placeholder="name@company.com" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand">
           </div>
         </div>
         <div>
           <label class="block text-xs font-mono text-[var(--text-muted)] mb-1">SUBJECT</label>
-          <input type="text" id="contact-subject" placeholder="Engineering Inquiry" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-xs text-[var(--text-main)]">
+          <input type="text" id="contact-subject" placeholder="Engineering Inquiry" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand">
         </div>
         <div>
           <label class="block text-xs font-mono text-[var(--text-muted)] mb-1">MESSAGE *</label>
-          <textarea id="contact-message" rows="4" required placeholder="Message details..." class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-xs text-[var(--text-main)]"></textarea>
+          <textarea id="contact-message" rows="4" required placeholder="Message details..." class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand"></textarea>
         </div>
-        <button type="submit" id="btn-contact-submit" class="w-full py-3 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold font-mono">
+        <button type="submit" id="btn-contact-submit" class="w-full py-3 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-bold font-mono transition-colors">
           Send Message to Database
         </button>
       </form>
     </section>
   </main>
 
-  <!-- ============================================================ -->
-  <!-- MODAL: RECRUITER 1-MINUTE BRIEF (Exact Match to image_105742)-->
-  <!-- ============================================================ -->
+  <!-- MODAL: RECRUITER 1-MINUTE BRIEF (image_105742.jpg) -->
   <div id="modal-recruiter-brief" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="w-full max-w-4xl rounded-2xl border border-emerald-500/40 bg-[var(--surface)] p-6 sm:p-8 space-y-6 shadow-2xl animate-in fade-in zoom-in-95">
       <div class="flex items-start justify-between border-b border-[var(--border)] pb-4">
         <div>
-          <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">RECRUITER 1-MINUTE BRIEF</span>
+          <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">RECRUITER 1-MINUTE BRIEF</span>
           <span class="text-xs font-mono text-[var(--text-muted)] ml-2">Executive Summary for Hiring Teams</span>
           <h3 class="text-2xl font-heading font-bold text-[var(--text-main)] mt-1">Raviranjan Kumar</h3>
           <span class="text-xs font-mono text-[var(--text-muted)]">BCA Student · Software Developer · Builder</span>
@@ -339,54 +376,52 @@
             <i data-lucide="mail" class="w-3.5 h-3.5"></i>
             <span>Get in Touch</span>
           </a>
-          <button type="button" onclick="openResumeModal()" class="px-3.5 py-1.5 rounded-lg border border-[var(--border)] text-xs font-medium hover:bg-[var(--elevated)] flex items-center gap-1.5">
-            <i data-lucide="file-text" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <button type="button" onclick="downloadActualResumeFile()" class="px-3.5 py-1.5 rounded-lg border border-[var(--border)] text-xs font-medium hover:bg-[var(--elevated)] flex items-center gap-1.5">
+            <i data-lucide="file-text" class="w-3.5 h-3.5 text-cyan-500"></i>
             <span>Download Resume</span>
           </button>
-          <button type="button" onclick="closeRecruiterModal()" class="p-1 rounded-lg text-[var(--text-muted)] hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+          <button type="button" onclick="closeRecruiterModal()" class="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs font-mono">
         <div class="space-y-2">
-          <span class="text-emerald-400 font-bold block">CORE FOCUS & STRENGTHS</span>
+          <span class="text-emerald-600 dark:text-emerald-400 font-bold block">CORE FOCUS & STRENGTHS</span>
           <p class="text-[var(--text-muted)] leading-relaxed">
             Building software for the AI-native era. Full-stack developer focused on Java, Spring Boot, Python, FastAPI, React, PostgreSQL, and AI/LLM applications.
           </p>
         </div>
         <div class="space-y-2">
-          <span class="text-sky-400 font-bold block">PRIMARY TECHNOLOGIES</span>
+          <span class="text-sky-600 dark:text-sky-400 font-bold block">PRIMARY TECHNOLOGIES</span>
           <div class="flex flex-wrap gap-1.5">
-            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-white">Java 21 / Spring Boot</span>
-            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-white">Python / FastAPI</span>
-            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-white">PostgreSQL</span>
-            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-white">Docker</span>
-            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-white">React & TypeScript</span>
-            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-white">PostgreSQL & PostGIS</span>
-            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-white">AI & RAG Applications</span>
-            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-white">Docker & Git</span>
+            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-[var(--text-main)]">Java 21 / Spring Boot</span>
+            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-[var(--text-main)]">Python / FastAPI</span>
+            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-[var(--text-main)]">PostgreSQL</span>
+            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-[var(--text-main)]">Docker</span>
+            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-[var(--text-main)]">React & TypeScript</span>
+            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-[var(--text-main)]">PostgreSQL & PostGIS</span>
+            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-[var(--text-main)]">AI & RAG Applications</span>
+            <span class="px-2 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-[var(--text-main)]">Docker & Git</span>
           </div>
         </div>
         <div class="space-y-2">
-          <span class="text-purple-400 font-bold block">EDUCATION & AVAILABILITY</span>
-          <span class="text-white block font-bold">Bachelor of Computer Applications (BCA)</span>
-          <span class="text-emerald-400 block">Available for Internships & Software Developer Roles</span>
+          <span class="text-purple-600 dark:text-purple-400 font-bold block">EDUCATION & AVAILABILITY</span>
+          <span class="text-[var(--text-main)] block font-bold">Bachelor of Computer Applications (BCA)</span>
+          <span class="text-emerald-600 dark:text-emerald-400 block font-semibold">Available for Internships & Software Developer Roles</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ============================================================ -->
-  <!-- MODAL: LIVE NEON DB RESUME (Exact Match to image_105701)     -->
-  <!-- ============================================================ -->
+  <!-- MODAL: LIVE NEON DB RESUME (image_105701.jpg) -->
   <div id="modal-resume-view" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="w-full max-w-3xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
       <div class="p-4 sm:p-5 border-b border-[var(--border)] flex items-center justify-between bg-[var(--elevated)]">
         <div class="flex items-center gap-3">
-          <i data-lucide="file-text" class="w-5 h-5 text-teal-400"></i>
+          <i data-lucide="file-text" class="w-5 h-5 text-teal-500"></i>
           <div>
             <h3 class="text-sm font-heading font-bold text-[var(--text-main)]">Curriculum Vitae // Live Neon DB Resume</h3>
-            <span class="text-[10px] font-mono text-emerald-400">● Auto-Synced with Admin Profile, Projects, Skills & Education</span>
+            <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">● Auto-Synced with Admin Profile, Projects, Skills & Education</span>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -394,26 +429,26 @@
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             <span>Download PDF</span>
           </button>
-          <button type="button" onclick="closeResumeModal()" class="text-[var(--text-muted)] hover:text-white p-1"><i data-lucide="x" class="w-4 h-4"></i></button>
+          <button type="button" onclick="closeResumeModal()" class="text-[var(--text-muted)] hover:text-[var(--text-main)] p-1"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
       </div>
 
       <div id="resume-content-body" class="p-6 max-h-[65vh] overflow-y-auto font-mono text-xs space-y-4 text-[var(--text-muted)] leading-relaxed">
         <div class="border-b border-[var(--border)] pb-3">
-          <h4 class="text-lg font-bold text-white">RAVIRANJAN KUMAR</h4>
+          <h4 class="text-lg font-bold text-[var(--text-main)]">RAVIRANJAN KUMAR</h4>
           <span>Software Engineer · BCA Student (Final Year 2026) · New Delhi / Bihar, India</span>
-          <span class="block text-emerald-400">raviranjanmaurya@zohomail.in | +91 8271190619</span>
+          <span class="block text-emerald-600 dark:text-emerald-400 font-semibold">raviranjanmaurya@zohomail.in | +91 8271190619</span>
         </div>
         <div>
-          <span class="font-bold text-white block mb-1">CORE TECHNICAL MATRIX</span>
+          <span class="font-bold text-[var(--text-main)] block mb-1">CORE TECHNICAL MATRIX</span>
           <span>Java 21, Spring Boot 3, Python, FastAPI, PostgreSQL, Neon Cloud, Redis, Docker, Flyway, Microservices, RAG Vector Search</span>
         </div>
         <div>
-          <span class="font-bold text-white block mb-1">LIVE TELEMETRY VERIFICATION</span>
+          <span class="font-bold text-[var(--text-main)] block mb-1">LIVE TELEMETRY VERIFICATION</span>
           <span>GitHub: 144 contributions in the last year · LeetCode: 31 solved (11-day streak) · GFG: 234 Score (Rank #234)</span>
         </div>
         <div>
-          <span class="font-bold text-white block mb-1">FEATURED ARCHITECTURE</span>
+          <span class="font-bold text-[var(--text-main)] block mb-1">FEATURED ARCHITECTURE</span>
           <span>1. Raviranjan.OS: Hexagonal modular developer platform built with Spring Boot 3 & Neon Serverless Postgres.</span>
           <span class="block">2. Autonomous RAG Knowledge Kernel: BM25 reranking + pgvector sub-120ms token streaming retrieval.</span>
         </div>
@@ -428,7 +463,7 @@
         <i data-lucide="sparkles" class="w-4 h-4 text-brand"></i>
         <span class="font-heading font-bold text-sm text-[var(--text-main)]">Raviranjan AI Assistant</span>
       </div>
-      <button type="button" onclick="toggleAiDrawer()" class="p-1 text-[var(--text-muted)] hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      <button type="button" onclick="toggleAiDrawer()" class="p-1 text-[var(--text-muted)] hover:text-[var(--text-main)]"><i data-lucide="x" class="w-4 h-4"></i></button>
     </div>
     <div id="ai-messages" class="flex-1 overflow-y-auto p-4 space-y-3">
       <div class="p-3 rounded-xl bg-[var(--elevated)] text-[var(--text-main)]">
@@ -436,7 +471,7 @@
       </div>
     </div>
     <form onsubmit="handleSendAiMessage(event)" class="p-3 border-t border-[var(--border)] flex gap-2">
-      <input type="text" id="ai-chat-input" placeholder="Ask AI..." required class="flex-1 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-white focus:outline-none focus:ring-2 focus:ring-brand">
+      <input type="text" id="ai-chat-input" placeholder="Ask AI..." required class="flex-1 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-brand">
       <button type="submit" class="px-3 py-2 rounded-xl bg-brand text-white font-bold"><i data-lucide="send" class="w-3.5 h-3.5"></i></button>
     </form>
   </div>
@@ -448,11 +483,11 @@
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      const border = type === 'success' ? 'border-emerald-500/40 text-emerald-300' : (type === 'error' ? 'border-rose-500/40 text-rose-300' : 'border-brand/40 text-brand');
+      const border = type === 'success' ? 'border-emerald-500/40 text-emerald-600 dark:text-emerald-300' : (type === 'error' ? 'border-rose-500/40 text-rose-600 dark:text-rose-300' : 'border-brand/40 text-brand');
       toast.className = `p-3.5 rounded-xl bg-[var(--surface)] border ${border} shadow-2xl text-xs flex items-center gap-2 pointer-events-auto`;
-      toast.innerHTML = `<span class="w-2 h-2 rounded-full ${type === 'success' ? 'bg-emerald-400' : (type === 'error' ? 'bg-rose-400' : 'bg-brand')}"></span><span>${message}</span>`;
+      toast.innerHTML = `<span class="w-2 h-2 rounded-full ${type === 'success' ? 'bg-emerald-500' : (type === 'error' ? 'bg-rose-500' : 'bg-brand')}"></span><span>${message}</span>`;
       container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3500);
+      setTimeout(() => { toast.remove(); }, 3500);
     }
 
     function openRecruiterModal() { document.getElementById('modal-recruiter-brief')?.classList.remove('hidden'); }
@@ -466,8 +501,45 @@
       showToast("Command copied to clipboard!", "success");
     }
 
+    // Triple Click on Logo to Access /admin
+    let logoClickCount = 0;
+    let logoClickTimer = null;
+    document.getElementById('brand-logo')?.addEventListener('click', (e) => {
+      logoClickCount++;
+      if (logoClickTimer) clearTimeout(logoClickTimer);
+      if (logoClickCount === 3) {
+        e.preventDefault();
+        showToast("Accessing Administrator Console...", "info");
+        setTimeout(() => { window.location.href = '/admin'; }, 400);
+        logoClickCount = 0;
+        return;
+      }
+      logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 800);
+    });
+
+    // Spinning Circle Animation on Sync Button
+    async function triggerClientPlatformSync(btn) {
+      if (!btn) btn = document.getElementById('btn-client-sync');
+      const icon = btn?.querySelector('i') || btn?.querySelector('svg');
+      if (icon) icon.classList.add('animate-spin');
+      if (btn) btn.disabled = true;
+      showToast("Synchronizing live telemetry from cloud APIs...", "info");
+
+      try {
+        await fetch('/api/activity/sync', { method: 'POST' }).catch(() => {});
+        await fetch('/api/activity/telemetry').catch(() => {});
+        renderHeatmap();
+        showToast("Live telemetry synchronized successfully!", "success");
+      } catch (err) {
+        showToast("Telemetry sync completed.", "success");
+      } finally {
+        if (icon) icon.classList.remove('animate-spin');
+        if (btn) btn.disabled = false;
+      }
+    }
+
     function downloadActualResumeFile() {
-      showToast("Downloading verified resume PDF...", "success");
+      showToast("Downloading verified resume...", "success");
       const lines = [
         "RAVIRANJAN KUMAR — CURRICULUM VITAE",
         "Software Engineer · BCA Student (Final Year 2026)",
@@ -499,7 +571,7 @@
     async function handleContactSubmit(e) {
       e.preventDefault();
       const now = Date.now();
-      contactSubmissionTimestamps = contactSubmissionTimestamps.filter(t => (now - t) < 600000); // 10 min window
+      contactSubmissionTimestamps = contactSubmissionTimestamps.filter(t => (now - t) < 600000);
 
       if (contactSubmissionTimestamps.length >= 3) {
         showToast("Rate limit exceeded: You can only send 3 messages in 10 minutes.", "error");
@@ -516,10 +588,10 @@
       btn.innerText = "Saving to Neon DB...";
 
       try {
-        const res = await fetch('/api/contact', {
+        await fetch('/api/contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, subject, message })
+          body: JSON.stringify({ name, email, subject, message, pageUrl: window.location.href })
         });
         contactSubmissionTimestamps.push(now);
         showToast("Inquiry recorded in Neon DB! Location and IP logged.", "success");
@@ -553,7 +625,7 @@
         const res = await fetch('/api/ai/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: q, conversationId: 'public-visitor' })
+          body: JSON.stringify({ message: q, conversationId: 'public-visitor', pageUrl: window.location.href })
         });
         const data = await res.json().catch(() => null);
         const aiBubble = document.createElement('div');
@@ -623,13 +695,13 @@
             grid.innerHTML = list.map(p => `
               <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-3 flex flex-col justify-between">
                 <div>
-                  <span class="text-xs font-mono font-bold text-brand uppercase">${p.category || 'BACKEND'}</span>
-                  <h3 class="text-base font-heading font-bold text-white mt-1">${p.title}</h3>
+                  <span class="text-xs font-mono font-bold text-brand uppercase">${p.category || 'FULL_STACK'}</span>
+                  <h3 class="text-base font-heading font-bold text-slate-900 dark:text-white mt-1">${p.title}</h3>
                   <p class="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">${p.summary || p.description || ''}</p>
                 </div>
                 <div class="pt-3 border-t border-[var(--border)] flex justify-between text-xs font-mono">
-                  <span class="text-emerald-400 font-bold">${p.status || 'Active'}</span>
-                  <a href="${p.githubUrl || '#'}" target="_blank" class="text-sky-400 hover:underline">GitHub ↗</a>
+                  <span class="text-emerald-600 dark:text-emerald-400 font-bold">${p.status || 'PUBLISHED'}</span>
+                  <a href="${p.githubUrl || '#'}" target="_blank" class="text-brand hover:underline font-semibold">GitHub ↗</a>
                 </div>
               </div>
             `).join('');
@@ -650,44 +722,6 @@
         document.documentElement.classList.add('dark');
         document.getElementById('theme-sun')?.classList.add('hidden');
         document.getElementById('theme-moon')?.classList.remove('hidden');
-      }
-    }
-
-    
-    // Triple Click on Logo to Access /admin
-    let logoClickCount = 0;
-    let logoClickTimer = null;
-    document.getElementById('brand-logo')?.addEventListener('click', (e) => {
-      logoClickCount++;
-      if (logoClickTimer) clearTimeout(logoClickTimer);
-      if (logoClickCount === 3) {
-        e.preventDefault();
-        showToast("Accessing Administrator Console...", "info");
-        setTimeout(() => { window.location.href = '/admin'; }, 400);
-        logoClickCount = 0;
-        return;
-      }
-      logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 800);
-    });
-
-    // Sync button spinning handler
-    async function triggerClientPlatformSync(btn) {
-      if (!btn) btn = document.getElementById('btn-client-sync');
-      const icon = btn?.querySelector('i') || btn?.querySelector('svg');
-      if (icon) icon.classList.add('animate-spin');
-      if (btn) { btn.disabled = true; }
-      showToast("Synchronizing live telemetry from cloud APIs...", "info");
-
-      try {
-        await fetch('/api/activity/sync', { method: 'POST' }).catch(() => {});
-        await fetch('/api/activity/telemetry').catch(() => {});
-        renderHeatmap();
-        showToast("Live telemetry synchronized successfully!", "success");
-      } catch (err) {
-        showToast("Telemetry sync completed.", "success");
-      } finally {
-        if (icon) icon.classList.remove('animate-spin');
-        if (btn) { btn.disabled = false; }
       }
     }
 
