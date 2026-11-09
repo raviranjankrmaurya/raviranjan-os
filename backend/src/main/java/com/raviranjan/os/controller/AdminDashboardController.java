@@ -312,6 +312,7 @@ public class AdminDashboardController {
         map.put("contactPhone", "+91-9999999999");
         map.put("updatedDateText", "Updated: Oct 2026");
         map.put("fontPreset", "geist");
+        map.put("designPreset", "aurora");
         map.put("heroAnimatedTexts", "Building AI-native software.|Scalable Java & Spring systems.|Production RAG & AI agents.|Full-stack cloud engineering.");
         map.put("heroRoleTexts", "Full-Stack & AI Engineer|Java 21 & Spring Architect|AI & RAG Builder|Cloud Systems Engineer");
 

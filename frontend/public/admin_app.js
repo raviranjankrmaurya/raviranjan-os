@@ -691,6 +691,7 @@ function prependUnifiedActivity(type, title, desc) {
 document.addEventListener('DOMContentLoaded', () => {
   initAdminTheme();
   applyAdminFontPreset(localStorage.getItem('raviranjan_admin_font_preset') || 'geist');
+  applyAdminDesignPreset(localStorage.getItem('raviranjan_design_preset') || 'aurora');
   updateMarkdownPreview();
   const isAuth = localStorage.getItem('raviranjan_admin_authenticated') === 'true' && Boolean(localStorage.getItem('raviranjan_auth_token'));
   if (isAuth) {
@@ -3791,6 +3792,13 @@ function applyAdminFontPreset(preset = 'geist') {
   localStorage.setItem('raviranjan_admin_font_preset', preset);
 }
 
+function applyAdminDesignPreset(preset = 'aurora') {
+  const valid = ['aurora', 'obsidian', 'signal', 'mono'];
+  const chosen = valid.includes(String(preset).toLowerCase()) ? String(preset).toLowerCase() : 'aurora';
+  document.documentElement.setAttribute('data-design-preset', chosen);
+  localStorage.setItem('raviranjan_design_preset', chosen);
+}
+
 async function loadSiteSettings() {
   try {
     const res = await fetch('/api/settings');
@@ -3820,6 +3828,9 @@ async function loadSiteSettings() {
     const fontPreset = settings.fontPreset || 'geist';
     setV('setting-font-preset', fontPreset);
     applyAdminFontPreset(fontPreset);
+    const designPreset = settings.designPreset || 'aurora';
+    setV('setting-design-preset', designPreset);
+    applyAdminDesignPreset(designPreset);
     setV('setting-hero-animated-texts', settings.heroAnimatedTexts || 'Building software for the AI-native era. | Engineering high-throughput distributed backends. | Architecting intelligent RAG & LLM workflows. | Shipping production-grade full-stack platforms.');
     setV('setting-hero-role-texts', settings.heroRoleTexts || 'Full-Stack & AI Engineer | Java 21 & Spring Boot Architect | Distributed Systems Builder | Applied AI & RAG Specialist');
 
@@ -3864,6 +3875,7 @@ async function handleSaveSiteSettings(e) {
   const email = document.getElementById('setting-contact-email')?.value?.trim() || '';
   const phone = document.getElementById('setting-contact-phone')?.value?.trim() || '';
   const fontPreset = document.getElementById('setting-font-preset')?.value?.trim() || 'geist';
+  const designPreset = document.getElementById('setting-design-preset')?.value?.trim() || 'aurora';
   const heroAnimatedTexts = document.getElementById('setting-hero-animated-texts')?.value?.trim() || 'Building AI-native software. | Scalable Java & Spring systems. | Production RAG & AI agents. | Full-stack cloud engineering.';
   const heroRoleTexts = document.getElementById('setting-hero-role-texts')?.value?.trim() || 'Full-Stack & AI Engineer | Java 21 & Spring Architect | AI & RAG Builder | Cloud Systems Engineer';
   const rawPrompts = document.getElementById('setting-ai-prompts')?.value || '';
@@ -3871,6 +3883,7 @@ async function handleSaveSiteSettings(e) {
 
   applyAdminAccentThemeColor(theme);
   applyAdminFontPreset(fontPreset);
+  applyAdminDesignPreset(designPreset);
 
   try {
     const headers = await getAuthHeaders();
@@ -3888,6 +3901,7 @@ async function handleSaveSiteSettings(e) {
         contactEmail: email,
         contactPhone: phone,
         fontPreset: fontPreset,
+        designPreset: designPreset,
         heroAnimatedTexts: heroAnimatedTexts,
         heroRoleTexts: heroRoleTexts,
         aiPromptsJson: JSON.stringify(promptsList)
