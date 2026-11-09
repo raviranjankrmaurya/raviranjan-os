@@ -21,6 +21,7 @@
   --font-mono: 'JetBrains Mono', monospace;
   --accent-color: #38bdf8;
   --glass-border: rgba(148, 163, 184, 0.14);
+  --content-max: 80rem;
 }
 
 /* Base Reset & Smooth Rendering */
@@ -36,6 +37,32 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+main#view-container {
+  scrollbar-gutter: stable;
+}
+
+.view-panel {
+  max-width: var(--content-max);
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  min-height: 2.5rem;
+}
+
+@media (max-width: 640px) {
+  main#view-container {
+    padding: 1rem;
+  }
+
+  .dashboard-hero h2 {
+    font-size: 1.75rem;
+  }
 }
 
 /* Premium workspace chrome */

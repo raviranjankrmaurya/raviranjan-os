@@ -19,6 +19,8 @@
   
   --font-ui: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --content-max: 72rem;
+  --space-section: clamp(3.5rem, 8vw, 7rem);
 }
 
 /* Admin-selected public visual systems. The selected value is persisted in site settings. */
@@ -65,6 +67,35 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-image: radial-gradient(circle at 75% 0%, var(--hero-glow, rgba(56, 189, 248, 0.12)), transparent 32rem);
   background-attachment: fixed;
+}
+
+.site-header {
+  min-height: 4.25rem;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+main > section {
+  scroll-margin-top: 6rem;
+}
+
+#overview h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.055em;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  min-height: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .site-header {
+    min-height: 4.75rem;
+  }
 }
 
 h1, h2, h3, h4, .font-heading {
@@ -209,6 +240,12 @@ html.light body {
   background-color: #f8fafc !important;
   color: #0f172a !important;
   background-image: radial-gradient(circle at 75% 0%, var(--hero-glow), transparent 34rem) !important;
+}
+
+html.light .site-header {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  border-color: #e4e4e7 !important;
+  box-shadow: 0 1px 12px rgba(24, 24, 27, 0.05);
 }
 
 html.light .saas-card {
