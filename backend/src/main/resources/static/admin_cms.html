@@ -368,7 +368,7 @@
         </div>
 
         <!-- Sync Now Button -->
-        <button type="button" onclick="triggerPlatformSync()" class="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--elevated)] text-[var(--text-main)] text-xs font-mono flex items-center gap-1.5 transition-colors">
+        <button type="button" id="btn-admin-sync" onclick="triggerPlatformSync()" class="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--elevated)] text-[var(--text-main)] text-xs font-mono flex items-center gap-1.5 transition-colors">
           <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-brand"></i>
           <span>Sync Now</span>
         </button>
@@ -667,11 +667,11 @@
       <div id="view-lab" class="admin-view hidden space-y-6">
         <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
           <h3 class="text-base font-heading font-bold text-[var(--text-main)]">Engineering Lab Experiments</h3>
-          <button type="button" onclick="showToast('Lab experiment created!', 'success')" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold">
+          <button type="button" onclick="openCreateModal('lab')" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold">
             + New Experiment
           </button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div id="lab-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
             <span class="text-xs font-mono text-cyan-400 font-bold">POC · SYSTEM</span>
             <h4 class="text-sm font-heading font-bold text-[var(--text-main)]">HNSW Vector Search vs BM25 Hybrid Benchmark</h4>
@@ -703,8 +703,8 @@
       <!-- VIEW 10: CAREER TIMELINE -->
       <div id="view-career" class="admin-view hidden space-y-6">
         <div class="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-4 text-xs font-mono">
-          <h3 class="text-base font-heading font-bold text-[var(--text-main)]">Internships & Career Timeline</h3>
-          <div class="space-y-3">
+          <div class="flex items-center justify-between"><h3 class="text-base font-heading font-bold text-[var(--text-main)]">Internships & Career Timeline</h3><button type="button" onclick="openCreateModal('career')" class="px-3.5 py-1.5 rounded-xl bg-brand text-white font-bold text-xs">+ Add Career</button></div>
+          <div id="career-container" class="space-y-3">
             <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--elevated)] space-y-1">
               <span class="text-brand font-bold">Bachelor of Computer Applications (BCA)</span>
               <span class="text-[var(--text-muted)] block">2023 – 2026 · Final Year Student</span>
@@ -716,11 +716,13 @@
       <!-- VIEW 11: ACHIEVEMENTS -->
       <div id="view-achievements" class="admin-view hidden space-y-6">
         <div class="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-4 text-xs font-mono">
-          <h3 class="text-base font-heading font-bold text-[var(--text-main)]">Achievements & Certifications</h3>
-          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--elevated)]">
+          <div class="flex items-center justify-between"><h3 class="text-base font-heading font-bold text-[var(--text-main)]">Achievements & Certifications</h3><button type="button" onclick="openCreateModal('achievement')" class="px-3.5 py-1.5 rounded-xl bg-brand text-white font-bold text-xs">+ Add Achievement</button></div>
+          <div id="achievements-container" class="space-y-3">
+            <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--elevated)]">
             <span class="text-emerald-400 font-bold">Institute Coding Rank #234</span>
             <span class="text-[var(--text-muted)] block">GeeksforGeeks Profile Rating & Problem Solving</span>
           </div>
+        </div>
         </div>
       </div>
 
@@ -728,7 +730,7 @@
       <div id="view-dsa" class="admin-view hidden space-y-6">
         <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
           <h3 class="text-base font-heading font-bold text-[var(--text-main)]">DSA Problems & Notes Repository</h3>
-          <button type="button" onclick="showToast('DSA Problem created in Neon DB!', 'success')" class="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-semibold">
+          <button type="button" onclick="openCreateModal('dsa')" class="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-semibold">
             + Add DSA Note
           </button>
         </div>
@@ -741,7 +743,7 @@
                 <th class="py-2">TOPIC</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="dsa-tbody">
               <tr class="border-b border-[var(--border)]">
                 <td class="py-3 text-[var(--text-main)]">LRU Cache Implementation</td>
                 <td class="text-amber-400">MEDIUM</td>
@@ -756,13 +758,15 @@
       <div id="view-writing" class="admin-view hidden space-y-6">
         <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
           <h3 class="text-base font-heading font-bold text-[var(--text-main)]">Articles & Technical Writing</h3>
-          <button type="button" onclick="showToast('Article created!', 'success')" class="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-semibold">
+          <button type="button" onclick="openCreateModal('article')" class="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-semibold">
             + New Article
           </button>
         </div>
-        <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
+        <div id="writing-container" class="space-y-3">
+          <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
           <h4 class="text-sm font-heading font-bold text-[var(--text-main)]">Understanding Virtual Threads in Java 21</h4>
           <span class="text-xs text-emerald-400 font-mono">PUBLISHED · 10 min read</span>
+        </div>
         </div>
       </div>
 
@@ -770,13 +774,15 @@
       <div id="view-research" class="admin-view hidden space-y-6">
         <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
           <h3 class="text-base font-heading font-bold text-[var(--text-main)]">Research Papers & Publications</h3>
-          <button type="button" onclick="showToast('Paper created!', 'success')" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold">
+          <button type="button" onclick="openCreateModal('research')" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold">
             + New Paper
           </button>
         </div>
-        <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
+        <div id="research-container" class="space-y-3">
+          <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
           <h4 class="text-sm font-heading font-bold text-[var(--text-main)]">Empirical Benchmark of Hybrid RAG Architectures under Strict SLA</h4>
           <span class="text-xs text-[var(--text-muted)] font-mono">Published in October 2026 · Author: Raviranjan Kumar</span>
+        </div>
         </div>
       </div>
 
@@ -784,13 +790,15 @@
       <div id="view-stories" class="admin-view hidden space-y-6">
         <div class="flex items-center justify-between border-b border-[var(--border)] pb-4">
           <h3 class="text-base font-heading font-bold text-[var(--text-main)]">Open Source Contribution Stories</h3>
-          <button type="button" onclick="showToast('Story created in Neon DB!', 'success')" class="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-semibold">
+          <button type="button" onclick="openCreateModal('story')" class="px-4 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white text-xs font-semibold">
             + Add Contribution Story
           </button>
         </div>
-        <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
+        <div id="stories-container" class="space-y-3">
+          <div class="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
           <h4 class="text-sm font-heading font-bold text-[var(--text-main)]">Optimized Connection Pool Allocation in Open Source Gateway</h4>
           <span class="text-xs text-purple-400 font-mono">MERGED PR #42</span>
+        </div>
         </div>
       </div>
 
@@ -948,7 +956,8 @@
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-indigo-600 flex items-center justify-center font-heading font-bold text-white text-xs shadow-sm">R</div>
           <div>
-            <h2 class="text-sm font-heading font-bold text-[var(--text-main)]">Admin OS Login</h2>
+            <h2 class="text-sm font-heading font-bold text-rose-400">Restricted, sorry you don’t have permission to load this page.</h2>
+<p class="text-[11px] text-[var(--text-muted)] mt-0.5">Administrator authorization required to access Raviranjan.OS Executive Console.</p>
             <span class="text-[10px] text-[var(--text-muted)]">Neon DB Cryptographic JWT</span>
           </div>
         </div>
@@ -1592,5 +1601,66 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   </script>
+
+  <!-- ============================================================ -->
+  <!-- UNIVERSAL ENTITY CREATION MODAL (Lab, DSA, Articles, etc.)   -->
+  <!-- ============================================================ -->
+  <div id="modal-universal-create" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl p-6 space-y-4 font-mono text-xs">
+      <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
+        <div class="flex items-center gap-2">
+          <span id="uni-modal-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand/10 text-brand border border-brand/20">NEW ENTITY</span>
+          <h3 id="uni-modal-title" class="text-sm font-heading font-bold text-[var(--text-main)]">Create New Item</h3>
+        </div>
+        <button type="button" onclick="closeUniversalCreateModal()" class="text-[var(--text-muted)] hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="form-universal-create" onsubmit="handleUniversalCreateSubmit(event)" class="space-y-3.5">
+        <input type="hidden" id="uni-entity-type" value="project">
+        <div>
+          <label id="uni-label-title" class="block text-[var(--text-muted)] mb-1">TITLE / NAME *</label>
+          <input type="text" id="uni-input-title" required placeholder="Enter title..." class="w-full p-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-[var(--text-main)]">
+        </div>
+        <div id="uni-field-extra1">
+          <label id="uni-label-extra1" class="block text-[var(--text-muted)] mb-1">CATEGORY / TOPIC</label>
+          <input type="text" id="uni-input-extra1" placeholder="e.g. Systems, AI, Graph Theory" class="w-full p-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-[var(--text-main)]">
+        </div>
+        <div>
+          <label id="uni-label-desc" class="block text-[var(--text-muted)] mb-1">DESCRIPTION / SUMMARY *</label>
+          <textarea id="uni-input-desc" rows="3" required placeholder="Details..." class="w-full p-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-[var(--text-main)]"></textarea>
+        </div>
+        <div id="uni-field-extra2">
+          <label id="uni-label-extra2" class="block text-[var(--text-muted)] mb-1">URL / REPO LINK</label>
+          <input type="text" id="uni-input-extra2" placeholder="https://..." class="w-full p-2.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-[var(--text-main)]">
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border)]">
+          <button type="button" onclick="closeUniversalCreateModal()" class="px-4 py-2 rounded-xl border border-[var(--border)]">Cancel</button>
+          <button type="submit" id="btn-uni-save" class="px-5 py-2 rounded-xl bg-brand hover:bg-brand-hover text-white font-bold cursor-pointer">
+            Save to Neon DB
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- MODAL: ADMIN QUICK JUMP / COMMAND MENU (Real Search)          -->
+  <!-- ============================================================ -->
+  <div id="modal-admin-jump" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-start justify-center pt-20 p-4">
+    <div class="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl overflow-hidden font-mono text-xs animate-in fade-in zoom-in-95">
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-[var(--border)]">
+        <i data-lucide="search" class="w-4 h-4 text-brand"></i>
+        <input type="text" id="admin-jump-input" placeholder="Type to jump to any module (e.g. Projects, Stories, Inquiries)..." class="w-full bg-transparent text-[var(--text-main)] focus:outline-none">
+        <kbd class="px-1.5 py-0.5 rounded bg-[var(--elevated)] border border-[var(--border)] text-[9px] text-[var(--text-muted)]">ESC</kbd>
+      </div>
+      <div id="admin-jump-list" class="max-h-80 overflow-y-auto p-2 space-y-1">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
