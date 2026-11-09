@@ -230,7 +230,7 @@ function showToast(message, type = 'info') {
   }[type] || 'border-slate-500/40 bg-[#11131a] text-slate-300';
 
   toast.className = `p-3 rounded-lg border shadow-xl flex items-center space-x-2 text-xs font-mono pointer-events-auto transition-all transform duration-200 translate-y-2 opacity-0 ${colors}`;
-  toast.innerHTML = `<i data-lucide="info" class="w-4 h-4"></i><span>${message}</span>`;
+  toast.innerHTML = `<i data-lucide="info" class="w-4 h-4"></i><span>${escapeHtml(message)}</span>`;
 
   container.appendChild(toast);
   if (window.lucide) window.lucide.createIcons();
@@ -690,6 +690,7 @@ function prependUnifiedActivity(type, title, desc) {
 // Document Ready Listener
 document.addEventListener('DOMContentLoaded', () => {
   initAdminTheme();
+  applyAdminFontPreset(localStorage.getItem('raviranjan_admin_font_preset') || 'geist');
   updateMarkdownPreview();
   const isAuth = localStorage.getItem('raviranjan_admin_authenticated') === 'true' && Boolean(localStorage.getItem('raviranjan_auth_token'));
   if (isAuth) {
@@ -3634,6 +3635,21 @@ async function loadAdminDashboardMetrics() {
       };
     }
 
+    const setHealth = (id, isAvailable) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerText = isAvailable ? 'CONNECTED' : 'NO DATA';
+      el.classList.toggle('text-emerald-400', isAvailable);
+      el.classList.toggle('bg-emerald-500/10', isAvailable);
+      el.classList.toggle('border-emerald-500/20', isAvailable);
+      el.classList.toggle('text-slate-400', !isAvailable);
+      el.classList.toggle('bg-slate-500/10', !isAvailable);
+      el.classList.toggle('border-slate-500/20', !isAvailable);
+    };
+    setHealth('health-github', Number(m.githubCommits) > 0 || Number(m.githubRepos) > 0);
+    setHealth('health-leetcode', Number(m.leetcodeSolved) > 0);
+    setHealth('health-gfg', Number(m.gfgScore) > 0 || Number(m.gfgProblems) > 0);
+
     const setT = (id, val) => {
       const el = document.getElementById(id);
       if (el !== null && el !== undefined && val !== undefined && val !== null) el.innerText = val;
@@ -3703,12 +3719,14 @@ async function loadAdminDashboardMetrics() {
         milestonesContainer.innerHTML = `<div class="text-slate-500 text-xs font-mono">No active projects in Neon DB. Create a project in the Projects tab.</div>`;
       } else {
         milestonesContainer.innerHTML = m.projectMilestones.map(pm => {
-          const pVal = pm.progress !== undefined ? pm.progress : 85;
+          const parsedProgress = Number(pm.progress);
+          const hasProgress = Number.isFinite(parsedProgress);
+          const pVal = hasProgress ? Math.min(100, Math.max(0, parsedProgress)) : 0;
           return `
             <div>
               <div class="flex justify-between mb-1.5">
                 <span class="text-slate-300">${escapeHtml(pm.title)}</span>
-                <span class="text-sky-400 font-bold">${pVal}%</span>
+                <span class="${hasProgress ? 'text-sky-400' : 'text-slate-500'} font-bold">${hasProgress ? `${pVal}%` : 'Not set'}</span>
               </div>
               <div class="h-2 rounded-full bg-[#1b202d] overflow-hidden">
                 <div class="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full" style="width: ${pVal}%"></div>
@@ -3759,6 +3777,20 @@ function applyAdminAccentThemeColor(hex) {
   `;
 }
 
+function applyAdminFontPreset(preset = 'geist') {
+  const presets = {
+    geist: ["'Geist'", "'Geist Mono'"],
+    editorial: ["'Inter'", "'JetBrains Mono'"],
+    portfolio: ["'Manrope'", "'JetBrains Mono'"],
+    jakarta: ["'Plus Jakarta Sans'", "'JetBrains Mono'"],
+    agency: ["'Space Grotesk'", "'JetBrains Mono'"]
+  };
+  const [uiFont, monoFont] = presets[preset] || presets.geist;
+  document.documentElement.style.setProperty('--font-ui', `${uiFont}, system-ui, sans-serif`);
+  document.documentElement.style.setProperty('--font-mono', `${monoFont}, monospace`);
+  localStorage.setItem('raviranjan_admin_font_preset', preset);
+}
+
 async function loadSiteSettings() {
   try {
     const res = await fetch('/api/settings');
@@ -3785,7 +3817,9 @@ async function loadSiteSettings() {
     setV('setting-contact-desc', settings.contactDescription || '');
     setV('setting-contact-email', settings.contactEmail);
     setV('setting-contact-phone', settings.contactPhone || '+91-9999999999');
-    setV('setting-font-preset', settings.fontPreset || 'geist');
+    const fontPreset = settings.fontPreset || 'geist';
+    setV('setting-font-preset', fontPreset);
+    applyAdminFontPreset(fontPreset);
     setV('setting-hero-animated-texts', settings.heroAnimatedTexts || 'Building software for the AI-native era. | Engineering high-throughput distributed backends. | Architecting intelligent RAG & LLM workflows. | Shipping production-grade full-stack platforms.');
     setV('setting-hero-role-texts', settings.heroRoleTexts || 'Full-Stack & AI Engineer | Java 21 & Spring Boot Architect | Distributed Systems Builder | Applied AI & RAG Specialist');
 
@@ -3836,6 +3870,7 @@ async function handleSaveSiteSettings(e) {
   const promptsList = rawPrompts.split('\n').map(s => s.trim()).filter(Boolean);
 
   applyAdminAccentThemeColor(theme);
+  applyAdminFontPreset(fontPreset);
 
   try {
     const headers = await getAuthHeaders();

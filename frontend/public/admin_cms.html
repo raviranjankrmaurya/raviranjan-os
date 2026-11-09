@@ -125,7 +125,10 @@
     }
   </script>
 </head>
-<body class="bg-[#090a0f] text-slate-100 font-sans antialiased overflow-hidden flex h-screen select-none">
+<body class="admin-shell bg-[#090a0f] text-slate-100 font-sans antialiased overflow-hidden flex h-screen select-none">
+  <div class="admin-ambient admin-ambient-one" aria-hidden="true"></div>
+  <div class="admin-ambient admin-ambient-two" aria-hidden="true"></div>
+  <div class="admin-grid-overlay" aria-hidden="true"></div>
 
   
   <!-- Built-in Mobile & Desktop Admin Login Gate Overlay on /admin -->
@@ -341,9 +344,9 @@
   </aside>
 
   <!-- Main Viewport -->
-  <div class="flex-1 flex flex-col h-full overflow-hidden bg-[#090a0f]">
+  <div class="flex-1 flex flex-col h-full overflow-hidden bg-[#090a0f] admin-workspace">
     <!-- Top Header (Responsive on Mobile, Tablet & Desktop) -->
-    <header class="min-h-[4rem] py-2 border-b border-[#1f2430] bg-[#0c0e14]/80 backdrop-blur px-3 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2 shrink-0 z-10">
+    <header class="admin-topbar min-h-[4rem] py-2 border-b border-[#1f2430] bg-[#0c0e14]/80 backdrop-blur px-3 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2 shrink-0 z-10">
       <div class="flex items-center space-x-2 font-mono text-xs text-slate-400">
         <button type="button" onclick="toggleAdminMobileSidebar()" class="lg:hidden p-2 rounded-md bg-[#131620] border border-[#202533] text-slate-300 hover:text-white mr-1" title="Open Admin Navigation">
           <i data-lucide="menu" class="w-4 h-4"></i>
@@ -351,6 +354,9 @@
         <span class="hidden sm:inline">Raviranjan.OS</span>
         <i data-lucide="chevron-right" class="w-3 h-3 text-slate-600 hidden sm:inline"></i>
         <span id="current-view-breadcrumb" class="text-white font-medium capitalize">Dashboard</span>
+        <span class="hidden md:inline-flex items-center gap-1.5 text-[10px] text-emerald-300/80 font-mono px-2 py-1 rounded-full bg-emerald-400/5 border border-emerald-400/15">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Live workspace
+        </span>
       </div>
 
       <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
@@ -361,7 +367,7 @@
         <!-- Notification Bell Trigger -->
         <button onclick="toggleNotificationDrawer()" class="relative p-2 rounded-md bg-[#131620] border border-[#202533] text-slate-300 hover:text-white hover:border-sky-500/40 transition-colors" title="Notification Center">
           <i data-lucide="bell" class="w-4 h-4"></i>
-          <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white font-mono text-[9px] font-bold flex items-center justify-center animate-pulse">3</span>
+          <span id="notif-badge" class="hidden absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white font-mono text-[9px] font-bold items-center justify-center animate-pulse"></span>
         </button>
 
         <button onclick="toggleAiDrawer()" class="px-2.5 sm:px-3 py-1.5 rounded-md bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-mono transition-colors flex items-center gap-1.5 shadow-sm shadow-cyan-500/10">
@@ -392,14 +398,20 @@
 
       <!-- VIEW: DASHBOARD -->
       <section id="view-dashboard" class="view-panel space-y-8 max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#1f2430]">
+        <div class="dashboard-hero flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-[#1f2430]">
           <div>
-            <h2 class="text-xl font-bold tracking-tight text-white font-mono">Platform Executive Telemetry</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Aggregated metrics from CMS manual domain and external automated integrations.</p>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="eyebrow-label">Command center</span>
+              <span class="text-[10px] text-slate-500 font-mono">/ overview</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">Platform <span class="text-gradient">telemetry</span></h2>
+            <p class="text-sm text-slate-400 mt-1 max-w-2xl">A live control surface for your portfolio, content, integrations, and publishing pipeline.</p>
           </div>
-          <div class="flex items-center space-x-2 text-xs font-mono">
-            <span class="text-slate-500">Live Auto-Sync:</span>
-            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">EVERY 15M</span>
+          <div class="flex items-center gap-2 text-xs font-mono">
+            <span class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Auto-sync · 15 min</span>
+            <button type="button" onclick="loadAdminDashboardMetrics()" class="icon-action" title="Refresh dashboard data" aria-label="Refresh dashboard data">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
           </div>
         </div>
 
@@ -533,41 +545,41 @@
                 <div class="p-3 rounded-lg bg-[#141822] border border-[#1f2430] flex flex-col gap-1">
                   <div class="flex justify-between items-center">
                     <span class="font-medium text-slate-200">GitHub REST & GraphQL</span>
-                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HEALTHY</span>
+                    <span id="health-github" class="health-pill text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-400 border border-slate-500/20">CHECKING</span>
                   </div>
                   <div class="flex justify-between text-[10px] text-slate-500 font-mono">
-                    <span>Last sync: 10m ago</span>
-                    <span>42ms</span>
+                    <span>Awaiting telemetry</span>
+                    <span>--</span>
                   </div>
                 </div>
                 <div class="p-3 rounded-lg bg-[#141822] border border-[#1f2430] flex flex-col gap-1">
                   <div class="flex justify-between items-center">
                     <span class="font-medium text-slate-200">LeetCode Public Endpoint</span>
-                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HEALTHY</span>
+                    <span id="health-leetcode" class="health-pill text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-400 border border-slate-500/20">CHECKING</span>
                   </div>
                   <div class="flex justify-between text-[10px] text-slate-500 font-mono">
-                    <span>Last sync: 1h ago</span>
-                    <span>180ms</span>
+                    <span>Awaiting telemetry</span>
+                    <span>--</span>
                   </div>
                 </div>
                 <div class="p-3 rounded-lg bg-[#141822] border border-[#1f2430] flex flex-col gap-1">
                   <div class="flex justify-between items-center">
                     <span class="font-medium text-slate-200">GeeksforGeeks Scraper</span>
-                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HEALTHY</span>
+                    <span id="health-gfg" class="health-pill text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-400 border border-slate-500/20">CHECKING</span>
                   </div>
                   <div class="flex justify-between text-[10px] text-slate-500 font-mono">
-                    <span>Last sync: 3h ago</span>
-                    <span>210ms</span>
+                    <span>Awaiting telemetry</span>
+                    <span>--</span>
                   </div>
                 </div>
                 <div class="p-3 rounded-lg bg-[#141822] border border-[#1f2430] flex flex-col gap-1">
                   <div class="flex justify-between items-center">
                     <span class="font-medium text-slate-200">WhatsApp Business Cloud</span>
-                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">WEBHOOK LIVE</span>
+                    <span id="health-whatsapp" class="health-pill text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-400 border border-slate-500/20">NOT CONFIGURED</span>
                   </div>
                   <div class="flex justify-between text-[10px] text-slate-500 font-mono">
                     <span>Inbound listener</span>
-                    <span>15ms</span>
+                    <span>Endpoint status unavailable</span>
                   </div>
                 </div>
               </div>
@@ -1151,7 +1163,7 @@ Write your technical essay here...</textarea>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-slate-300 mb-1">Typography Font Pairing Preset</label>
-                <select id="setting-font-preset" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
+                <select id="setting-font-preset" onchange="applyAdminFontPreset(this.value)" class="w-full bg-[#131620] border border-[#202533] rounded p-2 text-white focus:border-sky-500 focus:outline-none">
                   <option value="geist">Developer OS & AI SaaS — Geist + Geist Mono (Default)</option>
                   <option value="editorial">AI Chatbot & Editorial — Inter + Instrument Serif</option>
                   <option value="portfolio">Executive Portfolio — Manrope + Instrument Serif</option>
@@ -1419,12 +1431,12 @@ What AI projects has he worked on?</textarea>
           <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
             <span class="text-slate-400 block mb-1">Connected Account</span>
             <span id="admin-gh-user" class="text-sm font-bold text-white">@raviranjankrmaurya</span>
-            <span class="text-[10px] text-emerald-400 block mt-1">Token: Encrypted (AES-256-GCM)</span>
+            <span class="text-[10px] text-slate-500 block mt-1">Credential state loads from the server</span>
           </div>
           <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
             <span class="text-slate-400 block mb-1">Last Synchronization</span>
-            <span id="github-last-sync" class="text-sm font-bold text-sky-400">10 minutes ago</span>
-            <span class="text-[10px] text-slate-500 block mt-1">Status: SUCCESS</span>
+            <span id="github-last-sync" class="text-sm font-bold text-slate-400">Awaiting sync</span>
+            <span class="text-[10px] text-slate-500 block mt-1">Status: not checked</span>
           </div>
           <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
             <span class="text-slate-400 block mb-1">Records Processed</span>
@@ -1433,7 +1445,7 @@ What AI projects has he worked on?</textarea>
           </div>
           <div class="p-4 rounded-xl bg-[#10121a] border border-[#1f2430]">
             <span class="text-slate-400 block mb-1">Webhook Events</span>
-            <span class="text-sm font-bold text-emerald-400">HMAC-SHA256 Active</span>
+            <span class="text-sm font-bold text-slate-400">Server status</span>
             <span class="text-[10px] text-slate-500 block mt-1">push, pull_request, release</span>
           </div>
         </div>
@@ -1456,21 +1468,8 @@ What AI projects has he worked on?</textarea>
               </tr>
             </thead>
             <tbody id="github-sync-logs-body" class="divide-y divide-[#1f2430]">
-              <tr class="hover:bg-[#141822]/60">
-                <td class="py-2.5 px-4 text-slate-400">Just now</td>
-                <td class="py-2.5 px-4 text-slate-300">SCHEDULED</td>
-                <td class="py-2.5 px-4 text-emerald-400">SUCCESS</td>
-                <td class="py-2.5 px-4 text-white">24 commits, 2 PRs</td>
-                <td class="py-2.5 px-4 text-slate-500">42ms</td>
-                <td class="py-2.5 px-4 text-right text-sky-400 cursor-pointer hover:underline" onclick="showToast('Synced commit sha-7fa9b21 to main', 'info')">View Payload</td>
-              </tr>
-              <tr class="hover:bg-[#141822]/60">
-                <td class="py-2.5 px-4 text-slate-400">1 hour ago</td>
-                <td class="py-2.5 px-4 text-slate-300">WEBHOOK (push)</td>
-                <td class="py-2.5 px-4 text-emerald-400">SUCCESS</td>
-                <td class="py-2.5 px-4 text-white">3 commits</td>
-                <td class="py-2.5 px-4 text-slate-500">18ms</td>
-                <td class="py-2.5 px-4 text-right text-sky-400 cursor-pointer hover:underline" onclick="showToast('Synced push event on raviranjan-os', 'info')">View Payload</td>
+              <tr>
+                <td colspan="6" class="py-8 px-4 text-center text-slate-500">No synchronization records loaded yet. Run Sync GitHub to fetch live history.</td>
               </tr>
             </tbody>
           </table>
