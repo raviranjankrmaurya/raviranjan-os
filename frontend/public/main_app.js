@@ -2,8 +2,8 @@ function formatAiMarkdownToHtml(raw) {
   if (!raw) return '';
   return escapeHtml(raw)
     .replace(/\n/g, '<br>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
-    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-[10px]">&nearr;</span></a>');
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-fg">$1</strong>')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-xs">&nearr;</span></a>');
 }
 
 function getOrCreateBrowserFingerprint() {
@@ -249,9 +249,9 @@ function showToast(message, type = "info") {
   if (!container) return;
 
   const toast = document.createElement("div");
-  const borderCol = type === "success" ? "border-emerald-500/40 text-emerald-300" : "border-cyan-500/40 text-cyan-300";
-  toast.className = `p-3 rounded-lg bg-[#10121a] border ${borderCol} shadow-xl text-xs flex items-center space-x-2 animate-fade-in pointer-events-auto`;
-  toast.innerHTML = `<span class="w-2 h-2 rounded-full ${type === "success" ? "bg-emerald-400" : "bg-cyan-400"}"></span><span>${escapeHtml(message)}</span>`;
+  const borderCol = type === "success" ? "border-emerald-500/40 text-emerald-300" : "border-blue-500/40 text-blue-300";
+  toast.className = `p-3 rounded-lg bg-card border ${borderCol} shadow-xl text-xs flex items-center space-x-2 animate-fade-in pointer-events-auto`;
+  toast.innerHTML = `<span class="w-2 h-2 rounded-full ${type ==="success" ? "bg-emerald-400" : "bg-blue-400"}"></span><span>${escapeHtml(message)}</span>`;
   container.appendChild(toast);
 
   setTimeout(() => {
@@ -424,7 +424,7 @@ function fetchDynamicProjects() {
           title: p.title,
           version: p.version || "v1.0",
           status: p.status || "PUBLISHED",
-          statusClass: p.status === "PUBLISHED" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+          statusClass: p.status === "PUBLISHED" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-blue-500/10 text-blue-400 border-blue-500/20",
           progress: p.progress !== undefined ? p.progress : (p.progressPercentage || 85),
           category: cat,
           description: p.shortSummary || p.fullDescription || p.description || "",
@@ -450,10 +450,10 @@ function renderProjects(items) {
 
   if (!items || items.length === 0) {
     container.innerHTML = `
-      <div class="col-span-full p-8 rounded-xl bg-[#10121a] border border-[#1f2430] text-center space-y-2">
-        <i data-lucide="folder-search" class="w-8 h-8 text-slate-500 mx-auto"></i>
-        <p class="text-sm font-bold text-white font-mono">No Projects Published Yet</p>
-        <p class="text-xs text-slate-400">Add or publish projects in the Admin CMS to display them here from Neon DB.</p>
+      <div class="col-span-full p-8 rounded-xl bg-card border border-line text-center space-y-2">
+        <i data-lucide="folder-search" class="w-8 h-8 text-fg-3 mx-auto"></i>
+        <p class="text-sm font-bold text-fg">No Projects Published Yet</p>
+        <p class="text-xs text-fg-2">Add or publish projects in the Admin CMS to display them here from Neon DB.</p>
       </div>
     `;
     if (window.lucide) window.lucide.createIcons();
@@ -462,37 +462,37 @@ function renderProjects(items) {
 
   container.innerHTML = items.map(p => {
     const techBadges = (p.technologies || []).map(t =>
-      `<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#161924] text-slate-300 border border-[#232938]">${escapeHtml(t)}</span>`
+      `<span class="text-xs px-2 py-0.5 rounded bg-raised text-fg border border-line">${escapeHtml(t)}</span>`
     ).join("");
 
     const demoLink = (p.demo && p.demo !== "#")
-      ? `<a href="${escapeHtml(p.demo)}" target="_blank" rel="noopener noreferrer" class="hover:text-white flex items-center gap-1"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> Live Demo</a>`
-      : `<a href="#projects" onclick="openProjectDetail('${escapeHtml(p.slug)}'); return false;" class="hover:text-white flex items-center gap-1"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> Details</a>`;
+      ? `<a href="${escapeHtml(p.demo)}" target="_blank" rel="noopener noreferrer" class="hover:text-fg flex items-center gap-1"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> Live Demo</a>`
+      : `<a href="#projects" onclick="openProjectDetail('${escapeHtml(p.slug)}'); return false;" class="hover:text-fg flex items-center gap-1"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> Details</a>`;
 
     return `
       <div class="saas-card p-6 flex flex-col justify-between space-y-4" data-category="${escapeHtml(p.category)}">
         <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded ${p.statusClass}">${escapeHtml(p.status)}</span>
-            <span class="text-xs font-mono text-slate-400">Progress: <strong class="text-cyan-400">${p.progress}%</strong></span>
+            <span class="text-xs px-2 py-0.5 rounded ${p.statusClass}">${escapeHtml(p.status)}</span>
+            <span class="text-xs text-fg-2">Progress: <strong class="text-blue-400">${p.progress}%</strong></span>
           </div>
           <div>
-            <h3 class="text-lg font-bold text-white font-mono flex items-center justify-between">
+            <h3 class="text-lg font-bold text-fg flex items-center justify-between">
               <span>${escapeHtml(p.title)}</span>
-              <span class="text-[11px] font-normal text-slate-500">${escapeHtml(p.version)}</span>
+              <span class="text-xs font-normal text-fg-3">${escapeHtml(p.version)}</span>
             </h3>
-            <p class="text-xs text-slate-300 mt-1 font-sans leading-relaxed">
+            <p class="text-xs text-fg mt-1 font-sans leading-relaxed">
               ${escapeHtml(p.description)}
             </p>
           </div>
 
           <div class="space-y-1.5 pt-1">
-            <div class="flex justify-between text-[10px] font-mono text-slate-500">
+            <div class="flex justify-between text-xs text-fg-3">
               <span>${escapeHtml(p.milestoneSummary)}</span>
               <span>${p.progress}%</span>
             </div>
-            <div class="w-full bg-[#161924] rounded-full h-1.5 overflow-hidden">
-              <div class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-1.5 rounded-full" style="width: ${p.progress}%"></div>
+            <div class="w-full bg-raised rounded-full h-1.5 overflow-hidden">
+              <div class="bg-blue-600 h-1.5 rounded-full" style="width: ${p.progress}%"></div>
             </div>
           </div>
 
@@ -501,13 +501,13 @@ function renderProjects(items) {
           </div>
         </div>
 
-        <div class="pt-4 border-t border-[#1f2430] flex items-center justify-between text-xs font-mono">
-          <button onclick="openProjectDetail('${escapeHtml(p.slug)}')" class="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium">
+        <div class="pt-4 border-t border-line flex items-center justify-between text-xs">
+          <button onclick="openProjectDetail('${escapeHtml(p.slug)}')" class="text-blue-400 hover:text-blue-300 flex items-center gap-1 font-medium rounded-lg">
             <span>Read Case Study & ADRs</span>
             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </button>
-          <div class="flex items-center space-x-3 text-slate-400">
-            <a href="${escapeHtml(p.github)}" target="_blank" rel="noopener noreferrer" class="hover:text-white flex items-center gap-1">
+          <div class="flex items-center space-x-3 text-fg-2">
+            <a href="${escapeHtml(p.github)}" target="_blank" rel="noopener noreferrer" class="hover:text-fg flex items-center gap-1">
               <i data-lucide="github" class="w-3.5 h-3.5"></i> GitHub
             </a>
             ${demoLink}
@@ -541,7 +541,7 @@ function renderActivity(items) {
   if (!container) return;
 
   if (!items || items.length === 0) {
-    container.innerHTML = `<div class="p-6 text-center text-xs font-mono text-slate-500">No developer activity recorded yet in Neon DB.</div>`;
+    container.innerHTML = `<div class="p-6 text-center text-xs text-fg-3">No developer activity recorded yet in Neon DB.</div>`;
     return;
   }
 
@@ -551,22 +551,22 @@ function renderActivity(items) {
     if (!a.platformClass) {
       if (plat === "LEETCODE") pClass = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
       else if (plat === "GFG") pClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-      else if (plat === "PROJECT") pClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20";
+      else if (plat === "PROJECT") pClass = "bg-blue-500/10 text-blue-400 border border-blue-500/20";
     }
 
     const dateLabel = a.occurredAt ? new Date(a.occurredAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "";
     const metaText = a.meta || `${a.description || ""}${dateLabel ? " · " + dateLabel : ""}`;
     const linkHtml = a.externalUrl
-      ? `<a href="${escapeHtml(a.externalUrl)}" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline text-[10px] shrink-0">View ↗</a>`
+      ? `<a href="${escapeHtml(a.externalUrl)}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline text-xs shrink-0">View ↗</a>`
       : "";
 
     return `
-      <div class="flex items-start justify-between space-x-3 p-2.5 rounded bg-[#10121a] border border-[#1a1f2b] hover:border-slate-600 transition-colors">
+      <div class="flex items-start justify-between space-x-3 p-2.5 rounded bg-card border border-raised hover:border-line-strong transition-colors">
         <div class="flex items-start space-x-3">
-          <span class="px-1.5 py-0.5 rounded text-[10px] ${pClass}">${escapeHtml(plat)}</span>
+          <span class="px-1.5 py-0.5 rounded text-xs ${pClass}">${escapeHtml(plat)}</span>
           <div class="flex-1">
-            <div class="text-white font-medium">${escapeHtml(a.title)}</div>
-            <div class="text-slate-500 text-[10px] mt-0.5">${escapeHtml(metaText)}</div>
+            <div class="text-fg font-medium">${escapeHtml(a.title)}</div>
+            <div class="text-fg-3 text-xs mt-0.5">${escapeHtml(metaText)}</div>
           </div>
         </div>
         ${linkHtml}
@@ -674,11 +674,11 @@ function setHeatmapYear(year) {
   const btn2025 = document.getElementById("btn-year-2025");
   if (btn2026 && btn2025) {
     if (year === 2026) {
-      btn2026.className = "btn-year-active year-active px-2.5 py-1 rounded bg-[#1c202e] text-white transition-colors";
-      btn2025.className = "btn-year-inactive year-inactive px-2.5 py-1 rounded text-slate-400 hover:text-white transition-colors";
+      btn2026.className = "btn-year-active year-active px-2.5 py-1 rounded-lg bg-raised text-fg transition-colors";
+      btn2025.className = "btn-year-inactive year-inactive px-2.5 py-1 rounded-lg text-fg-2 hover:text-fg transition-colors";
     } else {
-      btn2025.className = "btn-year-active year-active px-2.5 py-1 rounded bg-[#1c202e] text-white transition-colors";
-      btn2026.className = "btn-year-inactive year-inactive px-2.5 py-1 rounded text-slate-400 hover:text-white transition-colors";
+      btn2025.className = "btn-year-active year-active px-2.5 py-1 rounded-lg bg-raised text-fg transition-colors";
+      btn2026.className = "btn-year-inactive year-inactive px-2.5 py-1 rounded-lg text-fg-2 hover:text-fg transition-colors";
     }
   }
   const targetDays = cachedHeatmapByYear[year] || cachedHeatmapData;
@@ -833,13 +833,13 @@ function handleCommandSearch(val) {
 // Project Category Filtering
 function filterProjects(cat) {
   document.querySelectorAll(".proj-filter").forEach(btn => {
-    btn.classList.remove("bg-cyan-500/10", "text-cyan-400", "border-cyan-500/30");
-    btn.classList.add("bg-[#10121a]", "text-slate-400");
+    btn.classList.remove("bg-blue-500/10", "text-blue-400", "border-blue-500/30");
+    btn.classList.add("bg-card", "text-fg-2");
   });
 
   if (event && event.target) {
-    event.target.classList.add("bg-cyan-500/10", "text-cyan-400", "border-cyan-500/30");
-    event.target.classList.remove("bg-[#10121a]", "text-slate-400");
+    event.target.classList.add("bg-blue-500/10", "text-blue-400", "border-blue-500/30");
+    event.target.classList.remove("bg-card", "text-fg-2");
   }
 
   const filtered = cat === "all" ? projectsList : projectsList.filter(p => p.category === cat);
@@ -959,62 +959,62 @@ function openProjectDetail(slug) {
 
   const milestonesHtml = (p.milestones || []).map(m => {
     const icon = m.status === "done" ? "✓" : (m.status === "in-progress" ? "◐" : "○");
-    const color = m.status === "done" ? "text-emerald-400" : (m.status === "in-progress" ? "text-cyan-400" : "text-slate-500");
-    return `<div class="flex items-center space-x-2 font-mono text-xs">
+    const color = m.status === "done" ? "text-emerald-400" : (m.status === "in-progress" ? "text-blue-400" : "text-fg-3");
+    return `<div class="flex items-center space-x-2 text-xs">
       <span class="${color} font-bold w-4">${icon}</span>
-      <span class="${m.status === "done" ? "text-slate-200" : "text-slate-400"}">${escapeHtml(m.name)}</span>
+      <span class="${m.status ==="done" ? "text-fg" : "text-fg-2"}">${escapeHtml(m.name)}</span>
     </div>`;
   }).join("");
 
   const techBadges = (p.technologies || []).map(t =>
-    `<span class="px-2 py-0.5 rounded bg-[#161924] border border-[#232938] text-[11px] font-mono text-cyan-300">${escapeHtml(t)}</span>`
+    `<span class="px-2 py-0.5 rounded bg-raised border border-line text-xs text-blue-300">${escapeHtml(t)}</span>`
   ).join("");
 
   body.innerHTML = `
     <div class="space-y-4 text-xs font-sans">
       <div>
-        <h4 class="font-mono text-cyan-400 font-bold uppercase text-[11px] mb-1">1. Problem Statement & Overview</h4>
-        <p class="text-slate-300 leading-relaxed">${escapeHtml(p.problem)}</p>
+        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">1. Problem Statement & Overview</h4>
+        <p class="text-fg leading-relaxed">${escapeHtml(p.problem)}</p>
       </div>
 
       <div>
-        <h4 class="font-mono text-cyan-400 font-bold uppercase text-[11px] mb-1">2. Engineered Solution</h4>
-        <p class="text-slate-300 leading-relaxed">${escapeHtml(p.solution)}</p>
+        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">2. Engineered Solution</h4>
+        <p class="text-fg leading-relaxed">${escapeHtml(p.solution)}</p>
       </div>
 
       <div>
-        <h4 class="font-mono text-cyan-400 font-bold uppercase text-[11px] mb-1">3. System Architecture</h4>
-        <p class="text-slate-300 leading-relaxed font-mono bg-[#161924] p-3 rounded border border-[#232938]">${escapeHtml(p.architecture)}</p>
+        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">3. System Architecture</h4>
+        <p class="text-fg leading-relaxed bg-raised p-3 rounded border border-line">${escapeHtml(p.architecture)}</p>
       </div>
 
       <div>
-        <h4 class="font-mono text-cyan-400 font-bold uppercase text-[11px] mb-2">4. Milestone Progress Matrix</h4>
-        <div class="space-y-1.5 bg-[#161924] p-3 rounded border border-[#232938]">
+        <h4 class="text-blue-400 font-bold uppercase text-xs mb-2">4. Milestone Progress Matrix</h4>
+        <div class="space-y-1.5 bg-raised p-3 rounded-xl border border-line">
           ${milestonesHtml}
         </div>
       </div>
 
       <div>
-        <h4 class="font-mono text-cyan-400 font-bold uppercase text-[11px] mb-1">5. Architectural Decision Record (ADR)</h4>
-        <p class="text-slate-300 bg-[#161924] p-3 rounded border border-[#232938] leading-relaxed font-mono">${escapeHtml(p.adr)}</p>
+        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">5. Architectural Decision Record (ADR)</h4>
+        <p class="text-fg bg-raised p-3 rounded border border-line leading-relaxed">${escapeHtml(p.adr)}</p>
       </div>
 
       <div>
-        <h4 class="font-mono text-cyan-400 font-bold uppercase text-[11px] mb-1">6. Key Engineering Lessons</h4>
-        <p class="text-slate-300 leading-relaxed">${escapeHtml(p.learned)}</p>
+        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">6. Key Engineering Lessons</h4>
+        <p class="text-fg leading-relaxed">${escapeHtml(p.learned)}</p>
       </div>
 
       <div>
-        <h4 class="font-mono text-cyan-400 font-bold uppercase text-[11px] mb-1">7. Technology Stack</h4>
+        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">7. Technology Stack</h4>
         <div class="flex flex-wrap gap-1.5 pt-1">${techBadges}</div>
       </div>
 
-      <div class="pt-4 border-t border-[#1f2430] flex items-center justify-between text-xs font-mono">
-        <a href="${escapeHtml(p.github)}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-white flex items-center gap-1.5">
+      <div class="pt-4 border-t border-line flex items-center justify-between text-xs">
+        <a href="${escapeHtml(p.github)}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded bg-raised hover:bg-raised border border-line text-fg flex items-center gap-1.5">
           <i data-lucide="github" class="w-3.5 h-3.5"></i>
           <span>View Source on GitHub</span>
         </a>
-        <button onclick="closeProjectDetail()" class="text-slate-400 hover:text-white">Close Case Study</button>
+        <button onclick="closeProjectDetail()" class="text-fg-2 hover:text-fg rounded-lg">Close Case Study</button>
       </div>
     </div>
   `;
@@ -1121,7 +1121,7 @@ async function fetchDynamicDsaNotes() {
 
         if (tabsBar) {
           tabsBar.innerHTML = dynamicDsaNotesList.map((n, i) => `
-            <button onclick="showDsaNote('${escapeHtml(n.key)}')" id="dsa-tab-${escapeHtml(n.key)}" class="px-2.5 py-1 rounded ${i === 0 ? 'bg-[#161924] text-cyan-400 border border-cyan-500/30' : 'bg-[#10121a] text-slate-400 hover:text-white'}">
+            <button onclick="showDsaNote('${escapeHtml(n.key)}')" id="dsa-tab-${escapeHtml(n.key)}" class="px-2.5 py-1 rounded-lg ${i === 0 ? 'bg-raised text-blue-400 border border-blue-500/30' : 'bg-card text-fg-2 hover:text-fg'}">
               ${escapeHtml(n.tabLabel)}
             </button>
           `).join("");
@@ -1135,7 +1135,7 @@ async function fetchDynamicDsaNotes() {
   }
 
   if (container) {
-    container.innerHTML = `<div class="p-6 text-center text-xs font-mono text-slate-500">No DSA problem notes saved in Neon DB yet. Add notes in Admin CMS → DSA Notes Repo.</div>`;
+    container.innerHTML = `<div class="p-6 text-center text-xs text-fg-3">No DSA problem notes saved in Neon DB yet. Add notes in Admin CMS → DSA Notes Repo.</div>`;
   }
 }
 
@@ -1152,9 +1152,9 @@ function showDsaNote(key) {
     const tab = document.getElementById(`dsa-tab-${k}`);
     if (tab) {
       if (String(k) === String(key)) {
-        tab.className = 'px-2.5 py-1 rounded bg-[#161924] text-cyan-400 border border-cyan-500/30';
+        tab.className = 'px-2.5 py-1 rounded-lg bg-raised text-blue-400 border border-blue-500/30';
       } else {
-        tab.className = 'px-2.5 py-1 rounded bg-[#10121a] text-slate-400 hover:text-white';
+        tab.className = 'px-2.5 py-1 rounded-lg bg-card text-fg-2 hover:text-fg';
       }
     }
   });
@@ -1166,35 +1166,35 @@ function showDsaNote(key) {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="space-y-3 font-sans">
         <div>
-          <span class="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Problem Statement</span>
-          <h4 class="text-sm font-bold font-mono text-white mt-0.5">${escapeHtml(note.problem)}</h4>
+          <span class="text-xs text-fg-3 uppercase tracking-wider">Problem Statement</span>
+          <h4 class="text-sm font-bold text-fg mt-0.5">${escapeHtml(note.problem)}</h4>
         </div>
         <div>
-          <span class="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Algorithmic Topic / Approach</span>
-          <p class="text-xs text-slate-300 mt-0.5">${escapeHtml(note.approach)}</p>
+          <span class="text-xs text-fg-3 uppercase tracking-wider">Algorithmic Topic / Approach</span>
+          <p class="text-xs text-fg mt-0.5">${escapeHtml(note.approach)}</p>
         </div>
-        <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-          <div class="p-2 rounded bg-[#161924] border border-[#232938]">
-            <span class="text-slate-500 text-[10px]">Time Complexity</span>
-            <div class="text-cyan-400 font-bold mt-0.5">${escapeHtml(note.timeComp)}</div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="p-2 rounded bg-raised border border-line">
+            <span class="text-fg-3 text-xs">Time Complexity</span>
+            <div class="text-blue-400 font-bold mt-0.5">${escapeHtml(note.timeComp)}</div>
           </div>
-          <div class="p-2 rounded bg-[#161924] border border-[#232938]">
-            <span class="text-slate-500 text-[10px]">Space Complexity</span>
+          <div class="p-2 rounded bg-raised border border-line">
+            <span class="text-fg-3 text-xs">Space Complexity</span>
             <div class="text-emerald-400 font-bold mt-0.5">${escapeHtml(note.spaceComp)}</div>
           </div>
         </div>
         <div>
-          <span class="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Key Engineering Takeaway</span>
-          <p class="text-xs text-slate-300 leading-relaxed mt-0.5">${escapeHtml(note.learned)}</p>
+          <span class="text-xs text-fg-3 uppercase tracking-wider">Key Engineering Takeaway</span>
+          <p class="text-xs text-fg leading-relaxed mt-0.5">${escapeHtml(note.learned)}</p>
         </div>
       </div>
 
       <div>
-        <div class="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-1">
+        <div class="flex items-center justify-between text-xs text-fg-3 mb-1">
           <span>Solution Implementation</span>
           <span>Synced from Neon DB</span>
         </div>
-        <pre class="p-3 rounded-lg bg-[#090a0f] border border-[#232938] text-[11px] font-mono text-slate-300 overflow-x-auto leading-relaxed"><code>${escapeHtml(note.code)}</code></pre>
+        <pre class="p-3 rounded-lg bg-canvas border border-line text-xs font-mono text-fg overflow-x-auto leading-relaxed"><code>${escapeHtml(note.code)}</code></pre>
       </div>
     </div>
   `;
@@ -1237,9 +1237,9 @@ function setPublicAiLanguage(lang) {
     const btn = document.getElementById("ai-lang-" + l);
     if (btn) {
       if (l === lang) {
-        btn.className = "px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px]";
+        btn.className = "px-2 py-0.5 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/40 text-xs";
       } else {
-        btn.className = "px-2 py-0.5 rounded bg-[#161924] text-slate-400 border border-[#232938] text-[10px] hover:text-white";
+        btn.className = "px-2 py-0.5 rounded-lg bg-raised text-fg-2 border border-line text-xs hover:text-fg";
       }
     }
   });
@@ -1251,13 +1251,13 @@ async function sendAiMessage(query) {
   if (!chatContainer) return;
 
   const userBubble = document.createElement('div');
-  userBubble.className = 'p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-200 text-xs font-mono ml-6';
+  userBubble.className = 'p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-200 text-xs  ml-6';
   userBubble.innerText = query;
   chatContainer.appendChild(userBubble);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
   const loadingBubble = document.createElement('div');
-  loadingBubble.className = 'p-3 rounded-lg bg-[#161924] border border-[#232938] text-slate-400 text-xs font-mono mr-6 flex items-center space-x-2';
+  loadingBubble.className = 'p-3 rounded-lg bg-raised border border-line text-fg-2 text-xs  mr-6 flex items-center space-x-2';
   loadingBubble.innerHTML = '<span class="inline-block animate-spin mr-1">⟳</span> Querying Neon DB & RAG Engine...';
   chatContainer.appendChild(loadingBubble);
   chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -1297,7 +1297,7 @@ async function sendAiMessage(query) {
 
     loadingBubble.remove();
     const aiBubble = document.createElement('div');
-    aiBubble.className = 'p-3 rounded-lg bg-[#161924] border border-[#232938] text-slate-300 text-xs font-sans leading-relaxed mr-6 space-y-2';
+    aiBubble.className = 'p-3 rounded-lg bg-raised border border-line text-fg text-xs font-sans leading-relaxed mr-6 space-y-2';
 
     if (res.ok) {
       const json = await res.json();
@@ -1308,12 +1308,12 @@ async function sendAiMessage(query) {
       }
       const rawAns = d?.answer || evaluatePortfolioRag(query);
       const formattedAns = escapeHtml(rawAns)
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-[10px]">&nearr;</span></a>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-fg">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-xs">&nearr;</span></a>')
         .replace(/\n/g, '<br>');
       aiBubble.innerHTML = `
-        <div class="flex items-center justify-between text-[10px] font-mono text-cyan-400 border-b border-[#232938] pb-1 mb-1">
+        <div class="flex items-center justify-between text-xs text-blue-400 border-b border-line pb-1 mb-1">
           <span>🤖 Ask AI · Grounded on Neon DB</span>
-          <span class="text-slate-500">${d?.latencyMs || 45}ms</span>
+          <span class="text-fg-3">${d?.latencyMs || 45}ms</span>
         </div>
         <div>${formattedAns}</div>
       `;
@@ -1327,7 +1327,7 @@ async function sendAiMessage(query) {
   } catch (err) {
     loadingBubble.remove();
     const aiBubble = document.createElement('div');
-    aiBubble.className = 'p-3 rounded-lg bg-[#161924] border border-[#232938] text-slate-300 text-xs font-sans leading-relaxed mr-6 space-y-2';
+    aiBubble.className = 'p-3 rounded-lg bg-raised border border-line text-fg text-xs font-sans leading-relaxed mr-6 space-y-2';
     aiBubble.innerHTML = evaluatePortfolioRag(query);
     chatContainer.appendChild(aiBubble);
     chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -1340,18 +1340,18 @@ function evaluatePortfolioRag(query) {
   const q = query.toLowerCase();
   if (q.includes('admin') || q.includes('cms') || q.includes('login') || q.includes('control panel') || q.includes('dashboard') || q.includes('auth') || q.includes('passphrase')) {
     return `<strong>🔐 Administrative Operating System Gateway</strong>
-    <p class="mt-1 text-slate-300">
+    <p class="mt-1 text-fg">
       Raviranjan.OS includes a private headless CMS for managing live projects, skills, research, and integration sync adapters.
     </p>
-    <div class="mt-3 p-3 rounded-lg bg-[#10121a] border border-cyan-500/30 space-y-2">
-      <div class="text-[11px] font-mono text-cyan-400 font-semibold uppercase tracking-wider">ADMIN ACCESS UNLOCK</div>
-      <p class="text-xs text-slate-400">Click the button below to open the private passphrase modal and authenticate, or go directly to <code>/admin</code>.</p>
+    <div class="mt-3 p-3 rounded-xl bg-card border border-blue-500/30 space-y-2">
+      <div class="text-xs text-blue-400 font-semibold uppercase tracking-wider">ADMIN ACCESS UNLOCK</div>
+      <p class="text-xs text-fg-2">Click the button below to open the private passphrase modal and authenticate, or go directly to <code>/admin</code>.</p>
       <div class="flex flex-wrap items-center gap-2 pt-1">
-        <button onclick="openAdminAuthModal(); togglePublicAiDrawer();" class="px-3 py-1.5 rounded bg-cyan-500 hover:bg-cyan-600 text-black font-semibold text-xs font-mono transition-colors flex items-center gap-1.5 shadow-sm">
+        <button onclick="openAdminAuthModal(); togglePublicAiDrawer();" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
           <i data-lucide="key" class="w-3.5 h-3.5"></i>
           <span>Unlock Admin Terminal</span>
         </button>
-        <a href="/admin" class="px-3 py-1.5 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-xs font-mono text-slate-300 transition-colors">
+        <a href="/admin" class="px-3 py-1.5 rounded bg-raised hover:bg-raised border border-line text-xs text-fg transition-colors">
           Open /admin
         </a>
       </div>
@@ -1366,7 +1366,7 @@ function evaluatePortfolioRag(query) {
       <li><strong>Key Feature:</strong> Calculates incident priority scores and performs sub-10ms geospatial point-in-polygon queries for nearest emergency personnel dispatch.</li>
       <li><strong>Progress:</strong> Currently at 85% completion.</li>
     </ul>
-    <div class="mt-2 text-[10px] font-mono text-cyan-400">Source: <a href="#projects" class="underline">Portfolio Projects / RakshaGrid</a></div>`;
+    <div class="mt-2 text-xs text-blue-400">Source: <a href="#projects" class="underline">Portfolio Projects / RakshaGrid</a></div>`;
   }
 
   if (q.includes('project') || q.includes('built') || q.includes('work')) {
@@ -1378,7 +1378,7 @@ function evaluatePortfolioRag(query) {
       <li><strong>AlgoVault:</strong> Interactive algorithm visualization playground (React, TypeScript, Canvas API).</li>
       <li><strong>Raviranjan.OS:</strong> His full personal developer operating system with Spring Boot and 24 CMS modules.</li>
     </ul>
-    <div class="mt-2 text-[10px] font-mono text-cyan-400">Source: <a href="#projects" class="underline">Projects Section</a></div>`;
+    <div class="mt-2 text-xs text-blue-400">Source: <a href="#projects" class="underline">Projects Section</a></div>`;
   }
 
   if (q.includes('technolog') || q.includes('stack') || q.includes('know') || q.includes('skill')) {
@@ -1398,7 +1398,7 @@ function evaluatePortfolioRag(query) {
       <li><strong>Spring Boot:</strong> Investigated Java 21 carrier thread unpinning under Virtual Thread executors to resolve test harness timeouts.</li>
       <li><strong>FastAPI:</strong> Submitted reproduction tests and guidance for proxy buffering headers with StreamingResponse in Server-Sent Events.</li>
     </ul>
-    <div class="mt-2 text-[10px] font-mono text-cyan-400">Source: <a href="#contributions" class="underline">Contribution Stories</a></div>`;
+    <div class="mt-2 text-xs text-blue-400">Source: <a href="#contributions" class="underline">Contribution Stories</a></div>`;
   }
 
   if (q.includes('postgres') || q.includes('database') || q.includes('sql')) {
@@ -1637,73 +1637,73 @@ async function renderInteractiveResumeSheet() {
     }
 
     const skillsHtml = skillCats.length > 0
-      ? skillCats.map(c => `<div class="text-xs"><strong class="text-white font-mono">${escapeHtml(c.name)}:</strong> <span class="text-slate-300">${(c.skills || []).map(s => escapeHtml(s.name)).join(', ')}</span></div>`).join('')
-      : `<div class="text-xs text-slate-300"><strong class="text-white font-mono">Core Stack:</strong> Java 21, Spring Boot, Python, FastAPI, React, TypeScript, PostgreSQL, Redis, Docker, Git, RAG/LLMs</div>`;
+      ? skillCats.map(c => `<div class="text-xs"><strong class="text-fg">${escapeHtml(c.name)}:</strong> <span class="text-fg">${(c.skills || []).map(s => escapeHtml(s.name)).join(', ')}</span></div>`).join('')
+      : `<div class="text-xs text-fg"><strong class="text-fg">Core Stack:</strong> Java 21, Spring Boot, Python, FastAPI, React, TypeScript, PostgreSQL, Redis, Docker, Git, RAG/LLMs</div>`;
 
     const eduHtml = edus.length > 0
       ? edus.map(ed => `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1f2430]/60 pb-2">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-line/60 pb-2">
           <div>
-            <div class="font-bold text-white text-xs">${escapeHtml(ed.degree)}</div>
-            <div class="text-[11px] text-cyan-400">${escapeHtml(ed.institution)}</div>
-            ${ed.description ? `<p class="text-[11px] text-slate-400 mt-0.5">${escapeHtml(ed.description)}</p>` : ''}
+            <div class="font-bold text-fg text-xs">${escapeHtml(ed.degree)}</div>
+            <div class="text-xs text-blue-400">${escapeHtml(ed.institution)}</div>
+            ${ed.description ? `<p class="text-xs text-fg-2 mt-0.5">${escapeHtml(ed.description)}</p>` : ''}
           </div>
-          <div class="text-[11px] font-mono text-slate-400">${escapeHtml(ed.startDate || '2023')} — ${escapeHtml(ed.endDate || 'Present')} · ${escapeHtml(ed.grade || 'Enrolled')}</div>
+          <div class="text-xs text-fg-2">${escapeHtml(ed.startDate || '2023')} — ${escapeHtml(ed.endDate || 'Present')} · ${escapeHtml(ed.grade || 'Enrolled')}</div>
         </div>
       `).join('')
-      : `<div class="text-xs text-slate-300"><strong>Bachelor of Computer Applications (BCA)</strong> · Enrolled</div>`;
+      : `<div class="text-xs text-fg"><strong>Bachelor of Computer Applications (BCA)</strong> · Enrolled</div>`;
 
     const expHtml = exps.length > 0
       ? exps.map(ex => {
           const isIntern = String(ex.employmentType || '').toUpperCase().includes('INTERN') || String(ex.role || '').toLowerCase().includes('intern');
           const statusLabel = isIntern ? (ex.current ? 'Pursuing Internship' : 'Completed Internship') : (ex.current ? 'Current' : 'Completed');
           return `
-        <div class="space-y-1 border-b border-[#1f2430]/60 pb-2.5">
+        <div class="space-y-1 border-b border-line/60 pb-2.5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between">
-            <div class="font-bold text-white text-xs">${escapeHtml(ex.role)} <span class="text-cyan-400 font-normal">@ ${escapeHtml(ex.company)}</span> <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 ml-1">${statusLabel}</span></div>
-            <div class="text-[11px] font-mono text-slate-400">${escapeHtml(ex.startDate || '')} — ${escapeHtml(ex.endDate || 'Present')}</div>
+            <div class="font-bold text-fg text-xs">${escapeHtml(ex.role)} <span class="text-blue-400 font-normal">@ ${escapeHtml(ex.company)}</span> <span class="text-xs px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-300 ml-1">${statusLabel}</span></div>
+            <div class="text-xs text-fg-2">${escapeHtml(ex.startDate || '')} — ${escapeHtml(ex.endDate || 'Present')}</div>
           </div>
-          <p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(ex.description || '')}</p>
-          <div class="flex flex-wrap gap-3 text-[10px] font-mono pt-0.5">
-            ${ex.offerLetterUrl ? `<a href="${escapeHtml(ex.offerLetterUrl)}" target="_blank" class="text-sky-400 hover:underline">Offer Letter ↗</a>` : ''}
+          <p class="text-xs text-fg leading-relaxed">${escapeHtml(ex.description || '')}</p>
+          <div class="flex flex-wrap gap-3 text-xs pt-0.5">
+            ${ex.offerLetterUrl ? `<a href="${escapeHtml(ex.offerLetterUrl)}" target="_blank" class="text-blue-400 hover:underline">Offer Letter ↗</a>` : ''}
             ${ex.certificateUrl ? `<a href="${escapeHtml(ex.certificateUrl)}" target="_blank" class="text-emerald-400 hover:underline">Completion Certificate ↗</a>` : ''}
             ${ex.achievements && ex.achievements.startsWith('http') ? `<a href="${escapeHtml(ex.achievements)}" target="_blank" class="text-amber-400 hover:underline">Project Report ↗</a>` : ''}
           </div>
         </div>
       `;
         }).join('')
-      : `<div class="text-xs text-slate-400">Open-source contributor & full-stack systems builder.</div>`;
+      : `<div class="text-xs text-fg-2">Open-source contributor & full-stack systems builder.</div>`;
 
     const projHtml = projs.slice(0, 5).map(p => {
       const tList = Array.isArray(p.technologies) ? p.technologies.join(', ') : (p.technologies || 'Java, Spring Boot, PostgreSQL');
       return `
-        <div class="space-y-1 border-b border-[#1f2430]/60 pb-2.5">
+        <div class="space-y-1 border-b border-line/60 pb-2.5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between">
-            <div class="font-bold text-white text-xs">${escapeHtml(p.title)} <span class="text-[10px] font-mono text-cyan-400 ml-1">[${escapeHtml(tList)}]</span></div>
-            ${p.githubRepoUrl ? `<a href="${escapeHtml(p.githubRepoUrl)}" target="_blank" class="text-[10px] font-mono text-sky-400 hover:underline">GitHub ↗</a>` : ''}
+            <div class="font-bold text-fg text-xs">${escapeHtml(p.title)} <span class="text-xs text-blue-400 ml-1">[${escapeHtml(tList)}]</span></div>
+            ${p.githubRepoUrl ? `<a href="${escapeHtml(p.githubRepoUrl)}" target="_blank" class="text-xs text-blue-400 hover:underline">GitHub ↗</a>` : ''}
           </div>
-          <p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(p.shortSummary || p.fullDescription || '')}</p>
+          <p class="text-xs text-fg leading-relaxed">${escapeHtml(p.shortSummary || p.fullDescription || '')}</p>
         </div>
       `;
     }).join('');
 
     const credsHtml = [
-      ...achs.map(a => `<li class="text-xs text-slate-300"><strong class="text-white">${escapeHtml(a.title)}</strong> — ${escapeHtml(a.organization || '')} ${a.description ? '(' + escapeHtml(a.description) + ')' : ''}</li>`),
-      ...certs.map(c => `<li class="text-xs text-slate-300"><strong class="text-white">${escapeHtml(c.title)}</strong> — Certified by ${escapeHtml(c.issuer || '')}</li>`)
+      ...achs.map(a => `<li class="text-xs text-fg"><strong class="text-fg">${escapeHtml(a.title)}</strong> — ${escapeHtml(a.organization || '')} ${a.description ? '(' + escapeHtml(a.description) + ')' : ''}</li>`),
+      ...certs.map(c => `<li class="text-xs text-fg"><strong class="text-fg">${escapeHtml(c.title)}</strong> — Certified by ${escapeHtml(c.issuer || '')}</li>`)
     ].join('');
 
     sheet.innerHTML = `
-      <div id="resume-print-area" class="max-w-3xl mx-auto bg-[#10131d] border border-[#232938] rounded-xl p-6 sm:p-8 space-y-5 shadow-xl">
+      <div id="resume-print-area" class="max-w-3xl mx-auto bg-subtle border border-line rounded-xl p-6 sm:p-8 space-y-5 shadow-xl">
         <!-- Resume Header -->
-        <div class="border-b border-[#232938] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="border-b border-line pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 class="text-2xl font-extrabold text-white tracking-tight font-mono">${escapeHtml(fullName)}</h1>
-            <p class="text-xs font-mono text-cyan-400 mt-0.5">${escapeHtml(headline)}</p>
+            <h1 class="text-2xl font-bold text-fg tracking-tight">${escapeHtml(fullName)}</h1>
+            <p class="text-xs text-blue-400 mt-0.5">${escapeHtml(headline)}</p>
           </div>
-          <div class="text-[11px] font-mono text-slate-300 space-y-0.5 sm:text-right">
+          <div class="text-xs text-fg space-y-0.5 sm:text-right">
             <div>📧 ${escapeHtml(email)} · 📞 ${escapeHtml(phone)}</div>
             <div>📍 ${escapeHtml(location)}</div>
-            <div class="flex sm:justify-end gap-2 pt-0.5 text-sky-400">
+            <div class="flex sm:justify-end gap-2 pt-0.5 text-blue-400">
               <a href="${escapeHtml(githubLink)}" target="_blank" class="hover:underline">GitHub</a> ·
               <a href="${escapeHtml(linkedinLink)}" target="_blank" class="hover:underline">LinkedIn</a> ·
               <a href="${escapeHtml(leetcodeLink)}" target="_blank" class="hover:underline">LeetCode</a>
@@ -1713,38 +1713,38 @@ async function renderInteractiveResumeSheet() {
 
         <!-- Executive Summary -->
         <div class="space-y-1.5">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Executive Summary</h3>
-          <p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(summary)}</p>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Executive Summary</h3>
+          <p class="text-xs text-fg leading-relaxed">${escapeHtml(summary)}</p>
         </div>
 
         <!-- Technical Skills -->
         <div class="space-y-1.5">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Technical Skills</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Technical Skills</h3>
           <div class="space-y-1">${skillsHtml}</div>
         </div>
 
         <!-- Experience -->
         <div class="space-y-2">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Work Experience & Engineering Roles</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Work Experience & Engineering Roles</h3>
           <div class="space-y-2">${expHtml}</div>
         </div>
 
         <!-- Key Projects -->
         <div class="space-y-2">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Featured Production Projects</h3>
-          <div class="space-y-2">${projHtml || '<div class="text-xs text-slate-400">Projects synced from Neon DB.</div>'}</div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Featured Production Projects</h3>
+          <div class="space-y-2">${projHtml || '<div class="text-xs text-fg-2">Projects synced from Neon DB.</div>'}</div>
         </div>
 
         <!-- Education -->
         <div class="space-y-2">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Education</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Education</h3>
           <div class="space-y-2">${eduHtml}</div>
         </div>
 
         <!-- Achievements & Certifications -->
         ${credsHtml ? `
         <div class="space-y-1.5">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Achievements & Certifications</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Achievements & Certifications</h3>
           <ul class="list-disc pl-4 space-y-1">${credsHtml}</ul>
         </div>
         ` : ''}
@@ -1776,13 +1776,13 @@ function downloadResumePdf() {
     <script src="https://cdn.tailwindcss.com"><\/script>
     <style>
       @media print {
-        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #ffffff !important; color: #0f172a !important; }
-        #resume-print-area { border: none !important; box-shadow: none !important; background: #ffffff !important; color: #0f172a !important; }
-        #resume-print-area * { color: #0f172a !important; border-color: #cbd5e1 !important; }
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #ffffff !important; color: #18181b !important; }
+        #resume-print-area { border: none !important; box-shadow: none !important; background: #ffffff !important; color: #18181b !important; }
+        #resume-print-area * { color: #18181b !important; border-color: #d4d4d8 !important; }
       }
     </style>
   </head>
-  <body class="bg-white text-slate-900 p-6">
+  <body class="bg-card text-zinc-900 p-6">
     ${printArea.outerHTML}
     <script>
       setTimeout(() => { window.print(); }, 450);
@@ -2099,8 +2099,8 @@ function fetchDynamicSkills() {
         if (allSkills.length > 0) {
           const markup = allSkills.map(s => {
             const isFeatured = s.featured;
-            const borderCls = isFeatured ? 'text-cyan-300 border-cyan-500/20' : 'text-slate-200 border-[#232938]';
-            return `<span class="text-[11px] font-mono px-2 py-0.5 rounded bg-[#161924] ${borderCls} border" title="${escapeHtml(s.description || s.name)}">${escapeHtml(s.name)}</span>`;
+            const borderCls = isFeatured ? 'text-blue-300 border-blue-500/20' : 'text-fg border-line';
+            return `<span class="text-xs px-2 py-0.5 rounded bg-raised ${borderCls} border" title="${escapeHtml(s.description || s.name)}">${escapeHtml(s.name)}</span>`;
           }).join('');
           if (container) container.innerHTML = markup;
           if (recruiterContainer) recruiterContainer.innerHTML = markup;
@@ -2119,7 +2119,7 @@ function fetchDynamicSkills() {
 function initTheme() {
   const savedAccent = localStorage.getItem("raviranjan_accent_color");
   if (savedAccent) applyAccentThemeColor(savedAccent);
-  const saved = localStorage.getItem('theme') || 'dark';
+  const saved = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
   if (saved === 'light') {
     document.documentElement.classList.remove('dark');
     document.documentElement.classList.add('light');
@@ -2204,25 +2204,25 @@ function applyAccentThemeColor(hex) {
     document.head.appendChild(styleEl);
   }
   styleEl.innerHTML = `
-    html body .bg-cyan-500, html body .bg-sky-500, html body .accent-bg-btn,
-    html.light body .bg-cyan-500, html.light body .bg-sky-500, html.light body .accent-bg-btn {
+    html body .bg-blue-500, html body .bg-blue-500, html body .accent-bg-btn,
+    html.light body .bg-blue-500, html.light body .bg-blue-500, html.light body .accent-bg-btn {
       background-color: ${hex} !important;
       color: #ffffff !important;
     }
-    html body .from-cyan-500, html.light body .from-cyan-500 {
+    html body .from-blue-500, html.light body .from-blue-500 {
       --tw-gradient-from: ${hex} !important;
       background-image: linear-gradient(to right, ${hex}, #10b981) !important;
     }
-    html body .text-cyan-400, html body .text-cyan-300, html body .text-sky-400,
-    html.light body .text-cyan-400, html.light body .text-cyan-300, html.light body .text-sky-400 {
+    html body .text-blue-400, html body .text-blue-300, html body .text-blue-400,
+    html.light body .text-blue-400, html.light body .text-blue-300, html.light body .text-blue-400 {
       color: ${hex} !important;
     }
-    html body .border-cyan-500\\/20, html body .border-cyan-500\\/30, html body .border-cyan-500\\/40, html body .border-sky-500\\/30,
-    html.light body .border-cyan-500\\/20, html.light body .border-cyan-500\\/30, html.light body .border-cyan-500\\/40 {
+    html body .border-blue-500\\/20, html body .border-blue-500\\/30, html body .border-blue-500\\/40, html body .border-blue-500\\/30,
+    html.light body .border-blue-500\\/20, html.light body .border-blue-500\\/30, html.light body .border-blue-500\\/40 {
       border-color: ${hex}66 !important;
     }
-    html body .bg-cyan-500\\/10, html body .bg-cyan-500\\/20, html body .bg-sky-500\\/10,
-    html.light body .bg-cyan-500\\/10, html.light body .bg-cyan-500\\/20, html.light body .bg-sky-500\\/10 {
+    html body .bg-blue-500\\/10, html body .bg-blue-500\\/20, html body .bg-blue-500\\/10,
+    html.light body .bg-blue-500\\/10, html.light body .bg-blue-500\\/20, html.light body .bg-blue-500\\/10 {
       background-color: ${hex}1f !important;
       color: ${hex} !important;
     }
@@ -2294,7 +2294,7 @@ async function loadPublicBrandingSettings() {
         const promptContainer = document.getElementById('hero-ai-prompts-list');
         if (promptContainer && Array.isArray(prompts) && prompts.length > 0) {
           promptContainer.innerHTML = prompts.map(q =>
-            `<button onclick="openAiWithQuery('${escapeHtml(q).replace(/'/g, "\'")}')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-[#131620] border border-[#202533] text-slate-300 hover:border-cyan-500/40 hover:text-white transition-colors">"${escapeHtml(q)}"</button>`
+            `<button onclick="openAiWithQuery('${escapeHtml(q).replace(/'/g, "\'")}')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-card border border-line text-fg hover:border-blue-500/40 hover:text-fg transition-colors">"${escapeHtml(q)}"</button>`
           ).join('');
         }
       } catch (e) {}
@@ -2351,36 +2351,36 @@ async function fetchDynamicCareerAndCredentials() {
 
       if (internEl) {
         internEl.innerHTML = internships.length === 0
-          ? `<div class="col-span-2 p-4 text-slate-500 text-center">No internships recorded in Neon DB yet.</div>`
+          ? `<div class="col-span-2 p-4 text-fg-3 text-center">No internships recorded in Neon DB yet.</div>`
           : internships.map(e => {
               const isPursuing = Boolean(e.current) || !e.endDate;
               const techBadges = (e.technologies || '')
                 .split(',')
                 .map(t => t.trim())
                 .filter(Boolean)
-                .map(t => `<span class="tech-stack-pill px-2 py-0.5 rounded bg-[#151925] border border-[#232938] text-[10px] text-cyan-300 font-medium">${escapeHtml(t)}</span>`)
+                .map(t => `<span class="tech-stack-pill px-2 py-0.5 rounded bg-raised border border-line text-xs text-blue-300 font-medium">${escapeHtml(t)}</span>`)
                 .join('');
               const reportUrl = e.achievements && String(e.achievements).startsWith('http') ? e.achievements : '';
               return `
-                <div class="p-4 rounded-xl bg-[#10121a] border ${isPursuing ? 'border-amber-500/30' : 'border-emerald-500/30'} space-y-2.5 flex flex-col justify-between">
+                <div class="p-4 rounded-xl bg-card border ${isPursuing ? 'border-amber-500/30' : 'border-emerald-500/30'} space-y-2.5 flex flex-col justify-between">
                   <div class="space-y-2">
                     <div class="flex items-start justify-between gap-2">
                       <div>
-                        <span class="font-bold text-white text-sm block">${escapeHtml(e.role)}</span>
-                        <span class="text-xs text-cyan-400 font-semibold">${escapeHtml(e.company)}</span>
-                        <span class="text-[11px] text-slate-400"> · ${escapeHtml(e.location || 'Remote · India')}</span>
+                        <span class="font-bold text-fg text-sm block">${escapeHtml(e.role)}</span>
+                        <span class="text-xs text-blue-400 font-semibold">${escapeHtml(e.company)}</span>
+                        <span class="text-xs text-fg-2"> · ${escapeHtml(e.location || 'Remote · India')}</span>
                       </div>
-                      <span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold shrink-0 ${isPursuing ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'}">
+                      <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold shrink-0 ${isPursuing ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'}">
                         ${isPursuing ? '● Pursuing / Active' : '✓ Completed'}
                       </span>
                     </div>
-                    <p class="text-xs text-slate-300 font-sans leading-relaxed">${escapeHtml(e.description || '')}</p>
+                    <p class="text-xs text-fg font-sans leading-relaxed">${escapeHtml(e.description || '')}</p>
                     ${techBadges ? `<div class="flex flex-wrap gap-1.5 pt-1">${techBadges}</div>` : ''}
                   </div>
-                  <div class="pt-2.5 border-t border-[#1f2430] flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                    <span class="text-slate-400">Timeline: <strong class="text-slate-200">${escapeHtml(e.startDate || '')} — ${escapeHtml(e.endDate || 'Present')}</strong></span>
+                  <div class="pt-2.5 border-t border-line flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span class="text-fg-2">Timeline: <strong class="text-fg">${escapeHtml(e.startDate || '')} — ${escapeHtml(e.endDate || 'Present')}</strong></span>
                     <div class="flex flex-wrap items-center gap-2">
-                      ${e.offerLetterUrl ? `<a href="${escapeHtml(e.offerLetterUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 transition-colors">Offer Letter ↗</a>` : ''}
+                      ${e.offerLetterUrl ? `<a href="${escapeHtml(e.offerLetterUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 transition-colors">Offer Letter ↗</a>` : ''}
                       ${e.certificateUrl
                         ? `<a href="${escapeHtml(e.certificateUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-colors">Completion Certificate ↗</a>`
                         : `<span class="px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Certificate Pending</span>`}
@@ -2395,16 +2395,16 @@ async function fetchDynamicCareerAndCredentials() {
       if (expEl) {
         const listToRender = workExps.length > 0 ? workExps : allExps;
         expEl.innerHTML = listToRender.length === 0
-          ? `<div class="p-3 text-slate-500 text-center">No work experience entries in Neon DB yet.</div>`
+          ? `<div class="p-3 text-fg-3 text-center">No work experience entries in Neon DB yet.</div>`
           : listToRender.map(e => `
-            <div class="p-3.5 rounded-lg bg-[#10121a] border border-[#1f2430] space-y-1.5">
+            <div class="p-3.5 rounded-xl bg-card border border-line space-y-1.5">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-white">${escapeHtml(e.role)}</span>
-                <span class="text-[10px] px-2 py-0.5 rounded ${e.current ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-500/10 text-slate-400'}">${e.current ? 'Current' : 'Completed'}</span>
+                <span class="font-bold text-fg">${escapeHtml(e.role)}</span>
+                <span class="text-xs px-2 py-0.5 rounded ${e.current ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-fg-3/10 text-fg-2'}">${e.current ? 'Current' : 'Completed'}</span>
               </div>
-              <div class="text-[11px] text-cyan-400">${escapeHtml(e.company)} · ${escapeHtml(e.location || 'India')}</div>
-              <p class="text-xs text-slate-300 font-sans leading-relaxed">${escapeHtml(e.description || '')}</p>
-              <div class="text-[10px] text-slate-500 pt-1">Timeline: ${escapeHtml(e.startDate || '')} — ${escapeHtml(e.endDate || 'Present')}</div>
+              <div class="text-xs text-blue-400">${escapeHtml(e.company)} · ${escapeHtml(e.location || 'India')}</div>
+              <p class="text-xs text-fg font-sans leading-relaxed">${escapeHtml(e.description || '')}</p>
+              <div class="text-xs text-fg-3 pt-1">Timeline: ${escapeHtml(e.startDate || '')} — ${escapeHtml(e.endDate || 'Present')}</div>
             </div>
           `).join('');
       }
@@ -2413,16 +2413,16 @@ async function fetchDynamicCareerAndCredentials() {
     if (eduEl && eduRes.ok) {
       const edus = (await eduRes.json())?.data || [];
       eduEl.innerHTML = edus.length === 0
-        ? `<div class="p-3 text-slate-500 text-center">No education entries in Neon DB yet.</div>`
+        ? `<div class="p-3 text-fg-3 text-center">No education entries in Neon DB yet.</div>`
         : edus.map(ed => `
-          <div class="p-3.5 rounded-lg bg-[#10121a] border border-[#1f2430] space-y-1.5">
+          <div class="p-3.5 rounded-xl bg-card border border-line space-y-1.5">
             <div class="flex items-center justify-between">
-              <span class="font-bold text-white">${escapeHtml(ed.degree)}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${escapeHtml(ed.grade || 'Enrolled')}</span>
+              <span class="font-bold text-fg">${escapeHtml(ed.degree)}</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${escapeHtml(ed.grade || 'Enrolled')}</span>
             </div>
-            <div class="text-[11px] text-emerald-400">${escapeHtml(ed.institution)}</div>
-            <p class="text-xs text-slate-300 font-sans leading-relaxed">${escapeHtml(ed.description || '')}</p>
-            <div class="text-[10px] text-slate-500 pt-1">Timeline: ${escapeHtml(ed.startDate || '')} — ${escapeHtml(ed.endDate || 'Present')}</div>
+            <div class="text-xs text-emerald-400">${escapeHtml(ed.institution)}</div>
+            <p class="text-xs text-fg font-sans leading-relaxed">${escapeHtml(ed.description || '')}</p>
+            <div class="text-xs text-fg-3 pt-1">Timeline: ${escapeHtml(ed.startDate || '')} — ${escapeHtml(ed.endDate || 'Present')}</div>
           </div>
         `).join('');
     }
@@ -2430,14 +2430,14 @@ async function fetchDynamicCareerAndCredentials() {
     if (achEl && achRes.ok) {
       const achs = (await achRes.json())?.data || [];
       achEl.innerHTML = achs.length === 0
-        ? `<div class="p-3 text-slate-500 text-center">No achievements in Neon DB yet.</div>`
+        ? `<div class="p-3 text-fg-3 text-center">No achievements in Neon DB yet.</div>`
         : achs.map(a => `
-          <div class="p-3 rounded-lg bg-[#10121a] border border-[#1f2430] flex items-start justify-between gap-2">
+          <div class="p-3 rounded-xl bg-card border border-line flex items-start justify-between gap-2">
             <div>
-              <div class="font-bold text-white">${escapeHtml(a.title)}</div>
-              <div class="text-[11px] text-slate-400">${escapeHtml(a.organization || '')} ${a.description ? '· ' + escapeHtml(a.description) : ''}</div>
+              <div class="font-bold text-fg">${escapeHtml(a.title)}</div>
+              <div class="text-xs text-fg-2">${escapeHtml(a.organization || '')} ${a.description ? '· ' + escapeHtml(a.description) : ''}</div>
             </div>
-            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">${escapeHtml(a.category || 'HONOR')}</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">${escapeHtml(a.category || 'HONOR')}</span>
           </div>
         `).join('');
     }
@@ -2445,14 +2445,14 @@ async function fetchDynamicCareerAndCredentials() {
     if (certEl && certRes.ok) {
       const certs = (await certRes.json())?.data || [];
       certEl.innerHTML = certs.length === 0
-        ? `<div class="p-3 text-slate-500 text-center">No certifications in Neon DB yet.</div>`
+        ? `<div class="p-3 text-fg-3 text-center">No certifications in Neon DB yet.</div>`
         : certs.map(c => `
-          <div class="p-3 rounded-lg bg-[#10121a] border border-[#1f2430] flex items-center justify-between gap-2">
+          <div class="p-3 rounded-xl bg-card border border-line flex items-center justify-between gap-2">
             <div>
-              <div class="font-bold text-white">${escapeHtml(c.title)}</div>
-              <div class="text-[11px] text-slate-400">${escapeHtml(c.issuer || '')} ${c.credentialId ? '· ID: ' + escapeHtml(c.credentialId) : ''}</div>
+              <div class="font-bold text-fg">${escapeHtml(c.title)}</div>
+              <div class="text-xs text-fg-2">${escapeHtml(c.issuer || '')} ${c.credentialId ? '· ID: ' + escapeHtml(c.credentialId) : ''}</div>
             </div>
-            ${c.credentialUrl ? `<a href="${escapeHtml(c.credentialUrl)}" target="_blank" rel="noopener noreferrer" class="text-[10px] text-cyan-400 hover:underline shrink-0">Verify ↗</a>` : `<span class="text-[10px] text-emerald-400 shrink-0">Verified</span>`}
+            ${c.credentialUrl ? `<a href="${escapeHtml(c.credentialUrl)}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-400 hover:underline shrink-0">Verify ↗</a>` : `<span class="text-xs text-emerald-400 shrink-0">Verified</span>`}
           </div>
         `).join('');
     }
@@ -2482,27 +2482,27 @@ async function fetchDynamicContributions() {
   }
 
   if (!stories || stories.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-[#10121a] border border-[#1f2430] text-center text-xs font-mono text-slate-500">No open-source contribution stories in Neon DB yet. Add stories in Admin CMS → Contribution Stories.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No open-source contribution stories in Neon DB yet. Add stories in Admin CMS → Contribution Stories.</div>`;
     return;
   }
 
   container.innerHTML = stories.map(s => `
     <div class="saas-card p-5 space-y-3 flex flex-col justify-between">
       <div class="space-y-2">
-        <div class="flex items-center justify-between text-xs font-mono">
-          <span class="text-white font-bold">${escapeHtml(s.repository)}</span>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-fg font-bold">${escapeHtml(s.repository)}</span>
           <span class="text-purple-400 font-semibold">${escapeHtml(s.externalContributionId || 'Merged PR')}</span>
         </div>
-        <h3 class="text-sm font-semibold text-white font-mono">${escapeHtml(s.title)}</h3>
-        <p class="text-xs text-slate-300 font-sans leading-relaxed">${escapeHtml(s.whatIContributed || s.whyIContributed || '')}</p>
-        <div class="p-3 rounded bg-[#161924] border border-[#232938] text-[11px] font-mono text-slate-400">
+        <h3 class="text-sm font-semibold text-fg">${escapeHtml(s.title)}</h3>
+        <p class="text-xs text-fg font-sans leading-relaxed">${escapeHtml(s.whatIContributed || s.whyIContributed || '')}</p>
+        <div class="p-3 rounded-xl bg-raised border border-line text-xs text-fg-2">
           <span class="text-purple-400 font-bold block mb-1">💡 What I Learned:</span>
           ${escapeHtml(s.whatILearned || 'Deep understanding of production systems internals.')}
         </div>
       </div>
-      <div class="flex items-center justify-between pt-2 border-t border-[#1f2430] text-xs font-mono">
-        <span class="text-slate-500">${escapeHtml(s.technologies || 'Open Source')}</span>
-        <a href="${escapeHtml(s.prUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-1 font-semibold">
+      <div class="flex items-center justify-between pt-2 border-t border-line text-xs">
+        <span class="text-fg-3">${escapeHtml(s.technologies || 'Open Source')}</span>
+        <a href="${escapeHtml(s.prUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline flex items-center gap-1 font-semibold">
           GitHub Link ↗
         </a>
       </div>
@@ -2526,29 +2526,29 @@ async function fetchDynamicResearch() {
   }
 
   if (!papers || papers.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-[#10121a] border border-[#1f2430] text-center text-xs font-mono text-slate-500">No research publications in Neon DB yet. Add papers in Admin CMS → Research Papers.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No research publications in Neon DB yet. Add papers in Admin CMS → Research Papers.</div>`;
     return;
   }
 
   container.innerHTML = papers.map(p => `
     <div class="saas-card p-5 space-y-3 flex flex-col justify-between">
       <div class="space-y-2">
-        <div class="flex items-center justify-between text-xs font-mono">
-          <span class="px-2 py-0.5 rounded text-[10px] ${p.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'} font-semibold">
+        <div class="flex items-center justify-between text-xs">
+          <span class="px-2 py-0.5 rounded text-xs ${p.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'} font-semibold">
             ${escapeHtml(p.status || 'PUBLISHED')}
           </span>
-          <span class="text-slate-500">${escapeHtml(p.publishedDate || '2026')}</span>
+          <span class="text-fg-3">${escapeHtml(p.publishedDate || '2026')}</span>
         </div>
-        <h3 class="text-sm font-semibold text-white font-mono">${escapeHtml(p.title)}</h3>
-        <p class="text-xs text-slate-300 font-sans leading-relaxed">${escapeHtml(p.abstractText || '')}</p>
-        <div class="text-[11px] font-mono text-slate-400">
-          <span class="text-slate-500">Methodology:</span> ${escapeHtml(p.methodology || 'Empirical systems benchmarking')}
+        <h3 class="text-sm font-semibold text-fg">${escapeHtml(p.title)}</h3>
+        <p class="text-xs text-fg font-sans leading-relaxed">${escapeHtml(p.abstractText || '')}</p>
+        <div class="text-xs text-fg-2">
+          <span class="text-fg-3">Methodology:</span> ${escapeHtml(p.methodology || 'Empirical systems benchmarking')}
         </div>
       </div>
-      <div class="flex items-center justify-between pt-3 border-t border-[#1f2430] text-xs font-mono">
-        <span class="text-slate-500 text-[11px]">Author: ${escapeHtml(p.authors || 'Raviranjan Kumar')}</span>
+      <div class="flex items-center justify-between pt-3 border-t border-line text-xs">
+        <span class="text-fg-3 text-xs">Author: ${escapeHtml(p.authors || 'Raviranjan Kumar')}</span>
         <div class="flex items-center gap-3">
-          <a href="${escapeHtml(p.githubUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Code ↗</a>
+          <a href="${escapeHtml(p.githubUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">Code ↗</a>
         </div>
       </div>
     </div>
@@ -2571,25 +2571,25 @@ async function fetchDynamicLab() {
   }
 
   if (!labs || labs.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-[#10121a] border border-[#1f2430] text-center text-xs font-mono text-slate-500">No engineering lab experiments in Neon DB yet. Add experiments in Admin CMS → Engineering Lab.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No engineering lab experiments in Neon DB yet. Add experiments in Admin CMS → Engineering Lab.</div>`;
     return;
   }
 
   container.innerHTML = labs.map(lab => `
     <div class="saas-card p-4 space-y-2.5 flex flex-col justify-between">
       <div class="space-y-1.5">
-        <div class="flex items-center justify-between text-xs font-mono">
-          <span class="text-emerald-400 font-semibold text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-emerald-400 font-semibold text-xs px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
             ${escapeHtml(lab.status || 'ACTIVE')}
           </span>
-          <span class="text-slate-500 text-[10px]">EXPERIMENTAL</span>
+          <span class="text-fg-3 text-xs">EXPERIMENTAL</span>
         </div>
-        <h3 class="text-xs font-bold text-white font-mono">${escapeHtml(lab.title)}</h3>
-        <p class="text-[11px] text-slate-300 font-sans leading-relaxed">${escapeHtml(lab.description || lab.objective || '')}</p>
+        <h3 class="text-xs font-bold text-fg">${escapeHtml(lab.title)}</h3>
+        <p class="text-xs text-fg font-sans leading-relaxed">${escapeHtml(lab.description || lab.objective || '')}</p>
       </div>
-      <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-[11px] font-mono">
-        <span class="text-slate-400">${escapeHtml(lab.technologies || 'Systems')}</span>
-        <a href="${escapeHtml(lab.githubUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Code ↗</a>
+      <div class="pt-2 border-t border-line flex items-center justify-between text-xs">
+        <span class="text-fg-2">${escapeHtml(lab.technologies || 'Systems')}</span>
+        <a href="${escapeHtml(lab.githubUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">Code ↗</a>
       </div>
     </div>
   `).join('');
@@ -2611,29 +2611,29 @@ async function fetchDynamicArticles() {
   }
 
   if (!articles || articles.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-[#10121a] border border-[#1f2430] text-center text-xs font-mono text-slate-500">No engineering articles in Neon DB yet. Publish articles in Admin CMS → Technical Writing.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No engineering articles in Neon DB yet. Publish articles in Admin CMS → Technical Writing.</div>`;
     return;
   }
 
   container.innerHTML = articles.map(a => `
     <div class="saas-card p-5 space-y-3 flex flex-col justify-between">
       <div class="space-y-2">
-        <div class="flex items-center justify-between text-xs font-mono text-slate-500">
+        <div class="flex items-center justify-between text-xs text-fg-3">
           <span>${escapeHtml(a.publishedAt ? new Date(a.publishedAt).toLocaleDateString([], { month: 'short', year: 'numeric' }) : (a.publishedDate || '2026'))}</span>
           <span>${escapeHtml(a.readingTimeMinutes ? a.readingTimeMinutes + ' min read' : (a.readTime || '6 min read'))}</span>
         </div>
-        <h3 class="text-sm font-semibold text-white font-mono hover:text-sky-400 transition-colors">
+        <h3 class="text-sm font-semibold text-fg hover:text-blue-400 transition-colors">
           ${escapeHtml(a.title)}
         </h3>
-        <p class="text-xs text-slate-300 font-sans leading-relaxed">${escapeHtml(a.summary || a.excerpt || '')}</p>
+        <p class="text-xs text-fg font-sans leading-relaxed">${escapeHtml(a.summary || a.excerpt || '')}</p>
       </div>
-      <div class="flex items-center justify-between pt-3 border-t border-[#1f2430] text-xs font-mono">
+      <div class="flex items-center justify-between pt-3 border-t border-line text-xs">
         <div class="flex flex-wrap gap-1">
           ${(a.tags ? (Array.isArray(a.tags) ? a.tags : Array.from(a.tags)) : ['Engineering']).map(t => `
-            <span class="px-1.5 py-0.5 rounded bg-[#161924] text-slate-400 text-[10px] border border-[#232938]">${escapeHtml(t)}</span>
+            <span class="px-1.5 py-0.5 rounded bg-raised text-fg-2 text-xs border border-line">${escapeHtml(t)}</span>
           `).join('')}
         </div>
-        <span class="text-sky-400 hover:underline cursor-pointer">Synced from Neon DB →</span>
+        <span class="text-blue-400 hover:underline cursor-pointer">Synced from Neon DB →</span>
       </div>
     </div>
   `).join('');
@@ -2756,6 +2756,7 @@ function initHeroTextAnimator() {
 
 // 3. Full-Viewport 3D Ambient Background Wave & Perspective Mesh (#bg-3d-canvas)
 function initHero3dVisual() {
+  return; // decorative animated background removed by the design system (readability + performance)
   const canvas = document.getElementById('bg-3d-canvas');
   if (!canvas || canvas.__initializedBg3d) return;
   canvas.__initializedBg3d = true;
@@ -2842,8 +2843,8 @@ function initHero3dVisual() {
         else ctx.lineTo(pt.px, pt.py);
       }
       ctx.strokeStyle = isLight
-        ? (r % 3 === 0 ? `rgba(124, 58, 237, ${alpha})` : `rgba(2, 132, 199, ${alpha})`)
-        : (r % 3 === 0 ? `rgba(99, 102, 241, ${alpha})` : `rgba(56, 189, 248, ${alpha})`);
+        ? (r % 3 === 0 ? `rgba(124, 58, 237, ${alpha})` : `rgba(37, 99, 235, ${alpha})`)
+        : (r % 3 === 0 ? `rgba(99, 102, 241, ${alpha})` : `rgba(59, 130, 246, ${alpha})`);
       ctx.lineWidth = r % 4 === 0 ? 1.25 : 0.8;
       ctx.stroke();
     }
@@ -2860,8 +2861,8 @@ function initHero3dVisual() {
         else ctx.lineTo(pt.px, pt.py);
       }
       ctx.strokeStyle = isLight
-        ? `rgba(2, 132, 199, ${alpha})`
-        : `rgba(56, 189, 248, ${alpha})`;
+        ? `rgba(37, 99, 235, ${alpha})`
+        : `rgba(59, 130, 246, ${alpha})`;
       ctx.lineWidth = 0.65;
       ctx.stroke();
     }
@@ -2876,8 +2877,8 @@ function initHero3dVisual() {
       ctx.beginPath();
       ctx.arc(px, py, p.size * p.z, 0, Math.PI * 2);
       ctx.fillStyle = isLight
-        ? `rgba(2, 132, 199, ${alpha})`
-        : `rgba(56, 189, 248, ${alpha})`;
+        ? `rgba(37, 99, 235, ${alpha})`
+        : `rgba(59, 130, 246, ${alpha})`;
       ctx.fill();
     }
 

@@ -1,34 +1,16 @@
-/** @type {import('tailwindcss').Config} */
+/** Kept in sync with the inline Tailwind CDN config in public/*.html. All colours are theme tokens from public/design-system.css. */
 module.exports = {
-  darkMode: ["class"],
-  content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-  ],
-  theme: {
-    extend: {
-      colors: {
-        background: '#090a0f',
-        surface: '#11131a',
-        'surface-elevated': '#171a23',
-        border: '#232733',
-        'border-focus': '#3b4255',
-        primary: '#38bdf8',
-        'primary-hover': '#0284c7',
-        accent: '#10b981',
-        warning: '#f59e0b',
-        danger: '#ef4444',
-        text: '#f1f5f9',
-        'text-muted': '#94a3b8',
-        'text-subtle': '#64748b',
-      },
-      fontFamily: {
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-      }
+  darkMode: ['class'],
+  content: ['./public/**/*.{html,js}'],
+  theme: { extend: {
+    fontFamily: { sans: ['Geist', 'Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'ui-monospace', 'monospace'] },
+    colors: {
+      canvas: 'rgb(var(--canvas) / <alpha-value>)', subtle: 'rgb(var(--subtle) / <alpha-value>)', card: 'rgb(var(--card) / <alpha-value>)',
+      raised: 'rgb(var(--raised) / <alpha-value>)', line: 'rgb(var(--line) / <alpha-value>)', 'line-strong': 'rgb(var(--line-strong) / <alpha-value>)',
+      fg: { DEFAULT: 'rgb(var(--fg) / <alpha-value>)', 2: 'rgb(var(--fg-2) / <alpha-value>)', 3: 'rgb(var(--fg-3) / <alpha-value>)' },
+      brand: { DEFAULT: 'rgb(var(--brand) / <alpha-value>)', hover: 'rgb(var(--brand-hover) / <alpha-value>)', fg: 'rgb(var(--brand-fg) / <alpha-value>)' },
     },
-  },
+    borderColor: { DEFAULT: 'rgb(var(--line) / <alpha-value>)' },
+  } },
   plugins: [],
-}
+};
