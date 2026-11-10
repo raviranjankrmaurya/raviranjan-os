@@ -205,7 +205,7 @@
       <button class="btn btn--primary" id="login-btn" type="submit" style="width:100%;min-height:40px;margin-top:4px">Unlock console</button>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:11px">
         <a href="/" style="font-size:11.5px;color:var(--muted)">Back to site</a>
-        <span style="font-size:11px;color:var(--faint)">Secured by JWT</span>
+        <span style="font-size:11px;color:var(--faint)">API · <span id="login-api">—</span></span>
       </div>
     </form>
   </div>
@@ -368,13 +368,56 @@
   'use strict';
 
   /* ------------------------------ config ------------------------------ */
-  var API_BASE = (function () {
+  var REMOTE_API = 'https://raviranjan-os-backend.onrender.com';
+  var API_BASE = '';           // '' = same origin (proxy / Spring static)
+  var apiProbe = null;
+
+  (function initApiBase() {
     var meta = document.querySelector('meta[name="api-base"]');
     var explicit = window.RAVIRANJAN_API_BASE || (meta && meta.content) || '';
-    if (explicit) return String(explicit).replace(/\/+$/, '');
-    // Served by the Spring app itself (same origin) → relative paths are perfect.
-    return '';
+    if (explicit) API_BASE = String(explicit).replace(/\/+$/, '');
   })();
+
+  function apiLabel() {
+    return API_BASE ? API_BASE.replace(/^https?:\/\//, '') : location.host;
+  }
+
+  function paintApiLabel() {
+    var el = document.getElementById('login-api');
+    if (el) el.textContent = apiLabel();
+  }
+
+  /**
+   * Decide once where the API lives.
+   *  · file://                → no origin to call, use the deployed backend
+   *  · same-origin /api works → keep it (Vercel rewrite, Spring static, node server)
+   *  · /api answers 404/HTML  → this host is not proxying, use the backend directly
+   */
+  function ensureApi() {
+    if (apiProbe) return apiProbe;
+
+    if (location.protocol === 'file:') {
+      API_BASE = REMOTE_API;
+      apiProbe = Promise.resolve();
+      paintApiLabel();
+      return apiProbe;
+    }
+
+    apiProbe = fetch('/api', { cache: 'no-store' })
+      .then(function (res) {
+        return res.text().then(function (text) {
+          var type = res.headers.get('content-type') || '';
+          var looksHtml = type.indexOf('text/html') === 0 || /^\s*</.test(text || '');
+          if (res.status === 404 || res.status === 405 || (res.ok && looksHtml)) {
+            API_BASE = REMOTE_API;
+          }
+        });
+      })
+      .catch(function () { API_BASE = REMOTE_API; })
+      .then(function () { paintApiLabel(); });
+
+    return apiProbe;
+  }
 
   var KEYS = {
     token: 'raviranjan_auth_token',
@@ -438,6 +481,12 @@
 
   function api(path, options) {
     options = options || {};
+    return ensureApi().then(function () {
+      return request(path, options);
+    });
+  }
+
+  function request(path, options) {
     var url = path.indexOf('http') === 0 ? path : API_BASE + path;
     var headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
     var token = lsGet(KEYS.token);
@@ -583,6 +632,7 @@
     $$('.side__foot .btn--icon')[0].innerHTML = icon('lock');
     $('.mob-toggle').innerHTML = icon('menu');
     $('#theme-btn').innerHTML = icon(document.documentElement.classList.contains('light') ? 'moon' : 'sun');
+    paintApiLabel();
     $('#bell-btn').innerHTML = icon('bell');
     $('#ai-btn').innerHTML = icon('sparkles') + '<span>Ask AI</span>';
     $('#refresh-btn').innerHTML = icon('refresh');
@@ -1109,6 +1159,7 @@
   function start() {
     applyTheme(lsGet(KEYS.theme) || 'system');
     buildChrome();
+    ensureApi();   // resolve the API origin early so the sign-in card can show it
 
     $('#login-form').addEventListener('submit', loginSubmit);
     $('#project-form').addEventListener('submit', saveProject);

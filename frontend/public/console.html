@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raviranjan.OS — Admin Console</title>
+<meta name="theme-color" content="#09090B">
+<script>
+  (function () {
+    try {
+      var s = localStorage.getItem('admin_theme') || 'system';
+      var t = (s === 'light' || s === 'dark') ? s : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      var r = document.documentElement;
+      r.classList.remove('light', 'dark'); r.classList.add(t); r.style.colorScheme = t;
+    } catch (e) {}
+  })();
+</script>
+<style>
+  :root{
+    --bg:#09090B; --surf:#0F0F12; --elev:#18181B; --line:#27272A; --line-strong:#3F3F46;
+    --ink:#FAFAFA; --muted:#A1A1AA; --faint:#8A8A93;
+    --brand:#3B82F6; --brand-soft:rgba(59,130,246,.12); --brand-line:rgba(59,130,246,.30); --brand-text:#60A5FA;
+    --ok:#10B981; --ok-soft:rgba(16,185,129,.12); --warn:#F59E0B; --bad:#F43F5E; --bad-soft:rgba(244,63,94,.12);
+    --shadow:0 1px 3px rgba(0,0,0,.36), 0 1px 2px -1px rgba(0,0,0,.32);
+    --shadow-lg:0 12px 32px -10px rgba(0,0,0,.55);
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --r:12px;
+  }
+  html.light{
+    --bg:#FFFFFF; --surf:#FFFFFF; --elev:#F4F4F5; --line:#E4E4E7; --line-strong:#D4D4D8;
+    --ink:#18181B; --muted:#52525B; --faint:#71717A;
+    --brand:#2563EB; --brand-soft:rgba(37,99,235,.08); --brand-line:rgba(37,99,235,.30); --brand-text:#1D4ED8;
+    --shadow:0 1px 3px rgba(24,24,27,.08), 0 1px 2px -1px rgba(24,24,27,.06);
+    --shadow-lg:0 12px 32px -12px rgba(24,24,27,.16);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow:hidden}
+  button{font-family:inherit;cursor:pointer}
+  a{color:var(--brand-text);text-decoration:none}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:99px;border:2px solid transparent;background-clip:content-box}
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+  /* ---------- shell ---------- */
+  .shell{display:flex;height:100dvh}
+  .side{width:250px;flex:0 0 250px;border-right:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;min-height:0}
+  .side__brand{height:60px;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--line);flex:0 0 auto}
+  .mark{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--mono);font-weight:700;font-size:12px;background:linear-gradient(140deg,#3B82F6,#2563EB 55%,#7C3AED);box-shadow:0 4px 14px -6px rgba(37,99,235,.75)}
+  .wordmark{font-weight:600;font-size:13.5px;letter-spacing:-.02em}
+  .sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .side__nav{flex:1;overflow-y:auto;padding:10px 8px}
+  .group-title{padding:10px 10px 6px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .nav{display:flex;align-items:center;gap:10px;width:100%;min-height:34px;padding:7px 10px;border-radius:8px;border:1px solid transparent;background:none;color:var(--muted);font-size:12.5px;font-weight:500;text-align:left}
+  .nav:hover{background:var(--elev);color:var(--ink)}
+  .nav.is-active{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand-text)}
+  .nav svg{width:15px;height:15px;flex:0 0 auto}
+  .side__foot{padding:10px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .avatar{width:28px;height:28px;border-radius:99px;background:var(--elev);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10.5px;font-weight:600}
+
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+  .top{min-height:60px;padding:8px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;flex:0 0 auto;background:color-mix(in srgb, var(--bg) 88%, transparent);backdrop-filter:blur(12px)}
+  .crumb{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .crumb b{color:var(--ink);font-weight:500;text-transform:capitalize}
+  .view{flex:1;overflow-y:auto;padding:20px 16px 48px}
+  @media(min-width:768px){ .view{padding:24px} }
+  @media(min-width:1280px){ .view{padding:28px 32px 56px} }
+
+  /* ---------- controls ---------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:var(--surf);color:var(--ink);font-size:12.5px;font-weight:550;white-space:nowrap;transition:background .14s ease,border-color .14s ease,color .14s ease}
+  .btn:hover{background:var(--elev);border-color:var(--line-strong)}
+  .btn svg{width:15px;height:15px}
+  .btn--primary{background:var(--brand);border-color:transparent;color:#fff}
+  .btn--primary:hover{filter:brightness(1.08);background:var(--brand)}
+  .btn--danger{background:var(--bad-soft);border-color:rgba(244,63,94,.3);color:#FB7185}
+  .btn--ghost{background:none;border-color:transparent;color:var(--muted)}
+  .btn--ghost:hover{background:var(--elev);color:var(--ink)}
+  .btn--sm{min-height:28px;padding:0 9px;font-size:11.5px;border-radius:7px}
+  .btn--icon{width:34px;padding:0}
+  .btn[aria-busy="true"]{pointer-events:none;position:relative;color:transparent}
+  .btn[aria-busy="true"] svg{opacity:0}
+  .btn[aria-busy="true"]::after{content:'';position:absolute;inset:0;margin:auto;width:13px;height:13px;border-radius:50%;border:1.8px solid var(--brand-text);border-top-color:transparent;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .field{display:block;margin-bottom:10px}
+  .field > span{display:block;font-size:11.5px;color:var(--muted);margin-bottom:5px}
+  input,select,textarea{width:100%;min-height:36px;padding:8px 11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13px;transition:border-color .14s,box-shadow .14s}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+  textarea{min-height:88px;resize:vertical;line-height:1.6}
+  .hint{font-size:11px;color:var(--faint);margin-top:4px}
+  .err{display:none;margin-bottom:10px;padding:9px 11px;border-radius:8px;border:1px solid rgba(244,63,94,.3);background:var(--bad-soft);color:#FDA4AF;font-size:12px}
+  .err.is-on{display:block}
+
+  /* ---------- surfaces ---------- */
+  .card{border:1px solid var(--line);background:var(--surf);border-radius:var(--r);box-shadow:var(--shadow)}
+  .card__head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
+  .card__title{font-size:13.5px;font-weight:600;letter-spacing:-.01em}
+  .card__body{padding:16px}
+  .grid{display:grid;gap:12px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  @media(min-width:900px){ .stats{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  @media(min-width:1280px){ .stats{grid-template-columns:repeat(5,minmax(0,1fr))} }
+  .stat{border:1px solid var(--line);background:var(--surf);border-radius:var(--r);padding:13px 14px}
+  .stat__label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .stat__value{font-size:22px;font-weight:600;letter-spacing:-.02em;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+  .stat__note{font-family:var(--mono);font-size:10px;color:var(--faint)}
+
+  .pill{display:inline-flex;align-items:center;gap:5px;height:21px;padding:0 8px;border-radius:99px;border:1px solid var(--line);background:var(--elev);color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.02em;white-space:nowrap}
+  .pill--ok{border-color:rgba(16,185,129,.3);background:var(--ok-soft);color:#34D399}
+  .pill--warn{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.1);color:#FBBF24}
+  .pill--bad{border-color:rgba(244,63,94,.3);background:var(--bad-soft);color:#FB7185}
+  .pill--brand{border-color:var(--brand-line);background:var(--brand-soft);color:var(--brand-text)}
+  html.light .pill--ok{color:#047857}
+  html.light .pill--warn{color:#B45309}
+  html.light .pill--bad{color:#BE123C}
+
+  .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surf)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{position:sticky;top:0;z-index:1;text-align:left;padding:9px 12px;background:var(--elev);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);white-space:nowrap}
+  td{padding:10px 12px;border-bottom:1px solid color-mix(in srgb, var(--line) 65%, transparent);color:var(--muted);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:color-mix(in srgb, var(--elev) 60%, transparent)}
+  td b{color:var(--ink);font-weight:550}
+
+  .empty{padding:34px 18px;text-align:center;border:1px dashed var(--line);border-radius:var(--r);color:var(--faint);font-size:12.5px}
+  .skel{height:14px;border-radius:6px;background:linear-gradient(90deg,var(--elev) 25%,var(--line) 37%,var(--elev) 63%);background-size:400% 100%;animation:shimmer 1.6s ease-in-out infinite}
+  @keyframes shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+
+  /* ---------- overlays ---------- */
+  .scrim{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(9,9,11,.62);backdrop-filter:blur(8px)}
+  .scrim.is-on{display:flex}
+  .modal{width:100%;max-width:560px;max-height:calc(100dvh - 32px);overflow:auto;background:var(--surf);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg)}
+  .modal__head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 18px;border-bottom:1px solid var(--line)}
+  .modal__body{padding:18px}
+  .modal__foot{display:flex;justify-content:flex-end;gap:8px;padding:13px 18px;border-top:1px solid var(--line);background:color-mix(in srgb, var(--elev) 50%, transparent)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  .drawer{position:fixed;top:0;right:0;bottom:0;z-index:85;width:min(420px,100%);background:var(--surf);border-left:1px solid var(--line);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .26s cubic-bezier(.16,1,.3,1)}
+  .drawer.is-on{transform:none}
+  .drawer__head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid var(--line);flex:0 0 auto}
+  .thread{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+  .msg{display:flex;gap:8px;align-items:flex-start}
+  .msg--me{flex-direction:row-reverse}
+  .msg__av{width:24px;height:24px;border-radius:7px;background:var(--brand-soft);color:var(--brand-text);display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-top:2px}
+  .msg__av svg{width:13px;height:13px}
+  .bubble{max-width:85%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--elev);font-size:12.5px;line-height:1.6;overflow-wrap:anywhere}
+  .msg--me .bubble{background:var(--brand-soft);border-color:var(--brand-line)}
+  .bubble b{color:var(--ink)}
+  .composer{border-top:1px solid var(--line);padding:11px 14px 13px;flex:0 0 auto}
+  .composer form{display:flex;gap:7px}
+  .typing{display:inline-flex;gap:4px;padding:3px 1px}
+  .typing i{width:5px;height:5px;border-radius:50%;background:var(--brand-text);opacity:.4;animation:tp 1.1s ease-in-out infinite}
+  .typing i:nth-child(2){animation-delay:.15s}
+  .typing i:nth-child(3){animation-delay:.3s}
+  @keyframes tp{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-2px)}}
+
+  .toasts{position:fixed;right:16px;bottom:16px;z-index:95;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+  .toast{display:flex;gap:9px;align-items:flex-start;min-width:240px;max-width:360px;padding:11px 13px;border-radius:10px;border:1px solid var(--line);background:var(--surf);box-shadow:var(--shadow-lg);font-size:12.5px;animation:tin .22s cubic-bezier(.16,1,.3,1)}
+  @keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .toast svg{width:15px;height:15px;flex:0 0 auto;margin-top:1px}
+
+  /* ---------- login ---------- */
+  #login{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:color-mix(in srgb, var(--bg) 96%, transparent);backdrop-filter:blur(18px)}
+  #login.is-off{display:none}
+  .login-card{width:100%;max-width:372px;background:var(--surf);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);overflow:hidden}
+  .login-head{padding:18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .login-body{padding:18px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:0 0 auto}
+
+  .mob-toggle{display:none}
+  @media(max-width:1023px){
+    .side{position:fixed;inset-block:0;left:0;z-index:90;transform:translateX(-100%);transition:transform .26s cubic-bezier(.16,1,.3,1);box-shadow:var(--shadow-lg)}
+    .side.is-on{transform:none}
+    .mob-toggle{display:inline-flex}
+    .mob-scrim{position:fixed;inset:0;z-index:80;background:rgba(9,9,11,.55);display:none}
+    .mob-scrim.is-on{display:block}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+
+<!-- ---------- sign in ---------- -->
+<div id="login">
+  <div class="login-card">
+    <div class="login-head">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="mark">R</span>
+        <div>
+          <p style="margin:0;font-weight:600;font-size:13.5px;letter-spacing:-.01em">Admin sign in</p>
+          <p style="margin:2px 0 0;display:flex;align-items:center;gap:5px" class="sub"><span class="dot"></span> Neon DB · SUPER_ADMIN</p>
+        </div>
+      </div>
+      <a class="btn btn--sm btn--ghost" href="/">Portfolio</a>
+    </div>
+    <form class="login-body" id="login-form" autocomplete="off">
+      <div class="err" id="login-err" role="alert"></div>
+      <label class="field"><span>Username</span>
+        <input id="login-user" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="raviranjankr" required>
+      </label>
+      <label class="field"><span>Password</span>
+        <input id="login-pass" type="password" autocomplete="current-password" placeholder="••••••••" required>
+      </label>
+      <button class="btn btn--primary" id="login-btn" type="submit" style="width:100%;min-height:40px;margin-top:4px">Unlock console</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:11px">
+        <a href="/" style="font-size:11.5px;color:var(--muted)">Back to site</a>
+        <span style="font-size:11px;color:var(--faint)">API · <span id="login-api">—</span></span>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ---------- shell ---------- -->
+<div class="shell" aria-hidden="false">
+  <div class="mob-scrim" id="mob-scrim" onclick="toggleSide(false)"></div>
+  <aside class="side" id="side">
+    <div class="side__brand">
+      <span class="mark">R</span>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="wordmark">Raviranjan.OS</span>
+          <span class="pill pill--brand" style="height:17px;font-size:9px;padding:0 5px">ADMIN</span>
+        </div>
+        <span class="sub">Control centre</span>
+      </div>
+    </div>
+    <nav class="side__nav" id="nav">
+      <div class="group-title">Operating system</div>
+      <button class="nav is-active" data-view="overview"></button>
+      <button class="nav" data-view="projects"></button>
+      <div class="group-title">Operations</div>
+      <button class="nav" data-view="inquiries"></button>
+      <button class="nav" data-view="notifications"></button>
+      <div class="group-title">Assistant</div>
+      <button class="nav" data-view="assistant"></button>
+    </nav>
+    <div class="side__foot">
+      <div style="display:flex;align-items:center;gap:8px;min-width:0">
+        <div class="avatar" id="side-avatar">RA</div>
+        <div style="min-width:0">
+          <p id="side-user" style="margin:0;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">admin</p>
+          <p class="sub" style="margin:0">SUPER_ADMIN</p>
+        </div>
+      </div>
+      <button class="btn btn--icon btn--ghost" onclick="lock()" title="Lock session" aria-label="Lock session"></button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div style="display:flex;align-items:center;gap:8px;min-width:0">
+        <button class="btn btn--icon btn--ghost mob-toggle" onclick="toggleSide()" aria-label="Open navigation"></button>
+        <div>
+          <div class="crumb"><span>Raviranjan.OS</span><span>›</span><b id="crumb">Overview</b></div>
+          <p class="sub" style="margin:2px 0 0" id="crumb-sub">Live Neon DB console</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <button class="btn btn--icon" id="theme-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme"></button>
+        <button class="btn btn--icon" id="bell-btn" onclick="openDrawer('notif')" title="Notifications" aria-label="Notifications" style="position:relative"></button>
+        <button class="btn" onclick="openDrawer('ai')" id="ai-btn"></button>
+        <button class="btn" id="refresh-btn" onclick="refreshView()" title="Refresh"></button>
+      </div>
+    </header>
+
+    <main class="view" id="view"></main>
+  </div>
+</div>
+
+<!-- ---------- project modal ---------- -->
+<div class="scrim" id="project-scrim" onclick="if(event.target===this) closeProject()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="project-title">
+    <div class="modal__head">
+      <p class="card__title" id="project-title">New project</p>
+      <button class="btn btn--icon btn--ghost" onclick="closeProject()" aria-label="Close"></button>
+    </div>
+    <form id="project-form">
+      <div class="modal__body">
+        <div class="err" id="project-err" role="alert"></div>
+        <label class="field"><span>Title *</span><input id="p-title" required></label>
+        <div class="row2">
+          <label class="field"><span>Slug</span><input id="p-slug" placeholder="auto-from-title"></label>
+          <label class="field"><span>Category</span>
+            <select id="p-category">
+              <option value="FULL_STACK">Full stack</option>
+              <option value="AI_ML">AI / ML</option>
+              <option value="BACKEND">Backend</option>
+              <option value="FRONTEND">Frontend</option>
+              <option value="DEVOPS">DevOps</option>
+              <option value="MOBILE">Mobile</option>
+            </select>
+          </label>
+        </div>
+        <label class="field"><span>Short summary</span><textarea id="p-summary" style="min-height:64px" maxlength="280"></textarea></label>
+        <label class="field"><span>Technologies (comma separated)</span><input id="p-tech" placeholder="Java 21, Spring Boot, PostgreSQL"></label>
+        <div class="row2">
+          <label class="field"><span>Status</span>
+            <select id="p-status">
+              <option value="PUBLISHED">Published</option>
+              <option value="DRAFT">Draft</option>
+              <option value="ARCHIVED">Archived</option>
+            </select>
+          </label>
+          <label class="field"><span>Progress %</span><input id="p-progress" type="number" min="0" max="100" value="85"></label>
+        </div>
+        <div class="row2">
+          <label class="field"><span>GitHub URL</span><input id="p-github" placeholder="https://github.com/…"></label>
+          <label class="field"><span>Live demo URL</span><input id="p-live" placeholder="https://…"></label>
+        </div>
+        <label class="field" style="margin-bottom:0"><span>Architecture style</span><input id="p-arch" placeholder="Modular monolith, event-driven…"></label>
+      </div>
+      <div class="modal__foot">
+        <button type="button" class="btn" onclick="closeProject()">Cancel</button>
+        <button type="submit" class="btn btn--primary" id="project-save">Save project</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ---------- drawers ---------- -->
+<aside class="drawer" id="drawer-ai" aria-hidden="true">
+  <div class="drawer__head">
+    <div style="display:flex;align-items:center;gap:9px">
+      <span class="mark" style="width:28px;height:28px;border-radius:8px" aria-hidden="true">✦</span>
+      <div>
+        <p style="margin:0;font-size:13px;font-weight:600">Ask Raviranjan</p>
+        <p class="sub" style="margin:1px 0 0;display:flex;align-items:center;gap:5px"><span class="dot"></span> Portfolio RAG · Neon DB</p>
+      </div>
+    </div>
+    <button class="btn btn--icon btn--ghost" onclick="closeDrawer('ai')" aria-label="Close"></button>
+  </div>
+  <div class="thread" id="ai-thread" aria-live="polite"></div>
+  <div class="composer">
+    <form id="ai-form">
+      <input id="ai-input" placeholder="Ask about projects, stack or experience…" autocomplete="off" aria-label="Your question">
+      <button class="btn btn--primary" type="submit" aria-label="Send" style="width:36px;padding:0"></button>
+    </form>
+    <p class="hint" style="text-align:center;margin:7px 0 0">Grounded answers only — no outside knowledge.</p>
+  </div>
+</aside>
+
+<aside class="drawer" id="drawer-notif" aria-hidden="true">
+  <div class="drawer__head">
+    <div style="display:flex;align-items:center;gap:9px">
+      <span class="mark" style="width:28px;height:28px;border-radius:8px;background:linear-gradient(140deg,#F59E0B,#E11D48)" aria-hidden="true">!</span>
+      <div>
+        <p style="margin:0;font-size:13px;font-weight:600">Notifications</p>
+        <p class="sub" style="margin:1px 0 0;display:flex;align-items:center;gap:5px"><span class="dot"></span> Live event stream</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn--sm" onclick="markAllRead()">Mark all read</button>
+      <button class="btn btn--icon btn--ghost" onclick="closeDrawer('notif')" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="thread" id="notif-thread"></div>
+</aside>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* =======================================================================
+   Raviranjan.OS — single-file admin console
+   No build step, no CDN, no dependency on the rest of the bundle.
+   ======================================================================= */
+(function () {
+  'use strict';
+
+  /* ------------------------------ config ------------------------------ */
+  var REMOTE_API = 'https://raviranjan-os-backend.onrender.com';
+  var API_BASE = '';           // '' = same origin (proxy / Spring static)
+  var apiProbe = null;
+
+  (function initApiBase() {
+    var meta = document.querySelector('meta[name="api-base"]');
+    var explicit = window.RAVIRANJAN_API_BASE || (meta && meta.content) || '';
+    if (explicit) API_BASE = String(explicit).replace(/\/+$/, '');
+  })();
+
+  function apiLabel() {
+    return API_BASE ? API_BASE.replace(/^https?:\/\//, '') : location.host;
+  }
+
+  function paintApiLabel() {
+    var el = document.getElementById('login-api');
+    if (el) el.textContent = apiLabel();
+  }
+
+  /**
+   * Decide once where the API lives.
+   *  · file://                → no origin to call, use the deployed backend
+   *  · same-origin /api works → keep it (Vercel rewrite, Spring static, node server)
+   *  · /api answers 404/HTML  → this host is not proxying, use the backend directly
+   */
+  function ensureApi() {
+    if (apiProbe) return apiProbe;
+
+    if (location.protocol === 'file:') {
+      API_BASE = REMOTE_API;
+      apiProbe = Promise.resolve();
+      paintApiLabel();
+      return apiProbe;
+    }
+
+    apiProbe = fetch('/api', { cache: 'no-store' })
+      .then(function (res) {
+        return res.text().then(function (text) {
+          var type = res.headers.get('content-type') || '';
+          var looksHtml = type.indexOf('text/html') === 0 || /^\s*</.test(text || '');
+          if (res.status === 404 || res.status === 405 || (res.ok && looksHtml)) {
+            API_BASE = REMOTE_API;
+          }
+        });
+      })
+      .catch(function () { API_BASE = REMOTE_API; })
+      .then(function () { paintApiLabel(); });
+
+    return apiProbe;
+  }
+
+  var KEYS = {
+    token: 'raviranjan_auth_token',
+    refresh: 'raviranjan_refresh_token',
+    flag: 'raviranjan_admin_authenticated',
+    user: 'raviranjan_admin_user',
+    theme: 'admin_theme'
+  };
+
+  var state = {
+    view: 'overview',
+    projects: [],
+    inquiries: [],
+    notifications: [],
+    metrics: null,
+    editing: null,
+    aiReady: false
+  };
+
+  /* ------------------------------ icons ------------------------------- */
+  var ICONS = {
+    dashboard: '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+    projects: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+    bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+    sparkles: '<path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/>',
+    lock: '<rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+    refresh: '<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    trash: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    send: '<path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>',
+    menu: '<path d="M3 6h18M3 12h18M3 18h18"/>',
+    x: '<path d="M18 6 6 18M6 6l12 12"/>',
+    github: '<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-1-2.6c3-.3 6.2-1.5 6.2-6.9A5.4 5.4 0 0 0 19.7 4a5 5 0 0 0-.1-3.7s-1.2-.3-3.9 1.5a13 13 0 0 0-7 0C5.9.1 4.7.4 4.7.4A5 5 0 0 0 4.6 4 5.4 5.4 0 0 0 3 8.1c0 5.4 3.2 6.6 6.2 6.9A3.4 3.4 0 0 0 8 17.6V21"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
+    alert: '<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>'
+  };
+
+  function icon(name, size) {
+    var body = ICONS[name] || ICONS.info;
+    var s = size || 15;
+    return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>';
+  }
+
+  /* ------------------------------ helpers ----------------------------- */
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function esc(v) {
+    return String(v === null || v === undefined ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+  function api(path, options) {
+    options = options || {};
+    return ensureApi().then(function () {
+      return request(path, options);
+    });
+  }
+
+  function request(path, options) {
+    var url = path.indexOf('http') === 0 ? path : API_BASE + path;
+    var headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+    var token = lsGet(KEYS.token);
+    if (token) {
+      headers['Authorization'] = 'Bearer ' + token;
+      headers['X-Admin-Token'] = token;
+    }
+    return fetch(url, Object.assign({}, options, { headers: headers, cache: 'no-store' }))
+      .then(function (res) {
+        return res.text().then(function (text) {
+          var json = null;
+          try { json = text ? JSON.parse(text) : null; } catch (e) { json = null; }
+          return { ok: res.ok, status: res.status, json: json, text: text };
+        });
+      });
+  }
+
+  function unwrap(r) {
+    var j = r.json || {};
+    return j.data !== undefined ? j.data : j;
+  }
+  function listOf(data) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.content)) return data.content;
+    return [];
+  }
+
+  function toast(message, kind) {
+    var wrap = $('#toasts');
+    if (!wrap) return;
+    var color = kind === 'success' ? 'var(--ok)' : kind === 'error' ? 'var(--bad)' : kind === 'warning' ? 'var(--warn)' : 'var(--brand-text)';
+    var name = kind === 'success' ? 'check' : kind === 'error' ? 'alert' : kind === 'warning' ? 'alert' : 'info';
+    var el = document.createElement('div');
+    el.className = 'toast';
+    el.setAttribute('role', 'status');
+    el.innerHTML = '<span style="color:' + color + '">' + icon(name) + '</span><span>' + esc(message) + '</span>';
+    wrap.appendChild(el);
+    setTimeout(function () {
+      el.style.transition = 'opacity .2s ease, transform .2s ease';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(6px)';
+      setTimeout(function () { el.remove(); }, 220);
+    }, 3200);
+  }
+
+  function busy(btn, on) {
+    if (!btn) return;
+    if (on) btn.setAttribute('aria-busy', 'true');
+    else btn.removeAttribute('aria-busy');
+  }
+
+  /* ------------------------------ session ----------------------------- */
+  function token() { return lsGet(KEYS.token); }
+  function isAuthed() { return lsGet(KEYS.flag) === 'true' && Boolean(token()); }
+  function currentUser() { return lsGet(KEYS.user) || 'admin'; }
+
+  function decodeJwt(t) {
+    if (!t || typeof t !== 'string') return null;
+    var parts = t.split('.');
+    if (parts.length !== 3) return null;
+    try {
+      var b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4 !== 0) b64 += '=';
+      var bin = atob(b64);
+      var pct = '';
+      for (var i = 0; i < bin.length; i++) pct += '%' + ('00' + bin.charCodeAt(i).toString(16)).slice(-2);
+      return JSON.parse(decodeURIComponent(pct));
+    } catch (e) { return null; }
+  }
+
+  function sessionExpiredSoon() {
+    var payload = decodeJwt(token());
+    if (!payload || !payload.exp) return false;      // unknown shape → let the API decide
+    return payload.exp * 1000 <= Date.now() + 30000;
+  }
+
+  function saveSession(data, fallbackUser) {
+    lsSet(KEYS.token, data.accessToken || data.access_token || data.token || '');
+    if (data.refreshToken) lsSet(KEYS.refresh, data.refreshToken);
+    lsSet(KEYS.flag, 'true');
+    lsSet(KEYS.user, data.username || fallbackUser || 'admin');
+  }
+
+  function clearSession() {
+    lsDel(KEYS.token); lsDel(KEYS.refresh); lsDel(KEYS.flag); lsDel(KEYS.user);
+  }
+
+  function showLogin(message) {
+    var box = $('#login');
+    box.classList.remove('is-off');
+    var err = $('#login-err');
+    if (message) { err.textContent = message; err.classList.add('is-on'); }
+    else { err.textContent = ''; err.classList.remove('is-on'); }
+    var u = $('#login-user');
+    if (u && !u.value) setTimeout(function () { u.focus(); }, 60);
+  }
+
+  function hideLogin() {
+    $('#login').classList.add('is-off');
+    $('#login-err').classList.remove('is-on');
+  }
+
+  function lock() {
+    clearSession();
+    showLogin('Session locked. Sign in again to continue.');
+  }
+
+  /* ------------------------------ theme ------------------------------- */
+  function applyTheme(mode) {
+    var t = mode === 'system'
+      ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+      : mode;
+    var r = document.documentElement;
+    r.classList.remove('light', 'dark');
+    r.classList.add(t);
+    r.style.colorScheme = t;
+    lsSet(KEYS.theme, mode);
+    var btn = $('#theme-btn');
+    if (btn) btn.innerHTML = icon(t === 'light' ? 'moon' : 'sun');
+  }
+
+  function toggleTheme() {
+    applyTheme(document.documentElement.classList.contains('light') ? 'dark' : 'light');
+  }
+
+  /* ------------------------------ shell ------------------------------- */
+  var VIEWS = {
+    overview: { label: 'Overview', sub: 'Live Neon DB telemetry', icon: 'dashboard' },
+    projects: { label: 'Projects', sub: 'Case studies and architecture', icon: 'projects' },
+    inquiries: { label: 'Inquiries', sub: 'Contact CRM pipeline', icon: 'inbox' },
+    notifications: { label: 'Notifications', sub: 'Event stream', icon: 'bell' },
+    assistant: { label: 'Ask AI', sub: 'Grounded portfolio assistant', icon: 'sparkles' }
+  };
+
+  function buildChrome() {
+    $$('#nav .nav').forEach(function (btn) {
+      var v = btn.getAttribute('data-view');
+      var meta = VIEWS[v];
+      btn.innerHTML = icon(meta.icon) + '<span>' + meta.label + '</span>';
+    });
+    $('#side-avatar').textContent = currentUser().substring(0, 2).toUpperCase();
+    $('#side-user').textContent = currentUser();
+    $$('.side__foot .btn--icon')[0].innerHTML = icon('lock');
+    $('.mob-toggle').innerHTML = icon('menu');
+    $('#theme-btn').innerHTML = icon(document.documentElement.classList.contains('light') ? 'moon' : 'sun');
+    paintApiLabel();
+    $('#bell-btn').innerHTML = icon('bell');
+    $('#ai-btn').innerHTML = icon('sparkles') + '<span>Ask AI</span>';
+    $('#refresh-btn').innerHTML = icon('refresh');
+    $('#refresh-btn').classList.add('btn--icon');
+    $('#drawer-ai .drawer__head .btn--icon').innerHTML = icon('x');
+    $('#drawer-notif .drawer__head .btn--icon').innerHTML = icon('x');
+    $('#project-scrim .modal__head .btn--icon').innerHTML = icon('x');
+    $('#ai-form button').innerHTML = icon('send');
+  }
+
+  function setView(view) {
+    state.view = view;
+    $$('#nav .nav').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-view') === view);
+    });
+    $('#crumb').textContent = VIEWS[view].label;
+    $('#crumb-sub').textContent = VIEWS[view].sub;
+    toggleSide(false);
+    // Show the shell immediately, then hydrate this view from the API.
+    render();
+    loadView();
+  }
+
+  function toggleSide(force) {
+    var side = $('#side');
+    var scrim = $('#mob-scrim');
+    var open = typeof force === 'boolean' ? force : !side.classList.contains('is-on');
+    side.classList.toggle('is-on', open);
+    scrim.classList.toggle('is-on', open);
+  }
+
+  function refreshView() {
+    var btn = $('#refresh-btn');
+    busy(btn, true);
+    loadView().then(function () { busy(btn, false); });
+  }
+
+  /* ------------------------------ data -------------------------------- */
+  function loadMetrics() {
+    return api('/api/admin/dashboard/metrics').then(function (r) {
+      if (r.ok) { state.metrics = unwrap(r) || {}; return; }
+      if (r.status === 401) throw { unauthorized: true };
+      return Promise.all([
+        api('/api/activity/telemetry').catch(function () { return null; }),
+        api('/api/projects?size=100').catch(function () { return null; }),
+        api('/api/admin/inquiries?size=100').catch(function () { return null; })
+      ]).then(function (res) {
+        var tel = res[0] && res[0].ok ? unwrap(res[0]) || {} : {};
+        var projs = res[1] && res[1].ok ? listOf(unwrap(res[1])) : [];
+        var inq = res[2] && res[2].ok ? listOf(unwrap(res[2])) : [];
+        state.metrics = {
+          totalProjects: projs.length,
+          publishedProjects: projs.filter(function (p) { return p.status === 'PUBLISHED'; }).length,
+          githubCommits: (tel.github && tel.github.contributions) || 0,
+          githubRepos: (tel.github && tel.github.repositories) || 0,
+          leetcodeSolved: (tel.leetcode && tel.leetcode.solvedTotal) || 0,
+          gfgScore: (tel.gfg && (tel.gfg.score || tel.gfg.codingScore)) || 0,
+          totalInquiries: inq.length,
+          newInquiries: inq.filter(function (i) { return i.status === 'NEW'; }).length
+        };
+      });
+    });
+  }
+
+  function loadProjects() {
+    return api('/api/admin/projects?size=100').then(function (r) {
+      if (r.ok) state.projects = listOf(unwrap(r));
+      else if (r.status === 401) throw { unauthorized: true };
+      else return api('/api/projects?size=100').then(function (pub) {
+        if (pub.ok) state.projects = listOf(unwrap(pub));
+      });
+    }).catch(function () {});
+  }
+
+  function loadInquiries() {
+    return api('/api/admin/inquiries?size=100').then(function (r) {
+      if (r.ok) state.inquiries = listOf(unwrap(r));
+      else if (r.status === 401) throw { unauthorized: true };
+    }).catch(function () {});
+  }
+
+  function loadNotifications() {
+    return api('/api/admin/notifications?size=50').then(function (r) {
+      if (r.ok) {
+        state.notifications = listOf(unwrap(r));
+        var unread = state.notifications.filter(function (n) { return !n.read; }).length;
+        var bell = $('#bell-btn');
+        if (bell) {
+          bell.innerHTML = icon('bell') + (unread
+            ? '<span style="position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--bad);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">' + unread + '</span>'
+            : '');
+        }
+        renderNotifications();
+      } else if (r.status === 401) throw { unauthorized: true };
+    }).catch(function () {});
+  }
+
+  function loadView() {
+    var p;
+    if (state.view === 'overview') p = loadMetrics();
+    else if (state.view === 'projects') p = loadProjects();
+    else if (state.view === 'inquiries') p = loadInquiries();
+    else if (state.view === 'notifications') p = loadNotifications();
+    else p = Promise.resolve();
+    return p.then(function () { render(); }).catch(function (err) {
+      if (err && err.unauthorized) { clearSession(); showLogin('Your session expired. Sign in again.'); }
+    });
+  }
+
+  /* ------------------------------ render ------------------------------ */
+  function render() {
+    var view = $('#view');
+    if (state.view === 'overview') view.innerHTML = viewOverview();
+    else if (state.view === 'projects') view.innerHTML = viewProjects();
+    else if (state.view === 'inquiries') view.innerHTML = viewInquiries();
+    else if (state.view === 'notifications') view.innerHTML = viewNotifications();
+    else view.innerHTML = viewAssistant();
+  }
+
+  function statCard(label, value, note, iconName) {
+    return '<div class="stat">' +
+      '<div class="stat__label"><span>' + esc(label) + '</span><span style="color:var(--faint)">' + icon(iconName) + '</span></div>' +
+      '<div class="stat__value">' + esc(value) + '</div>' +
+      '<div class="stat__note">' + esc(note) + '</div>' +
+      '</div>';
+  }
+
+  function viewOverview() {
+    var m = state.metrics || {};
+    var loading = !state.metrics;
+    return '' +
+      '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">' +
+        '<div>' +
+          '<h1 style="margin:0;font-size:19px;font-weight:600;letter-spacing:-.02em">Platform overview</h1>' +
+          '<p style="margin:4px 0 0;color:var(--muted);font-size:12.5px">Aggregated metrics from the CMS domain and external integrations.</p>' +
+        '</div>' +
+        '<span class="pill pill--ok"><span class="dot"></span> Neon DB connected</span>' +
+      '</div>' +
+      '<div class="grid stats" style="margin-bottom:16px">' +
+        statCard('Projects', loading ? '—' : (m.totalProjects != null ? m.totalProjects : 0), (m.publishedProjects != null ? m.publishedProjects + ' published' : 'CMS domain'), 'projects') +
+        statCard('GitHub commits', loading ? '—' : (m.githubCommits != null ? m.githubCommits : 0), (m.githubRepos != null ? m.githubRepos + ' repositories' : 'Telemetry'), 'github') +
+        statCard('LeetCode solved', loading ? '—' : (m.leetcodeSolved != null ? m.leetcodeSolved : 0), 'Public GraphQL', 'check') +
+        statCard('GFG score', loading ? '—' : (m.gfgScore != null ? m.gfgScore : 0), 'Coding score', 'check') +
+        statCard('Inquiries', loading ? '—' : (m.totalInquiries != null ? m.totalInquiries : 0), (m.newInquiries != null ? m.newInquiries + ' new' : 'CRM pipeline'), 'inbox') +
+      '</div>' +
+      '<div class="grid" style="grid-template-columns:1fr;gap:14px">' +
+        '<section class="card">' +
+          '<div class="card__head"><span class="card__title">Recent activity</span><span class="pill">Live feed</span></div>' +
+          '<div class="card__body" id="overview-activity"><div class="skel" style="width:60%"></div></div>' +
+        '</section>' +
+        '<section class="card">' +
+          '<div class="card__head"><span class="card__title">Quick actions</span></div>' +
+          '<div class="card__body" style="display:flex;flex-wrap:wrap;gap:8px">' +
+            '<button class="btn btn--primary" onclick="Admin.openProject()">' + icon('plus') + ' New project</button>' +
+            '<button class="btn" onclick="Admin.setView(\'inquiries\')">' + icon('inbox') + ' Review inquiries</button>' +
+            '<button class="btn" onclick="Admin.openDrawer(\'ai\')">' + icon('sparkles') + ' Ask the assistant</button>' +
+            '<a class="btn" href="/" target="_blank" rel="noopener">' + icon('dashboard') + ' Open public site</a>' +
+          '</div>' +
+        '</section>' +
+      '</div>';
+  }
+
+  function loadOverviewActivity() {
+    var box = $('#overview-activity');
+    if (!box) return;
+    api('/api/activity?size=6').then(function (r) {
+      var items = r.ok ? listOf(unwrap(r)) : [];
+      if (!items.length) {
+        box.innerHTML = '<div class="empty">No activity recorded yet.</div>';
+        return;
+      }
+      box.innerHTML = items.map(function (a) {
+        return '<div style="display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid color-mix(in srgb, var(--line) 60%, transparent)">' +
+          '<span class="pill pill--brand" style="margin-top:1px">' + esc(a.sourcePlatform || 'SYSTEM') + '</span>' +
+          '<div style="min-width:0;flex:1">' +
+            '<p style="margin:0;font-size:12.5px;color:var(--ink)">' + esc(a.title || '') + '</p>' +
+            '<p style="margin:2px 0 0;font-size:11.5px;color:var(--faint)">' + esc(a.description || '') + '</p>' +
+          '</div>' +
+          '<span class="pill">' + esc(a.timeAgo || '') + '</span>' +
+        '</div>';
+      }).join('');
+    }).catch(function () {
+      box.innerHTML = '<div class="empty">Activity feed unavailable.</div>';
+    });
+  }
+
+  function viewProjects() {
+    var rows = state.projects.map(function (p) {
+      var statusClass = p.status === 'PUBLISHED' ? 'pill--ok' : p.status === 'DRAFT' ? 'pill--warn' : 'pill';
+      return '<tr>' +
+        '<td><b>' + esc(p.title || 'Untitled') + '</b><div style="font-family:var(--mono);font-size:10.5px;color:var(--faint)">/' + esc(p.slug || '') + '</div></td>' +
+        '<td><span class="pill ' + statusClass + '">' + esc(p.status || '—') + '</span></td>' +
+        '<td>' + (p.progress != null ? p.progress + '%' : '—') + '</td>' +
+        '<td style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc((p.technologies || []).join(', ')) + '</td>' +
+        '<td style="white-space:nowrap">' +
+          '<button class="btn btn--sm btn--ghost" onclick="Admin.openProject(\'' + esc(p.id || p.slug) + '\')" aria-label="Edit project">' + icon('edit') + '</button> ' +
+          '<button class="btn btn--sm btn--ghost" onclick="Admin.deleteProject(\'' + esc(p.id || p.slug) + '\')" aria-label="Delete project">' + icon('trash') + '</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+
+    return '' +
+      '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">' +
+        '<div><h1 style="margin:0;font-size:19px;font-weight:600;letter-spacing:-.02em">Projects</h1>' +
+        '<p style="margin:4px 0 0;color:var(--muted);font-size:12.5px">' + state.projects.length + ' records in Neon DB.</p></div>' +
+        '<button class="btn btn--primary" onclick="Admin.openProject()">' + icon('plus') + ' New project</button>' +
+      '</div>' +
+      (state.projects.length
+        ? '<div class="table-wrap"><table><thead><tr><th>Project</th><th>Status</th><th>Progress</th><th>Stack</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+        : '<div class="empty">No projects yet — create the first one.</div>');
+  }
+
+  function viewInquiries() {
+    var rows = state.inquiries.map(function (i) {
+      var st = (i.status || 'NEW');
+      var cls = st === 'NEW' ? 'pill--warn' : st === 'CLOSED' || st === 'REJECTED' ? 'pill' : 'pill--brand';
+      return '<tr>' +
+        '<td><b>' + esc(i.fullName || i.name || 'Unknown') + '</b><div style="font-family:var(--mono);font-size:10.5px;color:var(--faint)">' + esc(i.email || '') + '</div></td>' +
+        '<td style="max-width:320px">' + esc((i.message || '').slice(0, 120)) + '</td>' +
+        '<td><span class="pill ' + cls + '">' + esc(st) + '</span></td>' +
+        '<td style="white-space:nowrap">' +
+          '<button class="btn btn--sm" onclick="Admin.setInquiryStatus(\'' + esc(i.id) + '\',\'IN_REVIEW\')">Review</button> ' +
+          '<button class="btn btn--sm" onclick="Admin.setInquiryStatus(\'' + esc(i.id) + '\',\'RESOLVED\')">Resolve</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+
+    return '' +
+      '<div style="margin-bottom:16px">' +
+        '<h1 style="margin:0;font-size:19px;font-weight:600;letter-spacing:-.02em">Inquiries</h1>' +
+        '<p style="margin:4px 0 0;color:var(--muted);font-size:12.5px">' + state.inquiries.length + ' recruiter messages from the contact form.</p>' +
+      '</div>' +
+      (state.inquiries.length
+        ? '<div class="table-wrap"><table><thead><tr><th>From</th><th>Message</th><th>Status</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+        : '<div class="empty">No inquiries yet.</div>');
+  }
+
+  function viewNotifications() {
+    return '' +
+      '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">' +
+        '<div><h1 style="margin:0;font-size:19px;font-weight:600;letter-spacing:-.02em">Notifications</h1>' +
+        '<p style="margin:4px 0 0;color:var(--muted);font-size:12.5px">' + state.notifications.filter(function (n) { return !n.read; }).length + ' unread.</p></div>' +
+        '<button class="btn" onclick="Admin.markAllRead()">' + icon('check') + ' Mark all read</button>' +
+      '</div>' +
+      '<div class="grid" style="gap:10px" id="notif-list">' + notifCards(state.notifications) + '</div>';
+  }
+
+  function notifCards(items) {
+    if (!items.length) return '<div class="empty">Nothing here yet. Contact-form submissions and integration events appear here.</div>';
+    return items.map(function (n) {
+      return '<div class="card" style="opacity:' + (n.read ? '.72' : '1') + '">' +
+        '<div class="card__body">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">' +
+            '<span class="pill ' + (n.priority === 'URGENT' ? 'pill--bad' : 'pill--brand') + '">' + esc(n.priority || 'INFO') + '</span>' +
+            '<span style="font-family:var(--mono);font-size:10.5px;color:var(--faint)">' + esc(n.createdAt ? new Date(n.createdAt).toLocaleString() : '') + '</span>' +
+          '</div>' +
+          '<p style="margin:0;font-size:13px;font-weight:550;color:var(--ink)">' + esc(n.title || '') + '</p>' +
+          '<p style="margin:3px 0 0;font-size:12px;color:var(--muted)">' + esc(n.message || '') + '</p>' +
+          '<div style="display:flex;gap:6px;margin-top:10px">' +
+            (n.read ? '' : '<button class="btn btn--sm" onclick="Admin.markRead(\'' + esc(n.id) + '\')">Mark read</button>') +
+            '<button class="btn btn--sm btn--danger" onclick="Admin.deleteNotification(\'' + esc(n.id) + '\')">Delete</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function viewAssistant() {
+    return '' +
+      '<div style="margin-bottom:16px">' +
+        '<h1 style="margin:0;font-size:19px;font-weight:600;letter-spacing:-.02em">Ask AI</h1>' +
+        '<p style="margin:4px 0 0;color:var(--muted);font-size:12.5px">Grounded on this portfolio\'s own data.</p>' +
+      '</div>' +
+      '<div class="card"><div class="card__body" style="display:flex;flex-wrap:wrap;gap:8px">' +
+        ['What projects has he built?', 'Explain RakshaGrid.', 'What technologies does he use?', 'Summarise his internships.'].map(function (q) {
+          return '<button class="btn btn--sm" onclick="Admin.ask(\'' + esc(q).replace(/'/g, "\\'") + '\')">' + esc(q) + '</button>';
+        }).join('') +
+      '</div></div>';
+  }
+
+  function renderNotifications() {
+    var list = $('#notif-list');
+    if (list) list.innerHTML = notifCards(state.notifications);
+    var thread = $('#notif-thread');
+    if (thread) {
+      thread.innerHTML = state.notifications.length
+        ? notifCards(state.notifications)
+        : '<div class="empty">No notifications yet.</div>';
+    }
+  }
+
+  /* ------------------------------ actions ----------------------------- */
+  function openDrawer(which) {
+    closeDrawer('ai'); closeDrawer('notif');
+    var el = $(which === 'ai' ? '#drawer-ai' : '#drawer-notif');
+    el.classList.add('is-on');
+    el.setAttribute('aria-hidden', 'false');
+    if (which === 'ai') {
+      if (!state.aiReady) {
+        state.aiReady = true;
+        addAiMessage('ai', 'Hi — ask me about projects, architecture decisions, the stack or the DSA notes. Answers come from this portfolio only.');
+      }
+      setTimeout(function () { var i = $('#ai-input'); if (i) i.focus(); }, 260);
+    } else {
+      var btn = $('#bell-btn');
+      busy(btn, true);
+      loadNotifications().then(function () { busy(btn, false); });
+    }
+  }
+
+  function closeDrawer(which) {
+    var el = $(which === 'ai' ? '#drawer-ai' : '#drawer-notif');
+    if (!el) return;
+    el.classList.remove('is-on');
+    el.setAttribute('aria-hidden', 'true');
+  }
+
+  function addAiMessage(role, html) {
+    var thread = $('#ai-thread');
+    var wrap = document.createElement('div');
+    wrap.className = 'msg' + (role === 'me' ? ' msg--me' : '');
+    wrap.innerHTML =
+      '<span class="msg__av">' + icon(role === 'me' ? 'info' : 'sparkles') + '</span>' +
+      '<div class="bubble">' + html + '</div>';
+    thread.appendChild(wrap);
+    thread.scrollTop = thread.scrollHeight;
+    return wrap;
+  }
+
+  function ask(text) {
+    openDrawer('ai');
+    var input = $('#ai-input');
+    if (input) input.value = text;
+    sendAi(text);
+  }
+
+  function sendAi(text) {
+    var query = String(text || '').trim();
+    if (!query) return;
+    addAiMessage('me', esc(query));
+    var typing = addAiMessage('ai', '<span class="typing"><i></i><i></i><i></i></span>');
+    api('/api/ai/chat', { method: 'POST', body: JSON.stringify({ query: query, sessionId: 'admin-console', pageUrl: '/admin' }) })
+      .then(function (r) {
+        var d = r.ok ? (unwrap(r) || {}) : {};
+        var answer = d.answer || 'No answer returned. Check the RAG configuration.';
+        var html = esc(answer)
+          .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+          .replace(/\[(.+?)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+          .replace(/\n/g, '<br>');
+        typing.remove();
+        addAiMessage('ai', html + (d.latencyMs ? '<div style="margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--faint)">' + d.latencyMs + 'ms</div>' : ''));
+      })
+      .catch(function () {
+        typing.remove();
+        addAiMessage('ai', 'Could not reach the assistant. Check the API connection and try again.');
+      });
+  }
+
+  /* projects */
+  function openProject(id) {
+    state.editing = null;
+    var p = null;
+    if (id) p = state.projects.filter(function (x) { return (x.id || x.slug) === id; })[0] || null;
+    state.editing = p;
+    $('#project-title').textContent = p ? 'Edit project' : 'New project';
+    $('#project-err').classList.remove('is-on');
+    $('#p-title').value = p ? (p.title || '') : '';
+    $('#p-slug').value = p ? (p.slug || '') : '';
+    $('#p-summary').value = p ? (p.shortSummary || '') : '';
+    $('#p-tech').value = p && p.technologies ? p.technologies.join(', ') : '';
+    $('#p-status').value = p && p.status ? p.status : 'PUBLISHED';
+    $('#p-progress').value = p && p.progress != null ? p.progress : 85;
+    $('#p-github').value = p ? (p.githubRepoUrl || '') : '';
+    $('#p-live').value = p ? (p.liveDemoUrl || '') : '';
+    $('#p-arch').value = p ? (p.architectureStyle || '') : '';
+    $('#p-category').value = p && p.category ? p.category : 'FULL_STACK';
+    $('#project-scrim').classList.add('is-on');
+    setTimeout(function () { $('#p-title').focus(); }, 80);
+  }
+
+  function closeProject() {
+    $('#project-scrim').classList.remove('is-on');
+    state.editing = null;
+  }
+
+  function saveProject(event) {
+    event.preventDefault();
+    var btn = $('#project-save');
+    var err = $('#project-err');
+    err.classList.remove('is-on');
+
+    var payload = {
+      title: $('#p-title').value.trim(),
+      slug: ($('#p-slug').value.trim() || $('#p-title').value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')),
+      shortSummary: $('#p-summary').value.trim(),
+      category: $('#p-category').value,
+      status: $('#p-status').value,
+      progress: Number($('#p-progress').value) || 0,
+      featured: true,
+      architectureStyle: $('#p-arch').value.trim(),
+      githubRepoUrl: $('#p-github').value.trim() || null,
+      liveDemoUrl: $('#p-live').value.trim() || null
+    };
+
+    if (!payload.title) {
+      err.textContent = 'Title is required.';
+      err.classList.add('is-on');
+      return;
+    }
+
+    busy(btn, true);
+    var editing = state.editing;
+    var req = editing
+      ? api('/api/admin/projects/' + encodeURIComponent(editing.id || editing.slug), { method: 'PUT', body: JSON.stringify(payload) })
+      : api('/api/admin/projects', { method: 'POST', body: JSON.stringify(payload) });
+
+    req.then(function (r) {
+      busy(btn, false);
+      if (r.ok) {
+        toast(editing ? 'Project updated' : 'Project created', 'success');
+        closeProject();
+        loadView();
+        return;
+      }
+      if (r.status === 401) { clearSession(); showLogin('Session expired — sign in again.'); return; }
+      var msg = (r.json && (r.json.message || r.json.error)) || ('Save failed (HTTP ' + r.status + ')');
+      err.textContent = msg;
+      err.classList.add('is-on');
+    }).catch(function (e) {
+      busy(btn, false);
+      err.textContent = 'Network error: ' + e.message;
+      err.classList.add('is-on');
+    });
+  }
+
+  function deleteProject(id) {
+    if (!window.confirm('Delete this project from Neon DB?')) return;
+    api('/api/admin/projects/' + encodeURIComponent(id), { method: 'DELETE' }).then(function (r) {
+      if (r.ok) { toast('Project deleted', 'success'); loadView(); }
+      else toast('Delete failed (HTTP ' + r.status + ')', 'error');
+    }).catch(function () { toast('Network error', 'error'); });
+  }
+
+  function setInquiryStatus(id, status) {
+    api('/api/admin/inquiries/' + encodeURIComponent(id), { method: 'PUT', body: JSON.stringify({ status: status }) })
+      .then(function (r) {
+        if (r.ok) { toast('Inquiry marked ' + status.toLowerCase(), 'success'); loadView(); }
+        else toast('Update failed (HTTP ' + r.status + ')', 'error');
+      }).catch(function () { toast('Network error', 'error'); });
+  }
+
+  function markRead(id) {
+    api('/api/admin/notifications/' + encodeURIComponent(id) + '/read', { method: 'PUT' })
+      .then(function (r) {
+        if (r.ok) loadNotifications();
+        else toast('Update failed (HTTP ' + r.status + ')', 'error');
+      }).catch(function () { toast('Network error', 'error'); });
+  }
+
+  function markAllRead() {
+    api('/api/admin/notifications/read-all', { method: 'PUT' }).then(function (r) {
+      if (r.ok) { toast('All notifications marked read', 'success'); loadNotifications(); }
+      else toast('Update failed (HTTP ' + r.status + ')', 'error');
+    }).catch(function () { toast('Network error', 'error'); });
+  }
+
+  function deleteNotification(id) {
+    api('/api/admin/notifications/' + encodeURIComponent(id), { method: 'DELETE' }).then(function (r) {
+      if (r.ok) { toast('Notification deleted', 'success'); loadNotifications(); }
+      else toast('Delete failed (HTTP ' + r.status + ')', 'error');
+    }).catch(function () { toast('Network error', 'error'); });
+  }
+
+  /* ------------------------------ auth ui ----------------------------- */
+  function loginSubmit(event) {
+    event.preventDefault();
+    var btn = $('#login-btn');
+    var err = $('#login-err');
+    var user = $('#login-user').value.trim();
+    var pass = $('#login-pass').value;
+    err.classList.remove('is-on');
+
+    if (!user || !pass) {
+      err.textContent = 'Enter both the username and the password.';
+      err.classList.add('is-on');
+      return;
+    }
+
+    busy(btn, true);
+    api('/api/v1/auth/login', { method: 'POST', body: JSON.stringify({ username: user, password: pass }) })
+      .then(function (r) {
+        busy(btn, false);
+        var data = unwrap(r) || {};
+        var tok = data.accessToken || data.access_token || data.token;
+        if (r.ok && tok) {
+          saveSession(data, user);
+          $('#login-pass').value = '';
+          hideLogin();
+          bootConsole();
+          toast('Signed in as ' + (data.username || user), 'success');
+          return;
+        }
+        if (r.status === 401 || r.status === 403) err.textContent = (r.json && r.json.message) || 'Invalid username or password.';
+        else if (r.status === 429) err.textContent = 'Too many attempts. Wait a minute and try again.';
+        else if (r.ok) err.textContent = 'The API answered but returned no token.';
+        else err.textContent = (r.json && (r.json.message || r.json.error)) || ('Sign-in failed (HTTP ' + r.status + ').');
+        err.classList.add('is-on');
+      })
+      .catch(function (e) {
+        busy(btn, false);
+        err.textContent = 'Cannot reach the API (' + e.message + '). The backend may be waking up — try again in a few seconds.';
+        err.classList.add('is-on');
+      });
+  }
+
+  /* ------------------------------ boot -------------------------------- */
+  function bootConsole() {
+    buildChrome();
+    setView('overview');
+    loadView().then(function () { loadOverviewActivity(); });
+    loadNotifications();
+  }
+
+  function start() {
+    applyTheme(lsGet(KEYS.theme) || 'system');
+    buildChrome();
+    ensureApi();   // resolve the API origin early so the sign-in card can show it
+
+    $('#login-form').addEventListener('submit', loginSubmit);
+    $('#project-form').addEventListener('submit', saveProject);
+    $('#ai-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var input = $('#ai-input');
+      var value = input.value;
+      input.value = '';
+      sendAi(value);
+    });
+    $$('#nav .nav').forEach(function (b) {
+      b.addEventListener('click', function () { setView(b.getAttribute('data-view')); });
+    });
+
+    if (!isAuthed()) { showLogin(); return; }
+    if (sessionExpiredSoon()) { clearSession(); showLogin('Your session expired. Sign in again.'); return; }
+    hideLogin();
+    bootConsole();
+  }
+
+  window.Admin = {
+    setView: setView,
+    openProject: openProject,
+    closeProject: closeProject,
+    deleteProject: deleteProject,
+    setInquiryStatus: setInquiryStatus,
+    markRead: markRead,
+    markAllRead: markAllRead,
+    deleteNotification: deleteNotification,
+    openDrawer: openDrawer,
+    closeDrawer: closeDrawer,
+    ask: ask,
+    refresh: refreshView,
+    lock: lock,
+    toggleTheme: toggleTheme
+  };
+
+  window.addEventListener('storage', function (e) {
+    if (e.key === KEYS.flag || e.key === KEYS.token) {
+      if (isAuthed()) { hideLogin(); bootConsole(); } else { showLogin('Signed out in another tab.'); }
+    }
+  });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+</script>
+</body>
+</html>
