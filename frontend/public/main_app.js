@@ -203,6 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
   localStorage.removeItem("cachedProfile");
 
   initTheme();
+  initHeaderChrome();
   if (window.lucide) {
     window.lucide.createIcons();
   }
@@ -248,20 +249,35 @@ function showToast(message, type = "info") {
   const container = document.getElementById("toast-container");
   if (!container) return;
 
+  const variant = {
+    success: "ds-badge--success",
+    error: "ds-badge--danger",
+    warning: "ds-badge--warning",
+    info: "ds-badge--brand",
+  }[type] || "ds-badge--brand";
+  const icon = {
+    success: "check-circle-2",
+    error: "alert-circle",
+    warning: "alert-triangle",
+    info: "info",
+  }[type] || "info";
+
   const toast = document.createElement("div");
-  const borderCol = type === "success" ? "border-emerald-500/40 text-emerald-300" : "border-cyan-500/40 text-cyan-300";
-  toast.className = `p-3 rounded-lg bg-[#10121a] border ${borderCol} shadow-xl text-xs flex items-center space-x-2 animate-fade-in pointer-events-auto`;
-  toast.innerHTML = `<span class="w-2 h-2 rounded-full ${type === "success" ? "bg-emerald-400" : "bg-cyan-400"}"></span><span>${escapeHtml(message)}</span>`;
+  toast.className = "ds-toast pointer-events-auto";
+  toast.setAttribute("role", "status");
+  toast.innerHTML =
+    '<span class="mt-0.5 shrink-0 text-brand-400"><i data-lucide="' + icon + '" class="w-4 h-4"></i></span>' +
+    '<span class="flex-1">' + escapeHtml(message) + "</span>";
   container.appendChild(toast);
+  if (window.lucide) window.lucide.createIcons();
 
   setTimeout(() => {
     toast.style.opacity = "0";
-    toast.style.transform = "translateY(10px)";
-    toast.style.transition = "all 0.3s ease";
-    setTimeout(() => toast.remove(), 300);
-  }, 3500);
+    toast.style.transform = "translateY(8px)";
+    toast.style.transition = "opacity 200ms ease, transform 200ms ease";
+    setTimeout(() => toast.remove(), 220);
+  }, 3600);
 }
-
 
 let backendRetryTimer = null;
 let backendRetryCount = 0;
@@ -450,7 +466,7 @@ function renderProjects(items) {
 
   if (!items || items.length === 0) {
     container.innerHTML = `
-      <div class="col-span-full p-8 rounded-xl bg-[#10121a] border border-[#1f2430] text-center space-y-2">
+      <div class="col-span-full p-8 rounded-xl bg-surface border border-line text-center space-y-2">
         <i data-lucide="folder-search" class="w-8 h-8 text-slate-500 mx-auto"></i>
         <p class="text-sm font-bold text-white font-mono">No Projects Published Yet</p>
         <p class="text-xs text-slate-400">Add or publish projects in the Admin CMS to display them here from Neon DB.</p>
@@ -462,7 +478,7 @@ function renderProjects(items) {
 
   container.innerHTML = items.map(p => {
     const techBadges = (p.technologies || []).map(t =>
-      `<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#161924] text-slate-300 border border-[#232938]">${escapeHtml(t)}</span>`
+      `<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-elevated text-slate-300 border border-line">${escapeHtml(t)}</span>`
     ).join("");
 
     const demoLink = (p.demo && p.demo !== "#")
@@ -491,7 +507,7 @@ function renderProjects(items) {
               <span>${escapeHtml(p.milestoneSummary)}</span>
               <span>${p.progress}%</span>
             </div>
-            <div class="w-full bg-[#161924] rounded-full h-1.5 overflow-hidden">
+            <div class="w-full bg-elevated rounded-full h-1.5 overflow-hidden">
               <div class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-1.5 rounded-full" style="width: ${p.progress}%"></div>
             </div>
           </div>
@@ -501,7 +517,7 @@ function renderProjects(items) {
           </div>
         </div>
 
-        <div class="pt-4 border-t border-[#1f2430] flex items-center justify-between text-xs font-mono">
+        <div class="pt-4 border-t border-line flex items-center justify-between text-xs font-mono">
           <button onclick="openProjectDetail('${escapeHtml(p.slug)}')" class="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium">
             <span>Read Case Study & ADRs</span>
             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
@@ -561,7 +577,7 @@ function renderActivity(items) {
       : "";
 
     return `
-      <div class="flex items-start justify-between space-x-3 p-2.5 rounded bg-[#10121a] border border-[#1a1f2b] hover:border-slate-600 transition-colors">
+      <div class="flex items-start justify-between space-x-3 p-2.5 rounded bg-surface border border-line hover:border-slate-600 transition-colors">
         <div class="flex items-start space-x-3">
           <span class="px-1.5 py-0.5 rounded text-[10px] ${pClass}">${escapeHtml(plat)}</span>
           <div class="flex-1">
@@ -674,10 +690,10 @@ function setHeatmapYear(year) {
   const btn2025 = document.getElementById("btn-year-2025");
   if (btn2026 && btn2025) {
     if (year === 2026) {
-      btn2026.className = "btn-year-active year-active px-2.5 py-1 rounded bg-[#1c202e] text-white transition-colors";
+      btn2026.className = "btn-year-active year-active px-2.5 py-1 rounded bg-elevated text-white transition-colors";
       btn2025.className = "btn-year-inactive year-inactive px-2.5 py-1 rounded text-slate-400 hover:text-white transition-colors";
     } else {
-      btn2025.className = "btn-year-active year-active px-2.5 py-1 rounded bg-[#1c202e] text-white transition-colors";
+      btn2025.className = "btn-year-active year-active px-2.5 py-1 rounded bg-elevated text-white transition-colors";
       btn2026.className = "btn-year-inactive year-inactive px-2.5 py-1 rounded text-slate-400 hover:text-white transition-colors";
     }
   }
@@ -834,12 +850,12 @@ function handleCommandSearch(val) {
 function filterProjects(cat) {
   document.querySelectorAll(".proj-filter").forEach(btn => {
     btn.classList.remove("bg-cyan-500/10", "text-cyan-400", "border-cyan-500/30");
-    btn.classList.add("bg-[#10121a]", "text-slate-400");
+    btn.classList.add("bg-surface", "text-slate-400");
   });
 
   if (event && event.target) {
     event.target.classList.add("bg-cyan-500/10", "text-cyan-400", "border-cyan-500/30");
-    event.target.classList.remove("bg-[#10121a]", "text-slate-400");
+    event.target.classList.remove("bg-surface", "text-slate-400");
   }
 
   const filtered = cat === "all" ? projectsList : projectsList.filter(p => p.category === cat);
@@ -967,7 +983,7 @@ function openProjectDetail(slug) {
   }).join("");
 
   const techBadges = (p.technologies || []).map(t =>
-    `<span class="px-2 py-0.5 rounded bg-[#161924] border border-[#232938] text-[11px] font-mono text-cyan-300">${escapeHtml(t)}</span>`
+    `<span class="px-2 py-0.5 rounded bg-elevated border border-line text-[11px] font-mono text-cyan-300">${escapeHtml(t)}</span>`
   ).join("");
 
   body.innerHTML = `
@@ -984,19 +1000,19 @@ function openProjectDetail(slug) {
 
       <div>
         <h4 class="font-mono text-cyan-400 font-bold uppercase text-[11px] mb-1">3. System Architecture</h4>
-        <p class="text-slate-300 leading-relaxed font-mono bg-[#161924] p-3 rounded border border-[#232938]">${escapeHtml(p.architecture)}</p>
+        <p class="text-slate-300 leading-relaxed font-mono bg-elevated p-3 rounded border border-line">${escapeHtml(p.architecture)}</p>
       </div>
 
       <div>
         <h4 class="font-mono text-cyan-400 font-bold uppercase text-[11px] mb-2">4. Milestone Progress Matrix</h4>
-        <div class="space-y-1.5 bg-[#161924] p-3 rounded border border-[#232938]">
+        <div class="space-y-1.5 bg-elevated p-3 rounded border border-line">
           ${milestonesHtml}
         </div>
       </div>
 
       <div>
         <h4 class="font-mono text-cyan-400 font-bold uppercase text-[11px] mb-1">5. Architectural Decision Record (ADR)</h4>
-        <p class="text-slate-300 bg-[#161924] p-3 rounded border border-[#232938] leading-relaxed font-mono">${escapeHtml(p.adr)}</p>
+        <p class="text-slate-300 bg-elevated p-3 rounded border border-line leading-relaxed font-mono">${escapeHtml(p.adr)}</p>
       </div>
 
       <div>
@@ -1009,8 +1025,8 @@ function openProjectDetail(slug) {
         <div class="flex flex-wrap gap-1.5 pt-1">${techBadges}</div>
       </div>
 
-      <div class="pt-4 border-t border-[#1f2430] flex items-center justify-between text-xs font-mono">
-        <a href="${escapeHtml(p.github)}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-white flex items-center gap-1.5">
+      <div class="pt-4 border-t border-line flex items-center justify-between text-xs font-mono">
+        <a href="${escapeHtml(p.github)}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded bg-elevated hover:bg-elevated border border-line text-white flex items-center gap-1.5">
           <i data-lucide="github" class="w-3.5 h-3.5"></i>
           <span>View Source on GitHub</span>
         </a>
@@ -1121,7 +1137,7 @@ async function fetchDynamicDsaNotes() {
 
         if (tabsBar) {
           tabsBar.innerHTML = dynamicDsaNotesList.map((n, i) => `
-            <button onclick="showDsaNote('${escapeHtml(n.key)}')" id="dsa-tab-${escapeHtml(n.key)}" class="px-2.5 py-1 rounded ${i === 0 ? 'bg-[#161924] text-cyan-400 border border-cyan-500/30' : 'bg-[#10121a] text-slate-400 hover:text-white'}">
+            <button onclick="showDsaNote('${escapeHtml(n.key)}')" id="dsa-tab-${escapeHtml(n.key)}" class="px-2.5 py-1 rounded ${i === 0 ? 'bg-elevated text-cyan-400 border border-cyan-500/30' : 'bg-surface text-slate-400 hover:text-white'}">
               ${escapeHtml(n.tabLabel)}
             </button>
           `).join("");
@@ -1152,9 +1168,9 @@ function showDsaNote(key) {
     const tab = document.getElementById(`dsa-tab-${k}`);
     if (tab) {
       if (String(k) === String(key)) {
-        tab.className = 'px-2.5 py-1 rounded bg-[#161924] text-cyan-400 border border-cyan-500/30';
+        tab.className = 'px-2.5 py-1 rounded bg-elevated text-cyan-400 border border-cyan-500/30';
       } else {
-        tab.className = 'px-2.5 py-1 rounded bg-[#10121a] text-slate-400 hover:text-white';
+        tab.className = 'px-2.5 py-1 rounded bg-surface text-slate-400 hover:text-white';
       }
     }
   });
@@ -1174,11 +1190,11 @@ function showDsaNote(key) {
           <p class="text-xs text-slate-300 mt-0.5">${escapeHtml(note.approach)}</p>
         </div>
         <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-          <div class="p-2 rounded bg-[#161924] border border-[#232938]">
+          <div class="p-2 rounded bg-elevated border border-line">
             <span class="text-slate-500 text-[10px]">Time Complexity</span>
             <div class="text-cyan-400 font-bold mt-0.5">${escapeHtml(note.timeComp)}</div>
           </div>
-          <div class="p-2 rounded bg-[#161924] border border-[#232938]">
+          <div class="p-2 rounded bg-elevated border border-line">
             <span class="text-slate-500 text-[10px]">Space Complexity</span>
             <div class="text-emerald-400 font-bold mt-0.5">${escapeHtml(note.spaceComp)}</div>
           </div>
@@ -1194,7 +1210,7 @@ function showDsaNote(key) {
           <span>Solution Implementation</span>
           <span>Synced from Neon DB</span>
         </div>
-        <pre class="p-3 rounded-lg bg-[#090a0f] border border-[#232938] text-[11px] font-mono text-slate-300 overflow-x-auto leading-relaxed"><code>${escapeHtml(note.code)}</code></pre>
+        <pre class="p-3 rounded-lg bg-canvas border border-line text-[11px] font-mono text-slate-300 overflow-x-auto leading-relaxed"><code>${escapeHtml(note.code)}</code></pre>
       </div>
     </div>
   `;
@@ -1239,7 +1255,7 @@ function setPublicAiLanguage(lang) {
       if (l === lang) {
         btn.className = "px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px]";
       } else {
-        btn.className = "px-2 py-0.5 rounded bg-[#161924] text-slate-400 border border-[#232938] text-[10px] hover:text-white";
+        btn.className = "px-2 py-0.5 rounded bg-elevated text-slate-400 border border-line text-[10px] hover:text-white";
       }
     }
   });
@@ -1257,7 +1273,7 @@ async function sendAiMessage(query) {
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
   const loadingBubble = document.createElement('div');
-  loadingBubble.className = 'p-3 rounded-lg bg-[#161924] border border-[#232938] text-slate-400 text-xs font-mono mr-6 flex items-center space-x-2';
+  loadingBubble.className = 'p-3 rounded-lg bg-elevated border border-line text-slate-400 text-xs font-mono mr-6 flex items-center space-x-2';
   loadingBubble.innerHTML = '<span class="inline-block animate-spin mr-1">⟳</span> Querying Neon DB & RAG Engine...';
   chatContainer.appendChild(loadingBubble);
   chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -1297,7 +1313,7 @@ async function sendAiMessage(query) {
 
     loadingBubble.remove();
     const aiBubble = document.createElement('div');
-    aiBubble.className = 'p-3 rounded-lg bg-[#161924] border border-[#232938] text-slate-300 text-xs font-sans leading-relaxed mr-6 space-y-2';
+    aiBubble.className = 'p-3 rounded-lg bg-elevated border border-line text-slate-300 text-xs font-sans leading-relaxed mr-6 space-y-2';
 
     if (res.ok) {
       const json = await res.json();
@@ -1311,7 +1327,7 @@ async function sendAiMessage(query) {
         .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-[10px]">&nearr;</span></a>')
         .replace(/\n/g, '<br>');
       aiBubble.innerHTML = `
-        <div class="flex items-center justify-between text-[10px] font-mono text-cyan-400 border-b border-[#232938] pb-1 mb-1">
+        <div class="flex items-center justify-between text-[10px] font-mono text-cyan-400 border-b border-line pb-1 mb-1">
           <span>🤖 Ask AI · Grounded on Neon DB</span>
           <span class="text-slate-500">${d?.latencyMs || 45}ms</span>
         </div>
@@ -1327,7 +1343,7 @@ async function sendAiMessage(query) {
   } catch (err) {
     loadingBubble.remove();
     const aiBubble = document.createElement('div');
-    aiBubble.className = 'p-3 rounded-lg bg-[#161924] border border-[#232938] text-slate-300 text-xs font-sans leading-relaxed mr-6 space-y-2';
+    aiBubble.className = 'p-3 rounded-lg bg-elevated border border-line text-slate-300 text-xs font-sans leading-relaxed mr-6 space-y-2';
     aiBubble.innerHTML = evaluatePortfolioRag(query);
     chatContainer.appendChild(aiBubble);
     chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -1343,15 +1359,15 @@ function evaluatePortfolioRag(query) {
     <p class="mt-1 text-slate-300">
       Raviranjan.OS includes a private headless CMS for managing live projects, skills, research, and integration sync adapters.
     </p>
-    <div class="mt-3 p-3 rounded-lg bg-[#10121a] border border-cyan-500/30 space-y-2">
+    <div class="mt-3 p-3 rounded-lg bg-surface border border-cyan-500/30 space-y-2">
       <div class="text-[11px] font-mono text-cyan-400 font-semibold uppercase tracking-wider">ADMIN ACCESS UNLOCK</div>
       <p class="text-xs text-slate-400">Click the button below to open the private passphrase modal and authenticate, or go directly to <code>/admin</code>.</p>
       <div class="flex flex-wrap items-center gap-2 pt-1">
-        <button onclick="openAdminAuthModal(); togglePublicAiDrawer();" class="px-3 py-1.5 rounded bg-cyan-500 hover:bg-cyan-600 text-black font-semibold text-xs font-mono transition-colors flex items-center gap-1.5 shadow-sm">
+        <button onclick="openAdminAuthModal(); togglePublicAiDrawer();" class="px-3 py-1.5 rounded bg-cyan-500 hover:bg-cyan-600 text-on-solid font-semibold text-xs font-mono transition-colors flex items-center gap-1.5 shadow-sm">
           <i data-lucide="key" class="w-3.5 h-3.5"></i>
           <span>Unlock Admin Terminal</span>
         </button>
-        <a href="/admin" class="px-3 py-1.5 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-xs font-mono text-slate-300 transition-colors">
+        <a href="/admin" class="px-3 py-1.5 rounded bg-elevated hover:bg-elevated border border-line text-xs font-mono text-slate-300 transition-colors">
           Open /admin
         </a>
       </div>
@@ -1545,11 +1561,11 @@ async function handleContactSubmit(e) {
 function toggleMobileNavMenu(forceState) {
   const menu = document.getElementById('mobile-nav-menu');
   if (!menu) return;
-  if (typeof forceState === 'boolean') {
-    menu.classList.toggle('hidden', !forceState);
-  } else {
-    menu.classList.toggle('hidden');
-  }
+  const isHidden = menu.classList.contains('hidden');
+  const open = typeof forceState === 'boolean' ? forceState : isHidden;
+  menu.classList.toggle('hidden', !open);
+  const toggle = document.getElementById('mobile-nav-toggle');
+  if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 
 function copyCurlCommand() {
@@ -1642,7 +1658,7 @@ async function renderInteractiveResumeSheet() {
 
     const eduHtml = edus.length > 0
       ? edus.map(ed => `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1f2430]/60 pb-2">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-line/60 pb-2">
           <div>
             <div class="font-bold text-white text-xs">${escapeHtml(ed.degree)}</div>
             <div class="text-[11px] text-cyan-400">${escapeHtml(ed.institution)}</div>
@@ -1658,7 +1674,7 @@ async function renderInteractiveResumeSheet() {
           const isIntern = String(ex.employmentType || '').toUpperCase().includes('INTERN') || String(ex.role || '').toLowerCase().includes('intern');
           const statusLabel = isIntern ? (ex.current ? 'Pursuing Internship' : 'Completed Internship') : (ex.current ? 'Current' : 'Completed');
           return `
-        <div class="space-y-1 border-b border-[#1f2430]/60 pb-2.5">
+        <div class="space-y-1 border-b border-line/60 pb-2.5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between">
             <div class="font-bold text-white text-xs">${escapeHtml(ex.role)} <span class="text-cyan-400 font-normal">@ ${escapeHtml(ex.company)}</span> <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 ml-1">${statusLabel}</span></div>
             <div class="text-[11px] font-mono text-slate-400">${escapeHtml(ex.startDate || '')} — ${escapeHtml(ex.endDate || 'Present')}</div>
@@ -1677,7 +1693,7 @@ async function renderInteractiveResumeSheet() {
     const projHtml = projs.slice(0, 5).map(p => {
       const tList = Array.isArray(p.technologies) ? p.technologies.join(', ') : (p.technologies || 'Java, Spring Boot, PostgreSQL');
       return `
-        <div class="space-y-1 border-b border-[#1f2430]/60 pb-2.5">
+        <div class="space-y-1 border-b border-line/60 pb-2.5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between">
             <div class="font-bold text-white text-xs">${escapeHtml(p.title)} <span class="text-[10px] font-mono text-cyan-400 ml-1">[${escapeHtml(tList)}]</span></div>
             ${p.githubRepoUrl ? `<a href="${escapeHtml(p.githubRepoUrl)}" target="_blank" class="text-[10px] font-mono text-sky-400 hover:underline">GitHub ↗</a>` : ''}
@@ -1693,9 +1709,9 @@ async function renderInteractiveResumeSheet() {
     ].join('');
 
     sheet.innerHTML = `
-      <div id="resume-print-area" class="max-w-3xl mx-auto bg-[#10131d] border border-[#232938] rounded-xl p-6 sm:p-8 space-y-5 shadow-xl">
+      <div id="resume-print-area" class="max-w-3xl mx-auto bg-canvas border border-line rounded-xl p-6 sm:p-8 space-y-5 shadow-xl">
         <!-- Resume Header -->
-        <div class="border-b border-[#232938] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="border-b border-line pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 class="text-2xl font-extrabold text-white tracking-tight font-mono">${escapeHtml(fullName)}</h1>
             <p class="text-xs font-mono text-cyan-400 mt-0.5">${escapeHtml(headline)}</p>
@@ -1713,38 +1729,38 @@ async function renderInteractiveResumeSheet() {
 
         <!-- Executive Summary -->
         <div class="space-y-1.5">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Executive Summary</h3>
+          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-line pb-1">Executive Summary</h3>
           <p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(summary)}</p>
         </div>
 
         <!-- Technical Skills -->
         <div class="space-y-1.5">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Technical Skills</h3>
+          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-line pb-1">Technical Skills</h3>
           <div class="space-y-1">${skillsHtml}</div>
         </div>
 
         <!-- Experience -->
         <div class="space-y-2">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Work Experience & Engineering Roles</h3>
+          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-line pb-1">Work Experience & Engineering Roles</h3>
           <div class="space-y-2">${expHtml}</div>
         </div>
 
         <!-- Key Projects -->
         <div class="space-y-2">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Featured Production Projects</h3>
+          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-line pb-1">Featured Production Projects</h3>
           <div class="space-y-2">${projHtml || '<div class="text-xs text-slate-400">Projects synced from Neon DB.</div>'}</div>
         </div>
 
         <!-- Education -->
         <div class="space-y-2">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Education</h3>
+          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-line pb-1">Education</h3>
           <div class="space-y-2">${eduHtml}</div>
         </div>
 
         <!-- Achievements & Certifications -->
         ${credsHtml ? `
         <div class="space-y-1.5">
-          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-[#1f2430] pb-1">Achievements & Certifications</h3>
+          <h3 class="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400 border-b border-line pb-1">Achievements & Certifications</h3>
           <ul class="list-disc pl-4 space-y-1">${credsHtml}</ul>
         </div>
         ` : ''}
@@ -2099,8 +2115,8 @@ function fetchDynamicSkills() {
         if (allSkills.length > 0) {
           const markup = allSkills.map(s => {
             const isFeatured = s.featured;
-            const borderCls = isFeatured ? 'text-cyan-300 border-cyan-500/20' : 'text-slate-200 border-[#232938]';
-            return `<span class="text-[11px] font-mono px-2 py-0.5 rounded bg-[#161924] ${borderCls} border" title="${escapeHtml(s.description || s.name)}">${escapeHtml(s.name)}</span>`;
+            const borderCls = isFeatured ? 'text-cyan-300 border-cyan-500/20' : 'text-slate-200 border-line';
+            return `<span class="text-[11px] font-mono px-2 py-0.5 rounded bg-elevated ${borderCls} border" title="${escapeHtml(s.description || s.name)}">${escapeHtml(s.name)}</span>`;
           }).join('');
           if (container) container.innerHTML = markup;
           if (recruiterContainer) recruiterContainer.innerHTML = markup;
@@ -2114,52 +2130,87 @@ function fetchDynamicSkills() {
 
 
 // =======================================================
-// THEME SYSTEM (Light / Dark Mode Toggle)
+// THEME SYSTEM — delegates to the shared engine (theme.js)
+//   · follows the OS preference by default
+//   · manual choice persists in localStorage("theme")
+//   · no flash: the class is applied by the inline head bootstrap
 // =======================================================
 function initTheme() {
+  if (window.DSTheme) {
+    window.DSTheme.init('site');
+    window.DSTheme.watch('site');
+  }
   const savedAccent = localStorage.getItem("raviranjan_accent_color");
   if (savedAccent) applyAccentThemeColor(savedAccent);
-  const saved = localStorage.getItem('theme') || 'dark';
-  if (saved === 'light') {
-    document.documentElement.classList.remove('dark');
-    document.documentElement.classList.add('light');
-    updateThemeIcon('light');
-  } else {
-    document.documentElement.classList.remove('light');
-    document.documentElement.classList.add('dark');
-    updateThemeIcon('dark');
-  }
+  syncThemeIcon();
 }
 
 function toggleTheme() {
-  const html = document.documentElement;
-  const isDark = html.classList.contains('dark');
-  if (isDark) {
-    html.classList.remove('dark');
-    html.classList.add('light');
-    localStorage.setItem('theme', 'light');
-    updateThemeIcon('light');
-    showToast('Switched to Light Mode', 'info');
-  } else {
-    html.classList.remove('light');
-    html.classList.add('dark');
-    localStorage.setItem('theme', 'dark');
-    updateThemeIcon('dark');
-    showToast('Switched to Dark Mode', 'info');
-  }
+  if (!window.DSTheme) return;
+  const next = window.DSTheme.toggle('site');
+  syncThemeIcon();
+  showToast(next === 'light' ? 'Light theme on' : 'Dark theme on', 'info');
 }
 
-function updateThemeIcon(theme) {
+function syncThemeIcon() {
+  const theme = window.DSTheme ? window.DSTheme.theme : 'dark';
   const icon = document.getElementById('theme-icon');
-  if (!icon) return;
-  if (theme === 'light') {
-    icon.setAttribute('data-lucide', 'moon');
-    icon.className = 'w-4 h-4 text-indigo-600';
-  } else {
-    icon.setAttribute('data-lucide', 'sun');
-    icon.className = 'w-4 h-4 text-amber-400';
+  const btn = document.getElementById('theme-toggle-btn');
+  if (icon) {
+    icon.setAttribute('data-lucide', theme === 'light' ? 'moon' : 'sun');
+    icon.className = 'w-4 h-4';
+  }
+  if (btn) {
+    btn.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
+    btn.setAttribute('title', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
   }
   if (window.lucide) window.lucide.createIcons();
+}
+
+// Backwards compatible alias (older call sites)
+function updateThemeIcon() {
+  syncThemeIcon();
+}
+
+window.addEventListener('themechange', syncThemeIcon);
+
+// =======================================================
+// HEADER CHROME — elevation on scroll + active section indicator
+// =======================================================
+function initHeaderChrome() {
+  const header = document.getElementById('site-header');
+  if (header) {
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  const links = Array.prototype.slice.call(document.querySelectorAll('#site-nav .ds-nav-link'));
+  if (!links.length || !('IntersectionObserver' in window)) return;
+
+  const targets = links
+    .map((a) => document.querySelector(a.getAttribute('href')))
+    .filter(Boolean);
+  if (!targets.length) return;
+
+  const setActive = (id) => {
+    links.forEach((a) => {
+      const active = a.getAttribute('href') === '#' + id;
+      a.classList.toggle('is-active', active);
+      if (active) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+  };
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) setActive(entry.target.id);
+      });
+    },
+    { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
+  );
+  targets.forEach((section) => observer.observe(section));
 }
 
 // Logo Triple-Click to open Admin Modal easily without keyboard shortcuts
@@ -2191,45 +2242,12 @@ function trackAnalyticsEvent(eventType) {
   } catch (e) {}
 }
 
+// Brand re-tint: delegates to the shared engine so one setting re-points the
+// brand scale in both themes (no per-utility override sheet).
 function applyAccentThemeColor(hex) {
-  if (!hex || !hex.startsWith("#")) return;
-  localStorage.setItem("raviranjan_accent_color", hex);
-  document.documentElement.style.setProperty("--accent-color", hex);
-  document.documentElement.style.setProperty("--color-primary", hex);
-  document.documentElement.style.setProperty("--border-focus", hex);
-  let styleEl = document.getElementById("dynamic-accent-theme");
-  if (!styleEl) {
-    styleEl = document.createElement("style");
-    styleEl.id = "dynamic-accent-theme";
-    document.head.appendChild(styleEl);
+  if (window.DSTheme && typeof window.DSTheme.applyBrand === 'function') {
+    window.DSTheme.applyBrand(hex);
   }
-  styleEl.innerHTML = `
-    html body .bg-cyan-500, html body .bg-sky-500, html body .accent-bg-btn,
-    html.light body .bg-cyan-500, html.light body .bg-sky-500, html.light body .accent-bg-btn {
-      background-color: ${hex} !important;
-      color: #ffffff !important;
-    }
-    html body .from-cyan-500, html.light body .from-cyan-500 {
-      --tw-gradient-from: ${hex} !important;
-      background-image: linear-gradient(to right, ${hex}, #10b981) !important;
-    }
-    html body .text-cyan-400, html body .text-cyan-300, html body .text-sky-400,
-    html.light body .text-cyan-400, html.light body .text-cyan-300, html.light body .text-sky-400 {
-      color: ${hex} !important;
-    }
-    html body .border-cyan-500\\/20, html body .border-cyan-500\\/30, html body .border-cyan-500\\/40, html body .border-sky-500\\/30,
-    html.light body .border-cyan-500\\/20, html.light body .border-cyan-500\\/30, html.light body .border-cyan-500\\/40 {
-      border-color: ${hex}66 !important;
-    }
-    html body .bg-cyan-500\\/10, html body .bg-cyan-500\\/20, html body .bg-sky-500\\/10,
-    html.light body .bg-cyan-500\\/10, html.light body .bg-cyan-500\\/20, html.light body .bg-sky-500\\/10 {
-      background-color: ${hex}1f !important;
-      color: ${hex} !important;
-    }
-    html body .saas-card:hover, html.light body .saas-card:hover {
-      border-color: ${hex}88 !important;
-    }
-  `;
 }
 
 async function loadPublicBrandingSettings() {
@@ -2294,7 +2312,7 @@ async function loadPublicBrandingSettings() {
         const promptContainer = document.getElementById('hero-ai-prompts-list');
         if (promptContainer && Array.isArray(prompts) && prompts.length > 0) {
           promptContainer.innerHTML = prompts.map(q =>
-            `<button onclick="openAiWithQuery('${escapeHtml(q).replace(/'/g, "\'")}')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-[#131620] border border-[#202533] text-slate-300 hover:border-cyan-500/40 hover:text-white transition-colors">"${escapeHtml(q)}"</button>`
+            `<button onclick="openAiWithQuery('${escapeHtml(q).replace(/'/g, "\'")}')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-elevated border border-line text-slate-300 hover:border-cyan-500/40 hover:text-white transition-colors">"${escapeHtml(q)}"</button>`
           ).join('');
         }
       } catch (e) {}
@@ -2358,11 +2376,11 @@ async function fetchDynamicCareerAndCredentials() {
                 .split(',')
                 .map(t => t.trim())
                 .filter(Boolean)
-                .map(t => `<span class="tech-stack-pill px-2 py-0.5 rounded bg-[#151925] border border-[#232938] text-[10px] text-cyan-300 font-medium">${escapeHtml(t)}</span>`)
+                .map(t => `<span class="tech-stack-pill px-2 py-0.5 rounded bg-elevated border border-line text-[10px] text-cyan-300 font-medium">${escapeHtml(t)}</span>`)
                 .join('');
               const reportUrl = e.achievements && String(e.achievements).startsWith('http') ? e.achievements : '';
               return `
-                <div class="p-4 rounded-xl bg-[#10121a] border ${isPursuing ? 'border-amber-500/30' : 'border-emerald-500/30'} space-y-2.5 flex flex-col justify-between">
+                <div class="p-4 rounded-xl bg-surface border ${isPursuing ? 'border-amber-500/30' : 'border-emerald-500/30'} space-y-2.5 flex flex-col justify-between">
                   <div class="space-y-2">
                     <div class="flex items-start justify-between gap-2">
                       <div>
@@ -2377,7 +2395,7 @@ async function fetchDynamicCareerAndCredentials() {
                     <p class="text-xs text-slate-300 font-sans leading-relaxed">${escapeHtml(e.description || '')}</p>
                     ${techBadges ? `<div class="flex flex-wrap gap-1.5 pt-1">${techBadges}</div>` : ''}
                   </div>
-                  <div class="pt-2.5 border-t border-[#1f2430] flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                  <div class="pt-2.5 border-t border-line flex flex-wrap items-center justify-between gap-2 text-[11px]">
                     <span class="text-slate-400">Timeline: <strong class="text-slate-200">${escapeHtml(e.startDate || '')} — ${escapeHtml(e.endDate || 'Present')}</strong></span>
                     <div class="flex flex-wrap items-center gap-2">
                       ${e.offerLetterUrl ? `<a href="${escapeHtml(e.offerLetterUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 transition-colors">Offer Letter ↗</a>` : ''}
@@ -2397,7 +2415,7 @@ async function fetchDynamicCareerAndCredentials() {
         expEl.innerHTML = listToRender.length === 0
           ? `<div class="p-3 text-slate-500 text-center">No work experience entries in Neon DB yet.</div>`
           : listToRender.map(e => `
-            <div class="p-3.5 rounded-lg bg-[#10121a] border border-[#1f2430] space-y-1.5">
+            <div class="p-3.5 rounded-lg bg-surface border border-line space-y-1.5">
               <div class="flex items-center justify-between">
                 <span class="font-bold text-white">${escapeHtml(e.role)}</span>
                 <span class="text-[10px] px-2 py-0.5 rounded ${e.current ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-500/10 text-slate-400'}">${e.current ? 'Current' : 'Completed'}</span>
@@ -2415,7 +2433,7 @@ async function fetchDynamicCareerAndCredentials() {
       eduEl.innerHTML = edus.length === 0
         ? `<div class="p-3 text-slate-500 text-center">No education entries in Neon DB yet.</div>`
         : edus.map(ed => `
-          <div class="p-3.5 rounded-lg bg-[#10121a] border border-[#1f2430] space-y-1.5">
+          <div class="p-3.5 rounded-lg bg-surface border border-line space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="font-bold text-white">${escapeHtml(ed.degree)}</span>
               <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${escapeHtml(ed.grade || 'Enrolled')}</span>
@@ -2432,7 +2450,7 @@ async function fetchDynamicCareerAndCredentials() {
       achEl.innerHTML = achs.length === 0
         ? `<div class="p-3 text-slate-500 text-center">No achievements in Neon DB yet.</div>`
         : achs.map(a => `
-          <div class="p-3 rounded-lg bg-[#10121a] border border-[#1f2430] flex items-start justify-between gap-2">
+          <div class="p-3 rounded-lg bg-surface border border-line flex items-start justify-between gap-2">
             <div>
               <div class="font-bold text-white">${escapeHtml(a.title)}</div>
               <div class="text-[11px] text-slate-400">${escapeHtml(a.organization || '')} ${a.description ? '· ' + escapeHtml(a.description) : ''}</div>
@@ -2447,7 +2465,7 @@ async function fetchDynamicCareerAndCredentials() {
       certEl.innerHTML = certs.length === 0
         ? `<div class="p-3 text-slate-500 text-center">No certifications in Neon DB yet.</div>`
         : certs.map(c => `
-          <div class="p-3 rounded-lg bg-[#10121a] border border-[#1f2430] flex items-center justify-between gap-2">
+          <div class="p-3 rounded-lg bg-surface border border-line flex items-center justify-between gap-2">
             <div>
               <div class="font-bold text-white">${escapeHtml(c.title)}</div>
               <div class="text-[11px] text-slate-400">${escapeHtml(c.issuer || '')} ${c.credentialId ? '· ID: ' + escapeHtml(c.credentialId) : ''}</div>
@@ -2482,7 +2500,7 @@ async function fetchDynamicContributions() {
   }
 
   if (!stories || stories.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-[#10121a] border border-[#1f2430] text-center text-xs font-mono text-slate-500">No open-source contribution stories in Neon DB yet. Add stories in Admin CMS → Contribution Stories.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-surface border border-line text-center text-xs font-mono text-slate-500">No open-source contribution stories in Neon DB yet. Add stories in Admin CMS → Contribution Stories.</div>`;
     return;
   }
 
@@ -2495,12 +2513,12 @@ async function fetchDynamicContributions() {
         </div>
         <h3 class="text-sm font-semibold text-white font-mono">${escapeHtml(s.title)}</h3>
         <p class="text-xs text-slate-300 font-sans leading-relaxed">${escapeHtml(s.whatIContributed || s.whyIContributed || '')}</p>
-        <div class="p-3 rounded bg-[#161924] border border-[#232938] text-[11px] font-mono text-slate-400">
+        <div class="p-3 rounded bg-elevated border border-line text-[11px] font-mono text-slate-400">
           <span class="text-purple-400 font-bold block mb-1">💡 What I Learned:</span>
           ${escapeHtml(s.whatILearned || 'Deep understanding of production systems internals.')}
         </div>
       </div>
-      <div class="flex items-center justify-between pt-2 border-t border-[#1f2430] text-xs font-mono">
+      <div class="flex items-center justify-between pt-2 border-t border-line text-xs font-mono">
         <span class="text-slate-500">${escapeHtml(s.technologies || 'Open Source')}</span>
         <a href="${escapeHtml(s.prUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline flex items-center gap-1 font-semibold">
           GitHub Link ↗
@@ -2526,7 +2544,7 @@ async function fetchDynamicResearch() {
   }
 
   if (!papers || papers.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-[#10121a] border border-[#1f2430] text-center text-xs font-mono text-slate-500">No research publications in Neon DB yet. Add papers in Admin CMS → Research Papers.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-surface border border-line text-center text-xs font-mono text-slate-500">No research publications in Neon DB yet. Add papers in Admin CMS → Research Papers.</div>`;
     return;
   }
 
@@ -2545,7 +2563,7 @@ async function fetchDynamicResearch() {
           <span class="text-slate-500">Methodology:</span> ${escapeHtml(p.methodology || 'Empirical systems benchmarking')}
         </div>
       </div>
-      <div class="flex items-center justify-between pt-3 border-t border-[#1f2430] text-xs font-mono">
+      <div class="flex items-center justify-between pt-3 border-t border-line text-xs font-mono">
         <span class="text-slate-500 text-[11px]">Author: ${escapeHtml(p.authors || 'Raviranjan Kumar')}</span>
         <div class="flex items-center gap-3">
           <a href="${escapeHtml(p.githubUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Code ↗</a>
@@ -2571,7 +2589,7 @@ async function fetchDynamicLab() {
   }
 
   if (!labs || labs.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-[#10121a] border border-[#1f2430] text-center text-xs font-mono text-slate-500">No engineering lab experiments in Neon DB yet. Add experiments in Admin CMS → Engineering Lab.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-surface border border-line text-center text-xs font-mono text-slate-500">No engineering lab experiments in Neon DB yet. Add experiments in Admin CMS → Engineering Lab.</div>`;
     return;
   }
 
@@ -2587,7 +2605,7 @@ async function fetchDynamicLab() {
         <h3 class="text-xs font-bold text-white font-mono">${escapeHtml(lab.title)}</h3>
         <p class="text-[11px] text-slate-300 font-sans leading-relaxed">${escapeHtml(lab.description || lab.objective || '')}</p>
       </div>
-      <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-[11px] font-mono">
+      <div class="pt-2 border-t border-line flex items-center justify-between text-[11px] font-mono">
         <span class="text-slate-400">${escapeHtml(lab.technologies || 'Systems')}</span>
         <a href="${escapeHtml(lab.githubUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Code ↗</a>
       </div>
@@ -2611,7 +2629,7 @@ async function fetchDynamicArticles() {
   }
 
   if (!articles || articles.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-[#10121a] border border-[#1f2430] text-center text-xs font-mono text-slate-500">No engineering articles in Neon DB yet. Publish articles in Admin CMS → Technical Writing.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-surface border border-line text-center text-xs font-mono text-slate-500">No engineering articles in Neon DB yet. Publish articles in Admin CMS → Technical Writing.</div>`;
     return;
   }
 
@@ -2627,10 +2645,10 @@ async function fetchDynamicArticles() {
         </h3>
         <p class="text-xs text-slate-300 font-sans leading-relaxed">${escapeHtml(a.summary || a.excerpt || '')}</p>
       </div>
-      <div class="flex items-center justify-between pt-3 border-t border-[#1f2430] text-xs font-mono">
+      <div class="flex items-center justify-between pt-3 border-t border-line text-xs font-mono">
         <div class="flex flex-wrap gap-1">
           ${(a.tags ? (Array.isArray(a.tags) ? a.tags : Array.from(a.tags)) : ['Engineering']).map(t => `
-            <span class="px-1.5 py-0.5 rounded bg-[#161924] text-slate-400 text-[10px] border border-[#232938]">${escapeHtml(t)}</span>
+            <span class="px-1.5 py-0.5 rounded bg-elevated text-slate-400 text-[10px] border border-line">${escapeHtml(t)}</span>
           `).join('')}
         </div>
         <span class="text-sky-400 hover:underline cursor-pointer">Synced from Neon DB →</span>
@@ -2754,139 +2772,21 @@ function initHeroTextAnimator() {
   }
 }
 
-// 3. Full-Viewport 3D Ambient Background Wave & Perspective Mesh (#bg-3d-canvas)
+// 3. Ambient background
+// ---------------------------------------------------------------------------
+// v2 design system: the animated canvas mesh has been replaced by a static,
+// token-driven CSS depth layer (#os-ambient-bg in styles.css). Painting 38x14
+// ribbons every frame cost battery and layout time on low-end phones, so the
+// canvas is retired. The function name is kept so existing boot code and any
+// stored integration keep working.
 function initHero3dVisual() {
   const canvas = document.getElementById('bg-3d-canvas');
-  if (!canvas || canvas.__initializedBg3d) return;
-  canvas.__initializedBg3d = true;
-
-  const ctx = canvas.getContext('2d');
-  let width = 0;
-  let height = 0;
-  let dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-  const resize = () => {
-    width = window.innerWidth || 1280;
-    height = window.innerHeight || 800;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  };
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Subtle floating 3D depth particles
-  const particles = Array.from({ length: 42 }, (_, i) => ({
-    x: (Math.sin(i * 12.9898) * 43758.5453) % 1,
-    y: (Math.cos(i * 78.233) * 23421.631) % 1,
-    z: 0.2 + ((i * 0.17) % 0.8),
-    size: 1.2 + (i % 3) * 0.7,
-    speedX: (i % 2 === 0 ? 1 : -1) * (0.00008 + (i % 5) * 0.00002),
-    speedY: -0.00012 - (i % 4) * 0.00003
-  })).map(p => ({ ...p, x: Math.abs(p.x), y: Math.abs(p.y) }));
-
-  let mouseX = 0;
-  let mouseY = 0;
-  let targetMouseX = 0;
-  let targetMouseY = 0;
-
-  window.addEventListener('mousemove', (e) => {
-    targetMouseX = (e.clientX / Math.max(1, width) - 0.5) * 2;
-    targetMouseY = (e.clientY / Math.max(1, height) - 0.5) * 2;
-  }, { passive: true });
-
-  const renderFrame = (time) => {
-    const t = time * 0.00055;
-    const isLight = document.documentElement.classList.contains('light');
-    mouseX += (targetMouseX - mouseX) * 0.04;
-    mouseY += (targetMouseY - mouseY) * 0.04;
-
-    ctx.clearRect(0, 0, width, height);
-
-    // Draw 3D perspective flowing topological wave ribbons across the background
-    const cols = 38;
-    const rows = 14;
-    const fov = 520;
-    const camZ = 420;
-    const centerX = width * 0.5 + mouseX * 36;
-    const centerY = height * 0.34 + mouseY * 22;
-
-    const grid = [];
-    for (let r = 0; r < rows; r++) {
-      const rowPts = [];
-      const depthRatio = r / (rows - 1);
-      const z = -120 + depthRatio * 560;
-      for (let c = 0; c < cols; c++) {
-        const colRatio = (c / (cols - 1)) - 0.5;
-        const worldX = colRatio * (width * 1.45);
-        const wave1 = Math.sin(colRatio * 5.2 + t * 1.8 + r * 0.38) * 38;
-        const wave2 = Math.cos(colRatio * 3.1 - t * 1.2 + r * 0.52) * 24;
-        const worldY = 130 + wave1 + wave2 + (depthRatio * 65) - mouseY * 18;
-
-        const scale = fov / Math.max(80, fov + z + camZ * 0.35);
-        const px = centerX + worldX * scale;
-        const py = centerY + worldY * scale;
-        rowPts.push({ px, py, scale, depthRatio, colRatio });
-      }
-      grid.push(rowPts);
-    }
-
-    // Horizontal flowing 3D wave lines
-    for (let r = 0; r < rows; r++) {
-      const fade = Math.sin((r / (rows - 1)) * Math.PI);
-      const alpha = isLight ? fade * 0.14 : fade * 0.17;
-      ctx.beginPath();
-      for (let c = 0; c < cols; c++) {
-        const pt = grid[r][c];
-        if (c === 0) ctx.moveTo(pt.px, pt.py);
-        else ctx.lineTo(pt.px, pt.py);
-      }
-      ctx.strokeStyle = isLight
-        ? (r % 3 === 0 ? `rgba(124, 58, 237, ${alpha})` : `rgba(2, 132, 199, ${alpha})`)
-        : (r % 3 === 0 ? `rgba(99, 102, 241, ${alpha})` : `rgba(56, 189, 248, ${alpha})`);
-      ctx.lineWidth = r % 4 === 0 ? 1.25 : 0.8;
-      ctx.stroke();
-    }
-
-    // Subtle cross-rib perspective filaments
-    for (let c = 0; c < cols; c += 2) {
-      const colFade = 1 - Math.abs((c / (cols - 1)) - 0.5) * 1.65;
-      if (colFade <= 0) continue;
-      const alpha = (isLight ? 0.065 : 0.08) * colFade;
-      ctx.beginPath();
-      for (let r = 0; r < rows; r++) {
-        const pt = grid[r][c];
-        if (r === 0) ctx.moveTo(pt.px, pt.py);
-        else ctx.lineTo(pt.px, pt.py);
-      }
-      ctx.strokeStyle = isLight
-        ? `rgba(2, 132, 199, ${alpha})`
-        : `rgba(56, 189, 248, ${alpha})`;
-      ctx.lineWidth = 0.65;
-      ctx.stroke();
-    }
-
-    // Subtle glowing intersection nodes & floating depth particles
-    for (const p of particles) {
-      p.x = (p.x + p.speedX + 1) % 1;
-      p.y = (p.y + p.speedY + 1) % 1;
-      const px = p.x * width + mouseX * 18 * p.z;
-      const py = p.y * height + mouseY * 14 * p.z;
-      const alpha = (isLight ? 0.18 : 0.28) * p.z;
-      ctx.beginPath();
-      ctx.arc(px, py, p.size * p.z, 0, Math.PI * 2);
-      ctx.fillStyle = isLight
-        ? `rgba(2, 132, 199, ${alpha})`
-        : `rgba(56, 189, 248, ${alpha})`;
-      ctx.fill();
-    }
-
-    requestAnimationFrame(renderFrame);
-  };
-
-  requestAnimationFrame(renderFrame);
+  if (canvas) {
+    canvas.setAttribute('aria-hidden', 'true');
+    canvas.style.display = 'none';
+  }
+  return;
 }
-
 // 4. Client-Side Public IP & GeoIP Prefetch (So Cloud Shell / Docker Bridge Still Captures Recruiter's Real Location)
 window.__visitorGeo = null;
 
@@ -2974,7 +2874,7 @@ window.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('DOMContentLoaded', () => {
   let tapCount = 0;
   let tapTimer = null;
-  const brandEls = document.querySelectorAll('header a[href="#"], header .font-mono.font-bold, footer');
+  const brandEls = document.querySelectorAll('#site-header .ds-mark');
   brandEls.forEach(el => {
     el.addEventListener('click', (ev) => {
       tapCount++;

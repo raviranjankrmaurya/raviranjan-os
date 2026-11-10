@@ -211,7 +211,7 @@ function updateMarkdownPreview() {
     .replace(/^# (.*$)/gim, '<h1 class="text-lg font-bold text-white font-mono">$1</h1>')
     .replace(/^## (.*$)/gim, '<h2 class="text-base font-bold text-sky-400 font-mono mt-3">$1</h2>')
     .replace(/^### (.*$)/gim, '<h3 class="text-sm font-semibold text-slate-200 font-mono mt-2">$1</h3>')
-    .replace(/```java([\\s\\S]*?)```/gim, '<pre class="bg-[#141822] p-3 rounded border border-[#202533] text-[11px] font-mono text-emerald-300 overflow-x-auto">$1</pre>')
+    .replace(/```java([\\s\\S]*?)```/gim, '<pre class="bg-elevated p-3 rounded border border-line text-[11px] font-mono text-emerald-300 overflow-x-auto">$1</pre>')
     .replace(/\\n/gim, '<br>');
 
   outputEl.innerHTML = html;
@@ -223,14 +223,18 @@ function showToast(message, type = 'info') {
   if (!container) return;
 
   const toast = document.createElement('div');
-  const colors = {
-    success: 'border-emerald-500/40 bg-[#0e1713] text-emerald-300',
-    warning: 'border-amber-500/40 bg-[#17140e] text-amber-300',
-    info: 'border-sky-500/40 bg-[#0e151a] text-sky-300',
-  }[type] || 'border-slate-500/40 bg-[#11131a] text-slate-300';
+  const icon = {
+    success: 'check-circle-2',
+    warning: 'alert-triangle',
+    error: 'alert-circle',
+    info: 'info',
+  }[type] || 'info';
 
-  toast.className = `p-3 rounded-lg border shadow-xl flex items-center space-x-2 text-xs font-mono pointer-events-auto transition-all transform duration-200 translate-y-2 opacity-0 ${colors}`;
-  toast.innerHTML = `<i data-lucide="info" class="w-4 h-4"></i><span>${message}</span>`;
+  toast.className = 'ds-toast pointer-events-auto transition-all duration-200 translate-y-2 opacity-0';
+  toast.setAttribute('role', 'status');
+  toast.innerHTML =
+    '<span class="mt-0.5 shrink-0 text-brand-400"><i data-lucide="' + icon + '" class="w-4 h-4"></i></span>' +
+    '<span class="flex-1">' + message + '</span>';
 
   container.appendChild(toast);
   if (window.lucide) window.lucide.createIcons();
@@ -277,7 +281,7 @@ function populateCommandResults() {
   ];
 
   results.innerHTML = commands.map(c => `
-    <div onclick="switchView('${c.view}'); toggleCommandPalette()" class="p-2 rounded hover:bg-[#1c2230] cursor-pointer flex items-center justify-between text-slate-300 hover:text-white">
+    <div onclick="switchView('${c.view}'); toggleCommandPalette()" class="p-2 rounded hover:bg-elevated cursor-pointer flex items-center justify-between text-slate-300 hover:text-white">
       <span>${c.label}</span>
       <span class="text-[10px] text-slate-500">↵ Select</span>
     </div>
@@ -457,7 +461,7 @@ async function loadAdminActivity() {
           : (plat === "GFG" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-sky-500/10 text-sky-400 border-sky-500/20");
         const dateStr = act.occurredAt ? new Date(act.occurredAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "";
         return `
-          <div class="p-3.5 rounded-lg bg-[#10121a] border border-[#1f2430] flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-sky-500/30 transition-all">
+          <div class="p-3.5 rounded-lg bg-surface border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-sky-500/30 transition-all">
             <div class="flex items-start space-x-3">
               <span class="px-2 py-0.5 rounded text-[9px] font-bold border ${badgeColor} shrink-0 mt-0.5">${escapeHtml(plat)}</span>
               <div>
@@ -559,7 +563,7 @@ async function loadAdminDsa() {
           ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
           : (p.difficulty === "EASY" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20");
         return `
-          <div class="p-3 bg-[#141822] border border-[#202533] rounded flex justify-between items-center">
+          <div class="p-3 bg-elevated border border-line rounded flex justify-between items-center">
             <div>
               <span class="font-bold text-white">${escapeHtml(p.title)}</span>
               <span class="text-[10px] text-slate-400 block">${escapeHtml(p.platform)} · Time: ${escapeHtml(p.timeComplexity || "O(n)")} · Space: ${escapeHtml(p.spaceComplexity || "O(1)")}</span>
@@ -670,7 +674,7 @@ function prependUnifiedActivity(type, title, desc) {
     'BLOG_PUBLISHED': 'bg-purple-500/10 text-purple-400 border-purple-500/20'
   }[type] || 'bg-slate-500/10 text-slate-400 border-slate-500/20';
 
-  card.className = 'p-3.5 rounded-lg bg-[#10121a] border border-[#1f2430] flex items-center justify-between hover:border-sky-500/30 transition-all animate-in fade-in duration-300';
+  card.className = 'p-3.5 rounded-lg bg-surface border border-line flex items-center justify-between hover:border-sky-500/30 transition-all animate-in fade-in duration-300';
   card.innerHTML = `
     <div class="flex items-center space-x-3">
       <span class="px-2 py-0.5 rounded text-[9px] font-bold border ${typeColors}">${type}</span>
@@ -763,7 +767,7 @@ async function handleSendAiMessage(e) {
       <div class="w-6 h-6 rounded-md bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
         <i data-lucide="bot" class="w-3.5 h-3.5"></i>
       </div>
-      <div class="p-3 rounded-lg bg-[#141822] border border-[#202533] text-slate-200 leading-relaxed max-w-[85%] font-sans">
+      <div class="p-3 rounded-lg bg-elevated border border-line text-slate-200 leading-relaxed max-w-[85%] font-sans">
         ${formatted}
       </div>
     `;
@@ -811,11 +815,11 @@ function toggleNotificationDrawer() {
 function filterNotifications(filterType) {
   document.querySelectorAll('.notif-filter').forEach(btn => {
     btn.classList.remove('active', 'bg-sky-500/10', 'text-sky-400', 'border-sky-500/30');
-    btn.classList.add('bg-[#161924]', 'text-slate-400');
+    btn.classList.add('bg-elevated', 'text-slate-400');
   });
   if (event && event.target) {
     event.target.classList.add('active', 'bg-sky-500/10', 'text-sky-400', 'border-sky-500/30');
-    event.target.classList.remove('bg-[#161924]', 'text-slate-400');
+    event.target.classList.remove('bg-elevated', 'text-slate-400');
   }
 
   const items = document.querySelectorAll('.notif-item');
@@ -922,7 +926,7 @@ function simulateEvent(eventType) {
     showToast('Integration failure alert: Circuit breaker tripped, serving cached data', 'warning');
   }
 
-  card.className = 'notif-item p-3.5 rounded-lg bg-[#141822] border border-sky-500/40 space-y-2 transition-all animate-in fade-in duration-300';
+  card.className = 'notif-item p-3.5 rounded-lg bg-elevated border border-sky-500/40 space-y-2 transition-all animate-in fade-in duration-300';
   card.setAttribute('data-type', type);
   card.setAttribute('data-priority', priority);
   card.setAttribute('data-read', 'false');
@@ -939,7 +943,7 @@ function simulateEvent(eventType) {
     </div>
     <p class="font-bold text-white text-xs font-mono">${title}</p>
     <p class="text-slate-400 text-[11px] leading-relaxed">${msg}</p>
-    <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-[10px] font-mono">
+    <div class="pt-2 border-t border-line flex items-center justify-between text-[10px] font-mono">
       <span class="text-sky-400">SSE Real-time Broadcast</span>
       <button onclick="markSingleRead(this)" class="text-slate-500 hover:text-slate-300">Mark read</button>
     </div>
@@ -1223,7 +1227,7 @@ function addSocialLinkPrompt() {
   const list = document.getElementById("social-links-list");
   if (list) {
     const item = document.createElement("div");
-    item.className = "p-2.5 rounded bg-[#10121a] border border-[#232938] flex items-center justify-between";
+    item.className = "p-2.5 rounded bg-surface border border-line flex items-center justify-between";
     item.innerHTML = `
       <div>
         <span class="text-white font-semibold">${escapeHtml(platform)}</span>
@@ -1342,7 +1346,7 @@ function renderAdminProjectsTable(projects) {
     const status = p.status || "PUBLISHED";
 
     return `
-      <tr class="hover:bg-[#141822]/70 transition-colors">
+      <tr class="hover:bg-elevated/70 transition-colors">
         <td class="py-3 px-4">
           <div class="font-medium text-white">${escapeHtml(p.title)}</div>
           <div class="text-[10px] text-slate-500">slug: ${escapeHtml(p.slug)}</div>
@@ -1353,7 +1357,7 @@ function renderAdminProjectsTable(projects) {
         <td class="py-3 px-4">
           <div class="flex items-center space-x-2">
             <span class="text-sky-400 font-bold">${prog}%</span>
-            <div class="w-16 h-1.5 rounded-full bg-[#1f2430]"><div class="h-full bg-sky-400 rounded-full" style="width: ${prog}%"></div></div>
+            <div class="w-16 h-1.5 rounded-full bg-elevated"><div class="h-full bg-sky-400 rounded-full" style="width: ${prog}%"></div></div>
           </div>
         </td>
         <td class="py-3 px-4 text-slate-300 text-[11px]">${escapeHtml(techList)}</td>
@@ -1622,10 +1626,10 @@ async function loadAdminCareer() {
       const dataEdu = await resEdu.json();
       cachedAdminEducations = dataEdu?.data || [];
       if (cachedAdminEducations.length === 0) {
-        eduContainer.innerHTML = '<div class="p-4 rounded-lg bg-[#10121a] border border-[#232938] text-center text-slate-500 text-xs">No education records in Neon DB yet. Click "+ Add Degree" to record one.</div>';
+        eduContainer.innerHTML = '<div class="p-4 rounded-lg bg-surface border border-line text-center text-slate-500 text-xs">No education records in Neon DB yet. Click "+ Add Degree" to record one.</div>';
       } else {
         eduContainer.innerHTML = cachedAdminEducations.map(edu => `
-          <div class="p-4 rounded-lg bg-[#10121a] border border-[#232938] space-y-2 text-xs font-mono">
+          <div class="p-4 rounded-lg bg-surface border border-line space-y-2 text-xs font-mono">
             <div class="flex items-center justify-between">
               <span class="text-white font-bold">${escapeHtml(edu.degree)}</span>
               <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${escapeHtml(edu.grade || 'Enrolled')}</span>
@@ -1659,13 +1663,13 @@ async function loadAdminCareer() {
 
     if (internContainer) {
       if (internships.length === 0) {
-        internContainer.innerHTML = '<div class="col-span-2 p-4 rounded-lg bg-[#10121a] border border-[#232938] text-center text-slate-500 text-xs">No internships in Neon DB yet. Click "+ Add Internship" to add one.</div>';
+        internContainer.innerHTML = '<div class="col-span-2 p-4 rounded-lg bg-surface border border-line text-center text-slate-500 text-xs">No internships in Neon DB yet. Click "+ Add Internship" to add one.</div>';
       } else {
         internContainer.innerHTML = internships.map(exp => {
           const isPursuing = Boolean(exp.current) || !exp.endDate;
           const reportUrl = exp.achievements && String(exp.achievements).startsWith('http') ? exp.achievements : '';
           return `
-            <div class="p-4 rounded-xl bg-[#10121a] border ${isPursuing ? 'border-amber-500/30' : 'border-emerald-500/30'} space-y-2.5 text-xs font-mono flex flex-col justify-between">
+            <div class="p-4 rounded-xl bg-surface border ${isPursuing ? 'border-amber-500/30' : 'border-emerald-500/30'} space-y-2.5 text-xs font-mono flex flex-col justify-between">
               <div class="space-y-1.5">
                 <div class="flex items-start justify-between gap-2">
                   <div>
@@ -1685,7 +1689,7 @@ async function loadAdminCareer() {
                   ${reportUrl ? `<a href="${escapeHtml(reportUrl)}" target="_blank" class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:underline">Project Report ↗</a>` : ''}
                 </div>
               </div>
-              <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-slate-500 text-[10px]">
+              <div class="pt-2 border-t border-line flex items-center justify-between text-slate-500 text-[10px]">
                 <span>Timeline: ${exp.startDate || ''} – ${exp.endDate || 'Present'}</span>
                 <div class="space-x-2">
                   <button type="button" onclick="openCareerModal('internship', '${exp.id}')" class="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30 hover:bg-sky-500/20">Edit / Add Certificate</button>
@@ -1700,10 +1704,10 @@ async function loadAdminCareer() {
 
     if (expContainer) {
       if (workExps.length === 0) {
-        expContainer.innerHTML = '<div class="p-4 rounded-lg bg-[#10121a] border border-[#232938] text-center text-slate-500 text-xs">No general experience records in Neon DB yet. Click "+ Add Experience" to record one.</div>';
+        expContainer.innerHTML = '<div class="p-4 rounded-lg bg-surface border border-line text-center text-slate-500 text-xs">No general experience records in Neon DB yet. Click "+ Add Experience" to record one.</div>';
       } else {
         expContainer.innerHTML = workExps.map(exp => `
-          <div class="p-4 rounded-lg bg-[#10121a] border border-[#232938] space-y-2 text-xs font-mono">
+          <div class="p-4 rounded-lg bg-surface border border-line space-y-2 text-xs font-mono">
             <div class="flex items-center justify-between">
               <span class="text-white font-bold">${escapeHtml(exp.role)}</span>
               <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">${exp.current ? 'Current' : 'Completed'}</span>
@@ -1865,7 +1869,7 @@ async function loadAdminCredentials() {
         achContainer.innerHTML = `<div class="p-4 text-center text-slate-500">No achievements in Neon DB. Click "+ Add Achievement" above.</div>`;
       } else {
         achContainer.innerHTML = cachedAdminAchievements.map(a => `
-          <div class="p-3 rounded bg-[#10121a] border border-[#232938] flex items-center justify-between gap-2">
+          <div class="p-3 rounded bg-surface border border-line flex items-center justify-between gap-2">
             <div>
               <span class="text-white font-bold">${escapeHtml(a.title)}</span>
               <span class="text-slate-400 block text-[10px]">${escapeHtml(a.organization || '')} · ${escapeHtml(a.description || a.category || '')}</span>
@@ -1886,7 +1890,7 @@ async function loadAdminCredentials() {
         certContainer.innerHTML = `<div class="p-4 text-center text-slate-500">No certifications in Neon DB. Click "+ Add Certification" above.</div>`;
       } else {
         certContainer.innerHTML = cachedAdminCertifications.map(c => `
-          <div class="p-3 rounded bg-[#10121a] border border-[#232938] flex items-center justify-between gap-2">
+          <div class="p-3 rounded bg-surface border border-line flex items-center justify-between gap-2">
             <div>
               <span class="text-white font-bold">${escapeHtml(c.title)}</span>
               <span class="text-slate-400 block text-[10px]">${escapeHtml(c.issuer || '')} ${c.credentialId ? '· ID: ' + escapeHtml(c.credentialId) : ''}</span>
@@ -2017,7 +2021,7 @@ async function loadAdminResearch() {
     }
 
     tbody.innerHTML = cachedAdminResearch.map(paper => `
-      <tr class="hover:bg-[#141824] transition-colors">
+      <tr class="hover:bg-elevated transition-colors">
         <td class="p-3.5 font-bold text-white">${escapeHtml(paper.title)}</td>
         <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] ${paper.status === "PUBLISHED" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"}">${escapeHtml(paper.status || "PUBLISHED")}</span></td>
         <td class="p-3.5 text-slate-300 font-sans max-w-xs truncate">${escapeHtml(paper.abstractText || "")}</td>
@@ -2165,7 +2169,7 @@ async function loadAdminSkills() {
       const skillCount = cat.skills ? cat.skills.length : 0;
       const skillsHtml = skillCount > 0
         ? (cat.skills || []).map(s => `
-            <span class="text-[11px] font-mono px-2.5 py-1 rounded bg-[#161924] text-slate-200 border border-[#232938] flex items-center gap-2">
+            <span class="text-[11px] font-mono px-2.5 py-1 rounded bg-elevated text-slate-200 border border-line flex items-center gap-2">
               <span>${escapeHtml(s.name)} <span class="text-sky-400 text-[10px]">(${s.proficiency || 85}%)</span></span>
               <button type="button" onclick="openSkillModal('${s.id}')" class="text-sky-400 hover:text-sky-300 text-[10px]" title="Edit skill">Edit</button>
               <button type="button" onclick="handleDeleteSkill('${s.id}')" class="text-rose-400 hover:text-rose-300 font-bold px-0.5" title="Delete skill">&times;</button>
@@ -2174,8 +2178,8 @@ async function loadAdminSkills() {
         : `<div class="w-full py-2 text-center text-slate-500 font-mono text-[11px]">No skills in this category yet. <button type="button" onclick="openSkillModal(null, '${escapeHtml(cat.name)}')" class="text-sky-400 hover:underline font-bold">+ Add First Skill</button></div>`;
 
       return `
-        <div class="saas-card p-5 space-y-3 border border-[#1f2430] rounded-xl bg-[#10121a]">
-          <div class="flex items-center justify-between border-b border-[#1f2430] pb-2">
+        <div class="saas-card p-5 space-y-3 border border-line rounded-xl bg-surface">
+          <div class="flex items-center justify-between border-b border-line pb-2">
             <span class="text-xs font-bold text-white font-mono uppercase">${escapeHtml(cat.name)}</span>
             <div class="flex items-center gap-2">
               <span class="text-[10px] text-slate-400">${skillCount} Skills</span>
@@ -2307,7 +2311,7 @@ async function loadAdminLab() {
             <span class="text-slate-500">Tech:</span> ${escapeHtml(lab.technologies || "Java 21")}
           </div>
         </div>
-        <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-[11px]">
+        <div class="pt-2 border-t border-line flex items-center justify-between text-[11px]">
           <a href="${escapeHtml(lab.githubUrl || "#")}" target="_blank" class="text-sky-400 hover:underline">GitHub ↗</a>
           <div class="space-x-2">
             <button type="button" onclick="openLabModal('${lab.id}')" class="text-sky-400 hover:underline">Edit</button>
@@ -2428,7 +2432,7 @@ async function loadAdminStories() {
           <h4 class="text-white font-semibold text-xs">${escapeHtml(s.title)}</h4>
           <p class="text-slate-400 text-xs font-sans leading-relaxed">${escapeHtml(s.whatIContributed || s.problem || "")}</p>
         </div>
-        <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-[11px]">
+        <div class="pt-2 border-t border-line flex items-center justify-between text-[11px]">
           <a href="${escapeHtml(s.prUrl || "#")}" target="_blank" class="text-sky-400 hover:underline">PR Link ↗</a>
           <div class="space-x-2">
             <button type="button" onclick="openStoryModal('${s.id}')" class="text-sky-400 hover:underline">Edit</button>
@@ -2483,7 +2487,7 @@ async function loadAdminArticles() {
         return;
       }
       tbody.innerHTML = cachedAdminArticles.map(a => `
-        <tr class="hover:bg-[#141824] transition-colors">
+        <tr class="hover:bg-elevated transition-colors">
           <td class="p-3 font-bold text-white">${escapeHtml(a.title)}</td>
           <td class="p-3 text-slate-400">${escapeHtml(a.slug)}</td>
           <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${escapeHtml(a.status || "PUBLISHED")}</span></td>
@@ -2576,11 +2580,11 @@ function filterAdminCrm(filterType, btnEl) {
   currentAdminCrmFilter = filterType;
   document.querySelectorAll('.crm-filter-btn').forEach(btn => {
     btn.classList.remove('active', 'bg-sky-500/10', 'text-sky-400', 'border-sky-500/30');
-    btn.classList.add('bg-[#161924]', 'text-slate-400', 'border-[#232938]');
+    btn.classList.add('bg-elevated', 'text-slate-400', 'border-line');
   });
   if (btnEl) {
     btnEl.classList.add('active', 'bg-sky-500/10', 'text-sky-400', 'border-sky-500/30');
-    btnEl.classList.remove('bg-[#161924]', 'text-slate-400', 'border-[#232938]');
+    btnEl.classList.remove('bg-elevated', 'text-slate-400', 'border-line');
   }
   renderAdminCrmList();
 }
@@ -2632,7 +2636,7 @@ function renderAdminCrmList() {
   });
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="p-6 rounded-xl bg-[#10121a] border border-[#1f2430] text-center text-slate-500">No contact inquiries match the selected filter in Neon DB.</div>`;
+    container.innerHTML = `<div class="p-6 rounded-xl bg-surface border border-line text-center text-slate-500">No contact inquiries match the selected filter in Neon DB.</div>`;
     return;
   }
 
@@ -2681,8 +2685,8 @@ function renderAdminCrmList() {
     }
 
     return `
-      <div class="p-4 rounded-xl bg-[#10121a] border ${isSpam || isAbusive ? 'border-rose-500/30' : 'border-[#1f2430]'} space-y-3">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 border-b border-[#1f2430] pb-2.5">
+      <div class="p-4 rounded-xl bg-surface border ${isSpam || isAbusive ? 'border-rose-500/30' : 'border-line'} space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 border-b border-line pb-2.5">
           <div class="flex flex-wrap items-center gap-2">
             <span class="font-bold text-white text-sm">${escapeHtml(inq.name || "Visitor")}</span>
             <span class="text-cyan-400 text-xs">&lt;${escapeHtml(inq.email || "")}&gt;</span>
@@ -2698,7 +2702,7 @@ function renderAdminCrmList() {
         <p class="text-slate-200 font-sans text-xs leading-relaxed whitespace-pre-wrap">${escapeHtml(inq.message || "")}</p>
 
         <!-- Contact Intelligence & AI Moderation Metadata Bar -->
-        <div class="p-2.5 rounded-lg bg-[#141824] border border-[#232938] grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] text-slate-400">
+        <div class="p-2.5 rounded-lg bg-elevated border border-line grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] text-slate-400">
           <div class="space-y-0.5">
             <div><strong class="text-slate-300">GeoIP & Origin:</strong> ${locationStr} ${inq.referrer ? `· <span class="text-slate-400">Ref: ${escapeHtml(inq.referrer)}</span>` : ''}</div>
             <div><strong class="text-slate-300">Client IP:</strong> <span class="text-emerald-400 font-mono">${escapeHtml(inq.ipAddress || "Scrubbed / Redacted")}</span> ${inq.browserHash ? `· <strong class="text-slate-300">Browser Hash:</strong> <code class="text-cyan-300 font-mono">${escapeHtml(String(inq.browserHash))}</code>` : ""}</div>
@@ -2905,11 +2909,11 @@ function renderEditorMilestones(milestones) {
   const listEl = document.getElementById('pe-milestones-list');
   if (!listEl) return;
   if (!milestones || milestones.length === 0) {
-    listEl.innerHTML = `<div class="p-4 rounded bg-[#10121a] border border-[#1f2430] text-center text-slate-500">No milestones recorded in Neon DB for this project yet. Use "+ Add Milestone" above.</div>`;
+    listEl.innerHTML = `<div class="p-4 rounded bg-surface border border-line text-center text-slate-500">No milestones recorded in Neon DB for this project yet. Use "+ Add Milestone" above.</div>`;
     return;
   }
   listEl.innerHTML = milestones.map(m => `
-    <div class="p-3 rounded-lg bg-[#131620] border border-[#202533] flex items-center justify-between">
+    <div class="p-3 rounded-lg bg-elevated border border-line flex items-center justify-between">
       <div>
         <div class="flex items-center space-x-2">
           <span class="font-bold text-white">${escapeHtml(m.title)}</span>
@@ -2966,15 +2970,15 @@ function renderEditorChangelogs(changelogs) {
   const listEl = document.getElementById('pe-changelogs-list');
   if (!listEl) return;
   if (!changelogs || changelogs.length === 0) {
-    listEl.innerHTML = `<div class="p-4 rounded bg-[#10121a] border border-[#1f2430] text-center text-slate-500">No changelog entries recorded in Neon DB for this project yet. Use "+ Log Release" above.</div>`;
+    listEl.innerHTML = `<div class="p-4 rounded bg-surface border border-line text-center text-slate-500">No changelog entries recorded in Neon DB for this project yet. Use "+ Log Release" above.</div>`;
     return;
   }
   listEl.innerHTML = changelogs.map(c => `
-    <div class="p-3 rounded-lg bg-[#131620] border border-[#202533] flex items-center justify-between">
+    <div class="p-3 rounded-lg bg-elevated border border-line flex items-center justify-between">
       <div>
         <div class="flex items-center space-x-2">
           <span class="font-bold text-emerald-400">${escapeHtml(c.versionTag)}</span>
-          ${c.commitHash ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-[#161924] text-slate-400 font-mono">#${escapeHtml(c.commitHash)}</span>` : ''}
+          ${c.commitHash ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-elevated text-slate-400 font-mono">#${escapeHtml(c.commitHash)}</span>` : ''}
         </div>
         <p class="text-[11px] text-slate-300 mt-1">${escapeHtml(c.releaseSummary || '')}</p>
       </div>
@@ -3024,11 +3028,11 @@ function renderEditorDecisions(decisions) {
   const listEl = document.getElementById('pe-decisions-list');
   if (!listEl) return;
   if (!decisions || decisions.length === 0) {
-    listEl.innerHTML = `<div class="p-4 rounded bg-[#10121a] border border-[#1f2430] text-center text-slate-500">No Architectural Decision Records (ADRs) in Neon DB for this project yet. Use "+ Save ADR" above.</div>`;
+    listEl.innerHTML = `<div class="p-4 rounded bg-surface border border-line text-center text-slate-500">No Architectural Decision Records (ADRs) in Neon DB for this project yet. Use "+ Save ADR" above.</div>`;
     return;
   }
   listEl.innerHTML = decisions.map(d => `
-    <div class="p-3 rounded-lg bg-[#131620] border border-[#202533] space-y-1">
+    <div class="p-3 rounded-lg bg-elevated border border-line space-y-1">
       <div class="flex items-center justify-between">
         <span class="font-bold text-white">${escapeHtml(d.decisionTitle)}</span>
         <div class="flex items-center space-x-2">
@@ -3199,17 +3203,17 @@ function renderHomepageBuilderList() {
   const container = document.getElementById('admin-homepage-sections-list');
   if (!container) return;
   container.innerHTML = currentHomepageSections.map((sec, idx) => `
-    <div class="p-3.5 rounded-lg bg-[#10121a] border border-[#1f2430] flex items-center justify-between hover:border-sky-500/40 transition-colors">
+    <div class="p-3.5 rounded-lg bg-surface border border-line flex items-center justify-between hover:border-sky-500/40 transition-colors">
       <div class="flex items-center space-x-3">
-        <span class="w-6 h-6 rounded bg-[#161924] border border-[#232938] text-sky-400 flex items-center justify-center font-bold">${idx + 1}</span>
+        <span class="w-6 h-6 rounded bg-elevated border border-line text-sky-400 flex items-center justify-center font-bold">${idx + 1}</span>
         <div>
           <span class="text-white font-bold">${escapeHtml(sec.title)} <span class="text-[10px] text-slate-500">#${escapeHtml(sec.id)}</span></span>
           <span class="text-[10px] text-slate-400 block">${escapeHtml(sec.desc || '')}</span>
         </div>
       </div>
       <div class="flex items-center space-x-2">
-        <button type="button" onclick="moveHomepageSection(${idx}, -1)" class="px-2 py-1 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-slate-300" title="Move Up">↑</button>
-        <button type="button" onclick="moveHomepageSection(${idx}, 1)" class="px-2 py-1 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-slate-300" title="Move Down">↓</button>
+        <button type="button" onclick="moveHomepageSection(${idx}, -1)" class="px-2 py-1 rounded bg-elevated hover:bg-elevated border border-line text-slate-300" title="Move Up">↑</button>
+        <button type="button" onclick="moveHomepageSection(${idx}, 1)" class="px-2 py-1 rounded bg-elevated hover:bg-elevated border border-line text-slate-300" title="Move Down">↓</button>
         <label class="flex items-center space-x-1.5 pl-2 cursor-pointer">
           <input type="checkbox" ${sec.visible !== false ? 'checked' : ''} onchange="toggleHomepageSection(${idx}, this.checked)" class="w-4 h-4 accent-sky-500 rounded">
           <span class="text-[10px] text-slate-400">Visible</span>
@@ -3553,31 +3557,42 @@ async function exportAnalyticsCsv() {
 // ADMIN THEME TOGGLE (DARK / LIGHT MODE)
 // ==========================================
 function initAdminTheme() {
-  const saved = localStorage.getItem('admin_theme') || 'dark';
-  applyAdminTheme(saved);
+  if (window.DSTheme) {
+    window.DSTheme.init('admin');
+    window.DSTheme.watch('admin');
+  }
+  syncAdminThemeIcon();
 }
 
 function toggleAdminTheme() {
-  const isLight = document.documentElement.classList.contains('light');
-  const target = isLight ? 'dark' : 'light';
-  localStorage.setItem('admin_theme', target);
-  applyAdminTheme(target);
-  showToast(`Switched admin panel to ${target} mode`, 'info');
+  if (!window.DSTheme) return;
+  const next = window.DSTheme.toggle('admin');
+  syncAdminThemeIcon();
+  showToast(next === 'light' ? 'Admin panel: light theme' : 'Admin panel: dark theme', 'info');
 }
 
+// Backwards compatible alias
 function applyAdminTheme(theme) {
+  if (window.DSTheme) window.DSTheme.set(theme === 'light' ? 'light' : 'dark', 'admin');
+  syncAdminThemeIcon();
+}
+
+function syncAdminThemeIcon() {
+  const theme = window.DSTheme ? window.DSTheme.theme : 'dark';
   const icon = document.getElementById('admin-theme-icon');
-  if (theme === 'light') {
-    document.documentElement.classList.remove('dark');
-    document.documentElement.classList.add('light');
-    if (icon) icon.setAttribute('data-lucide', 'moon');
-  } else {
-    document.documentElement.classList.remove('light');
-    document.documentElement.classList.add('dark');
-    if (icon) icon.setAttribute('data-lucide', 'sun');
+  const btn = document.getElementById('admin-theme-toggle');
+  if (icon) {
+    icon.setAttribute('data-lucide', theme === 'light' ? 'moon' : 'sun');
+    icon.className = 'w-4 h-4';
+  }
+  if (btn) {
+    btn.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
+    btn.setAttribute('title', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
   }
   if (window.lucide) window.lucide.createIcons();
 }
+
+window.addEventListener('themechange', syncAdminThemeIcon);
 
 // ==========================================
 // PLATFORM EXECUTIVE TELEMETRY & ANALYTICS (DYNAMIC NEON DB)
@@ -3678,7 +3693,7 @@ async function loadAdminDashboardMetrics() {
           cachedAdminActivities = m.recentMutations;
           const timeStr = act.occurredAt ? new Date(act.occurredAt).toLocaleDateString([], { month: "short", day: "numeric" }) : "recent";
           return `
-            <div class="p-3 rounded-lg bg-[#141822] border border-[#1f2430] flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-sky-500/30 transition-colors">
+            <div class="p-3 rounded-lg bg-elevated border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-sky-500/30 transition-colors">
               <div class="flex items-start space-x-3">
                 <span class="px-2 py-0.5 rounded text-[10px] font-mono border ${badgeColor} shrink-0 mt-0.5">${escapeHtml(act.sourcePlatform || "SYSTEM")}</span>
                 <div>
@@ -3710,7 +3725,7 @@ async function loadAdminDashboardMetrics() {
                 <span class="text-slate-300">${escapeHtml(pm.title)}</span>
                 <span class="text-sky-400 font-bold">${pVal}%</span>
               </div>
-              <div class="h-2 rounded-full bg-[#1b202d] overflow-hidden">
+              <div class="h-2 rounded-full bg-elevated overflow-hidden">
                 <div class="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full" style="width: ${pVal}%"></div>
               </div>
             </div>
@@ -3726,37 +3741,11 @@ async function loadAdminDashboardMetrics() {
 // ==========================================
 // SITE SETTINGS MANAGEMENT (NEON DB)
 // ==========================================
+// Brand re-tint for the admin surface (shared engine, both themes).
 function applyAdminAccentThemeColor(hex) {
-  if (!hex || !hex.startsWith('#')) return;
-  localStorage.setItem('raviranjan_accent_color', hex);
-  document.documentElement.style.setProperty('--accent-color', hex);
-  document.documentElement.style.setProperty('--color-primary', hex);
-  let styleEl = document.getElementById('dynamic-admin-accent-theme');
-  if (!styleEl) {
-    styleEl = document.createElement('style');
-    styleEl.id = 'dynamic-admin-accent-theme';
-    document.head.appendChild(styleEl);
+  if (window.DSTheme && typeof window.DSTheme.applyBrand === 'function') {
+    window.DSTheme.applyBrand(hex);
   }
-  styleEl.innerHTML = `
-    html body .bg-sky-500, html body .bg-cyan-500,
-    html.light body .bg-sky-500, html.light body .bg-cyan-500 {
-      background-color: ${hex} !important;
-      color: #ffffff !important;
-    }
-    html body .text-sky-400, html body .text-cyan-400,
-    html.light body .text-sky-400, html.light body .text-cyan-400 {
-      color: ${hex} !important;
-    }
-    html body .border-sky-500\/30, html body .border-cyan-500\/30,
-    html.light body .border-sky-500\/30, html.light body .border-cyan-500\/30 {
-      border-color: ${hex}66 !important;
-    }
-    html body .bg-sky-500\/10, html body .bg-cyan-500\/10,
-    html.light body .bg-sky-500\/10, html.light body .bg-cyan-500\/10 {
-      background-color: ${hex}1f !important;
-      color: ${hex} !important;
-    }
-  `;
 }
 
 async function loadSiteSettings() {
@@ -3911,7 +3900,7 @@ async function loadAdminAuditLogs() {
         const act = (log.action || 'UPDATE').toUpperCase();
         const actColor = act === 'DELETE' ? 'text-rose-400' : (act === 'CREATE' || act === 'PUBLISH' ? 'text-emerald-400' : 'text-sky-400');
         return `
-          <tr class="hover:bg-[#141822]/60 transition-colors">
+          <tr class="hover:bg-elevated/60 transition-colors">
             <td class="py-2.5 px-4 text-slate-400">${escapeHtml(ts)}</td>
             <td class="py-2.5 px-4 text-white font-semibold">${escapeHtml(log.principal || 'raviranjan')}</td>
             <td class="py-2.5 px-4 ${actColor} font-bold">${escapeHtml(act)}</td>
@@ -4030,8 +4019,8 @@ async function loadAiConfig() {
               ? formatAiMarkdownToHtml(l.answer || '')
               : escapeHtml(l.answer || '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
             return `
-              <div class="p-3.5 rounded-lg bg-[#141822] border border-[#202533] space-y-2">
-                <div class="flex flex-wrap items-center justify-between gap-1 text-[10px] text-slate-400 border-b border-[#1f2430] pb-1.5">
+              <div class="p-3.5 rounded-lg bg-elevated border border-line space-y-2">
+                <div class="flex flex-wrap items-center justify-between gap-1 text-[10px] text-slate-400 border-b border-line pb-1.5">
                   <div class="flex flex-wrap items-center gap-1.5">
                     <span class="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold">${escapeHtml(l.detectedLanguage || 'ENGLISH')}</span>
                     <span class="text-emerald-400 font-mono font-semibold">IP: ${escapeHtml(l.clientIp || '127.0.0.1')}</span>
@@ -4043,7 +4032,7 @@ async function loadAiConfig() {
                   </div>
                 </div>
                 <p class="text-white font-bold text-xs">Q: "${escapeHtml(l.userQuery)}"</p>
-                <div class="text-slate-200 font-sans text-[11px] leading-relaxed bg-[#10121a] p-2.5 rounded-lg border border-[#1f2430] space-y-1">${formattedAnswer}</div>
+                <div class="text-slate-200 font-sans text-[11px] leading-relaxed bg-surface p-2.5 rounded-lg border border-line space-y-1">${formattedAnswer}</div>
                 <div class="text-[9px] text-slate-400 flex flex-wrap justify-between gap-2 pt-0.5">
                   <span><strong>Device:</strong> ${escapeHtml(shortUa)}</span>
                   <span><strong>Hash:</strong> <code class="text-cyan-300 font-mono">${escapeHtml(displayHash)}</code></span>
@@ -4172,7 +4161,7 @@ function renderAdminNotifications(items) {
     const timeStr = n.createdAt ? new Date(n.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
 
     return `
-      <div class="notif-item p-3.5 rounded-lg bg-[#141822] border border-[#232938] space-y-2 hover:border-sky-500/30 transition-all ${isRead ? 'opacity-70' : ''}" data-type="${escapeHtml(type)}" data-priority="${escapeHtml(priority)}" data-read="${isRead}">
+      <div class="notif-item p-3.5 rounded-lg bg-elevated border border-line space-y-2 hover:border-sky-500/30 transition-all ${isRead ? 'opacity-70' : ''}" data-type="${escapeHtml(type)}" data-priority="${escapeHtml(priority)}" data-read="${isRead}">
         <div class="flex items-center justify-between font-mono text-[10px]">
           <div class="flex items-center space-x-1.5">
             <span class="px-1.5 py-0.5 rounded border font-bold ${pColor}">${escapeHtml(priority)}</span>
@@ -4182,7 +4171,7 @@ function renderAdminNotifications(items) {
         </div>
         <p class="font-bold text-white text-xs font-mono">${escapeHtml(n.title)}</p>
         <p class="text-slate-300 text-[11px] leading-relaxed">${escapeHtml(n.message || '')}</p>
-        <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-[10px] font-mono">
+        <div class="pt-2 border-t border-line flex items-center justify-between text-[10px] font-mono">
           <a href="#crm" onclick="switchView('${(type === 'CRM' || type === 'NEW_CONTACT_INQUIRY' || type === 'CONTACT_INQUIRY') ? 'crm' : 'dashboard'}'); toggleNotificationDrawer(); return false;" class="text-sky-400 hover:underline">Open Module ↗</a>
           <div class="flex items-center space-x-3">
             ${isRead ? '<span class="text-slate-500">Read</span>' : `<button type="button" onclick="markNotificationReadById('${n.id}', this)" class="text-emerald-400 hover:underline">Mark read</button>`}
@@ -4320,7 +4309,7 @@ function initDynamicAdminCommandPalette() {
     const query = q.toLowerCase().trim();
     const matched = modules.filter(m => m.label.toLowerCase().includes(query) || m.tag.toLowerCase().includes(query));
     cmdResults.innerHTML = matched.map(m => `
-      <div onclick="${m.action === 'password' ? 'toggleCommandPalette(); openChangePasswordModal();' : `switchView('${m.view}'); toggleCommandPalette();`}" class="p-2 rounded hover:bg-[#161924] cursor-pointer flex justify-between items-center text-slate-300 hover:text-white">
+      <div onclick="${m.action === 'password' ? 'toggleCommandPalette(); openChangePasswordModal();' : `switchView('${m.view}'); toggleCommandPalette();`}" class="p-2 rounded hover:bg-elevated cursor-pointer flex justify-between items-center text-slate-300 hover:text-white">
         <span>${escapeHtml(m.label)}</span>
         <span class="text-[10px] text-sky-400 font-mono">${escapeHtml(m.tag)}</span>
       </div>
