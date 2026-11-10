@@ -173,5 +173,94 @@
     el.textContent = block('html.dark', dark) + '\n' + block('html.light', light);
   };
 
+
+  /* ------------------------------------------------------------------
+     API transport — same-origin proxy, with a direct-backend fallback.
+     ------------------------------------------------------------------
+     Every app call uses a relative "/api/..." URL, so it only works when
+     the page is served by something that proxies /api (server.js, Vercel
+     rewrites, the Spring Boot app). On a plain static host that path
+     returns 404 or the HTML shell, and the UI shows "loading" forever.
+
+     This wrapper keeps the relative path as the first choice and, the
+     first time it clearly is not being proxied, switches the whole session
+     to the backend origin directly. The backend allows all origins
+     (allowedOriginPatterns "*"), so this works from any host.
+
+     Override the backend origin with:
+       window.RAVIRANJAN_API_BASE = "https://your-backend"
+     or <meta name="api-base" content="https://your-backend">
+     ------------------------------------------------------------------ */
+  (function installApiTransport() {
+    if (window.__dsApiTransportInstalled) return;
+    window.__dsApiTransportInstalled = true;
+
+    var meta = document.querySelector('meta[name="api-base"]');
+    var FALLBACK = String(
+      window.RAVIRANJAN_API_BASE || (meta && meta.content) || 'https://raviranjan-os-backend.onrender.com'
+    ).replace(/\/+$/, '');
+
+    var nativeFetch = window.fetch ? window.fetch.bind(window) : null;
+    if (!nativeFetch || !FALLBACK) return;
+
+    var useDirect = false;
+
+    function isRelativeApi(url) {
+      return typeof url === 'string' && (url === '/api' || url.indexOf('/api/') === 0 || url.indexOf('/api?') === 0);
+    }
+
+    function directUrl(url) {
+      return FALLBACK + url;
+    }
+
+    // A proxy miss looks like: 404/405, a 5xx with an HTML body, or any
+    // 2xx that is HTML (the SPA shell being served for /api/...).
+    function looksUnproxied(res) {
+      if (!res) return true;
+      var type = (res.headers && res.headers.get && (res.headers.get('content-type') || '')) || '';
+      if (res.status === 404 || res.status === 405) return true;
+      if (res.ok && type.indexOf('text/html') === 0) return true;
+      return false;
+    }
+
+    window.fetch = function (input, init) {
+      var url = typeof input === 'string' ? input : (input && input.url) || '';
+
+      if (!isRelativeApi(url)) return nativeFetch(input, init);
+
+      if (useDirect) {
+        try {
+          return nativeFetch(directUrl(url), init);
+        } catch (e) {
+          return nativeFetch(input, init);
+        }
+      }
+
+      return nativeFetch(input, init).then(
+        function (res) {
+          if (!looksUnproxied(res)) return res;
+          useDirect = true;
+          console.info('[Raviranjan.OS] /api is not proxied on this host — using ' + FALLBACK + ' directly.');
+          return nativeFetch(directUrl(url), init).catch(function () {
+            return res;
+          });
+        },
+        function (err) {
+          // Network-level failure (no server behind /api at all)
+          useDirect = true;
+          console.info('[Raviranjan.OS] /api unreachable on this host — using ' + FALLBACK + ' directly.');
+          return nativeFetch(directUrl(url), init).catch(function () {
+            throw err;
+          });
+        }
+      );
+    };
+
+    window.DS_API_BASE = FALLBACK;
+    window.DS_API_IS_DIRECT = function () {
+      return useDirect;
+    };
+  })();
+
   window.DSTheme = DSTheme;
 })();

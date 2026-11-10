@@ -197,6 +197,33 @@ function startBackendWarmupAndHydrationLoop() {
   }, 2500);
 }
 
+// ---------------------------------------------------------------------------
+// Live telemetry: GitHub heatmap / LeetCode / GFG counters and the activity
+// feed refresh themselves while the tab is visible, so the page shows real
+// time data instead of a single snapshot from page load.
+// ---------------------------------------------------------------------------
+let liveRefreshTimer = null;
+
+function startLiveTelemetry() {
+  if (liveRefreshTimer) return;
+  liveRefreshTimer = setInterval(() => {
+    if (document.hidden) return;
+    if (typeof fetchDynamicIntegrations === 'function') {
+      Promise.resolve(fetchDynamicIntegrations()).catch(() => {});
+    }
+    if (typeof fetchDynamicActivity === 'function') {
+      Promise.resolve(fetchDynamicActivity()).catch(() => {});
+    }
+  }, 60000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    if (typeof fetchDynamicIntegrations === 'function') {
+      Promise.resolve(fetchDynamicIntegrations()).catch(() => {});
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Wipe any legacy localStorage portfolio data so 100% comes from Neon DB
   localStorage.removeItem("customProjects");
@@ -205,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initHeaderChrome();
   if (window.lucide) {
-    window.lucide.createIcons();
+    refreshIcons();
   }
 
   // 1. Initial baseline UI render + 3D Neural Core + Animated Hero Headline + Visitor GeoIP Prefetch
@@ -217,6 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 2. Dynamic Fetch from REST API + Instant Backend Cold-Start Auto-Warmup
   triggerAllDynamicFetches();
   startBackendWarmupAndHydrationLoop();
+  startLiveTelemetry();
   trackAnalyticsEvent("PAGE_VIEW");
 
   // 3. Check for Recruiter Route
@@ -269,7 +297,7 @@ function showToast(message, type = "info") {
     '<span class="mt-0.5 shrink-0 text-brand-400"><i data-lucide="' + icon + '" class="w-4 h-4"></i></span>' +
     '<span class="flex-1">' + escapeHtml(message) + "</span>";
   container.appendChild(toast);
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 
   setTimeout(() => {
     toast.style.opacity = "0";
@@ -472,7 +500,7 @@ function renderProjects(items) {
         <p class="text-xs text-slate-400">Add or publish projects in the Admin CMS to display them here from Neon DB.</p>
       </div>
     `;
-    if (window.lucide) window.lucide.createIcons();
+    refreshIcons();
     return;
   }
 
@@ -533,7 +561,7 @@ function renderProjects(items) {
     `;
   }).join("");
 
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 }
 
 // Dynamic Unified Activity Feed (Strictly from Neon DB)
@@ -1036,7 +1064,7 @@ function openProjectDetail(slug) {
   `;
 
   modal.classList.remove("hidden");
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 }
 
 function closeProjectDetail() {
@@ -1249,34 +1277,49 @@ function handleAiInput(e) {
 
 function setPublicAiLanguage(lang) {
   currentPublicAiLang = lang;
-  ["AUTO", "HINGLISH", "HINDI", "ENGLISH"].forEach(l => {
+  ["AUTO", "HINGLISH", "HINDI", "ENGLISH"].forEach((l) => {
     const btn = document.getElementById("ai-lang-" + l);
-    if (btn) {
-      if (l === lang) {
-        btn.className = "px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px]";
-      } else {
-        btn.className = "px-2 py-0.5 rounded bg-elevated text-slate-400 border border-line text-[10px] hover:text-white";
-      }
-    }
+    if (!btn) return;
+    btn.classList.toggle("is-active", l === lang);
+    btn.setAttribute("aria-pressed", l === lang ? "true" : "false");
   });
   showToast("AI Assistant language set to: " + lang, "info");
 }
 
+function aiMessageNode(role, html, metaText) {
+  const wrap = document.createElement('div');
+  wrap.className = 'ds-msg ds-msg--' + (role === 'user' ? 'user' : 'ai');
+  const avatar = document.createElement('span');
+  avatar.className = 'ds-msg__avatar';
+  avatar.setAttribute('aria-hidden', 'true');
+  avatar.innerHTML = '<i data-lucide="' + (role === 'user' ? 'user' : 'sparkles') + '"></i>';
+  const body = document.createElement('div');
+  body.className = 'ds-msg__body';
+  if (metaText) {
+    const meta = document.createElement('div');
+    meta.className = 'ds-msg__meta';
+    meta.innerHTML = metaText;
+    body.appendChild(meta);
+  }
+  const bubble = document.createElement('div');
+  bubble.className = 'ds-bubble';
+  bubble.innerHTML = html;
+  body.appendChild(bubble);
+  wrap.appendChild(avatar);
+  wrap.appendChild(body);
+  return wrap;
+}
+
 async function sendAiMessage(query) {
-  const chatContainer = document.getElementById('ai-chat-messages');
-  if (!chatContainer) return;
+  const thread = document.getElementById('ai-chat-messages');
+  if (!thread || !query) return;
 
-  const userBubble = document.createElement('div');
-  userBubble.className = 'p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-200 text-xs font-mono ml-6';
-  userBubble.innerText = query;
-  chatContainer.appendChild(userBubble);
-  chatContainer.scrollTop = chatContainer.scrollHeight;
+  thread.appendChild(aiMessageNode('user', escapeHtml(query)));
 
-  const loadingBubble = document.createElement('div');
-  loadingBubble.className = 'p-3 rounded-lg bg-elevated border border-line text-slate-400 text-xs font-mono mr-6 flex items-center space-x-2';
-  loadingBubble.innerHTML = '<span class="inline-block animate-spin mr-1">⟳</span> Querying Neon DB & RAG Engine...';
-  chatContainer.appendChild(loadingBubble);
-  chatContainer.scrollTop = chatContainer.scrollHeight;
+  const typing = aiMessageNode('ai', '<span class="ds-typing"><i></i><i></i><i></i></span>', '<span>Assistant</span>');
+  thread.appendChild(typing);
+  thread.scrollTop = thread.scrollHeight;
+  if (window.lucide) window.lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
 
   try {
     const geo = await resolveClientGeoForContact();
@@ -1311,47 +1354,41 @@ async function sendAiMessage(query) {
       })
     });
 
-    loadingBubble.remove();
-    const aiBubble = document.createElement('div');
-    aiBubble.className = 'p-3 rounded-lg bg-elevated border border-line text-slate-300 text-xs font-sans leading-relaxed mr-6 space-y-2';
+    typing.remove();
+    let html;
+    let meta = '<span>Assistant</span>';
 
     if (res.ok) {
-      const json = await res.json();
-      const d = json?.data;
+      const json = await res.json().catch(() => null);
+      const d = json && json.data;
       if (d && d.sessionId) {
         visitorAiSessionId = d.sessionId;
         localStorage.setItem("raviranjan_ai_session_id", visitorAiSessionId);
       }
-      const rawAns = d?.answer || evaluatePortfolioRag(query);
-      const formattedAns = escapeHtml(rawAns)
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-[10px]">&nearr;</span></a>')
+      const rawAns = (d && d.answer) || evaluatePortfolioRag(query);
+      html = escapeHtml(rawAns)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
         .replace(/\n/g, '<br>');
-      aiBubble.innerHTML = `
-        <div class="flex items-center justify-between text-[10px] font-mono text-cyan-400 border-b border-line pb-1 mb-1">
-          <span>🤖 Ask AI · Grounded on Neon DB</span>
-          <span class="text-slate-500">${d?.latencyMs || 45}ms</span>
-        </div>
-        <div>${formattedAns}</div>
-      `;
+      if (d && d.latencyMs) {
+        meta = '<span>Assistant</span><span aria-hidden="true">·</span><span>' + d.latencyMs + 'ms</span>';
+      }
     } else {
-      aiBubble.innerHTML = evaluatePortfolioRag(query);
+      html = evaluatePortfolioRag(query);
+      meta = '<span>Assistant</span><span aria-hidden="true">·</span><span>Offline answer</span>';
     }
 
-    chatContainer.appendChild(aiBubble);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    if (window.lucide) window.lucide.createIcons();
+    thread.appendChild(aiMessageNode('ai', html, meta));
+    thread.scrollTop = thread.scrollHeight;
+    if (window.lucide) window.lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
   } catch (err) {
-    loadingBubble.remove();
-    const aiBubble = document.createElement('div');
-    aiBubble.className = 'p-3 rounded-lg bg-elevated border border-line text-slate-300 text-xs font-sans leading-relaxed mr-6 space-y-2';
-    aiBubble.innerHTML = evaluatePortfolioRag(query);
-    chatContainer.appendChild(aiBubble);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    if (window.lucide) window.lucide.createIcons();
+    typing.remove();
+    thread.appendChild(aiMessageNode('ai', evaluatePortfolioRag(query), '<span>Assistant</span><span aria-hidden="true">·</span><span>Offline answer</span>'));
+    thread.scrollTop = thread.scrollHeight;
+    if (window.lucide) window.lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
   }
 }
 
-// Grounded Portfolio RAG Evaluation Engine (Strict Truthfulness - No Hallucinations)
 function evaluatePortfolioRag(query) {
   const q = query.toLowerCase();
   if (q.includes('admin') || q.includes('cms') || q.includes('login') || q.includes('control panel') || q.includes('dashboard') || q.includes('auth') || q.includes('passphrase')) {
@@ -1587,7 +1624,7 @@ async function openResumeModal() {
   if (!modal) return;
   modal.classList.remove('hidden');
   await renderInteractiveResumeSheet();
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 }
 
 function closeResumeModal() {
@@ -1849,7 +1886,7 @@ function openAdminAuthModal() {
     })
     .catch(() => {});
 
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 }
 
 function closeAdminAuthModal() {
@@ -2092,7 +2129,7 @@ async function handleAdminLogin(event) {
       submitBtn.disabled = false;
       submitBtn.innerHTML = '<i data-lucide="key" class="w-3.5 h-3.5 mr-1"></i><span>Unlock Admin OS</span>';
     }
-    if (window.lucide) window.lucide.createIcons();
+    refreshIcons();
   }
 }
 
@@ -2152,6 +2189,11 @@ function toggleTheme() {
   showToast(next === 'light' ? 'Light theme on' : 'Dark theme on', 'info');
 }
 
+function refreshIcons() {
+  if (!window.lucide || typeof window.lucide.createIcons !== 'function') return;
+  window.lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
+}
+
 function syncThemeIcon() {
   const theme = window.DSTheme ? window.DSTheme.theme : 'dark';
   const icon = document.getElementById('theme-icon');
@@ -2164,7 +2206,7 @@ function syncThemeIcon() {
     btn.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
     btn.setAttribute('title', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
   }
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 }
 
 // Backwards compatible alias (older call sites)

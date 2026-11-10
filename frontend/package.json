@@ -4,11 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "node server.js",
-    "build": "echo 'Static assets ready for deployment'",
+    "build": "npm run build:css",
+    "build:css": "tailwindcss -c public/tailwind.config.js --content \"./public/index.html\" --content \"./public/admin_cms.html\" --content \"./public/main_app.js\" --content \"./public/admin_app.js\" -o public/tailwind.css --minify",
     "start": "node server.js"
   },
   "dependencies": {
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.5.2"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
   }
 }

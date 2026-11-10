@@ -36,17 +36,20 @@
   <title>Raviranjan.OS — Admin Operating System</title>
   <meta name="description" content="Admin operating system for Raviranjan.OS — content, CRM, telemetry and AI configuration.">
 
+  <link rel="preconnect" href="https://raviranjan-os-backend.onrender.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raviranjan-os-backend.onrender.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/tailwind.config.js?v=2"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tailwind is prebuilt into /tailwind.css (no CDN round-trip at runtime).
+       Rebuild after markup changes: npm run build:css -->
+  <link rel="stylesheet" href="/tailwind.css?v=4">
+  <script src="/vendor/lucide.min.js?v=1"></script>
 
-  <link rel="stylesheet" href="/design-system.css?v=2">
-  <link rel="stylesheet" href="/admin_styles.css?v=19">
-  <script src="/theme.js?v=2"></script>
+  <link rel="stylesheet" href="/design-system.css?v=3">
+  <link rel="stylesheet" href="/admin_styles.css?v=20">
+  <script src="/theme.js?v=3"></script>
 </head>
 <body class="bg-canvas text-ink font-sans antialiased overflow-hidden flex h-screen">
 
@@ -282,12 +285,12 @@
           <i id="admin-theme-icon" data-lucide="sun"></i>
         </button>
         <!-- Notifications -->
-        <button onclick="toggleNotificationDrawer()" class="icon-action inline-flex relative" title="Notification centre" aria-label="Open notifications">
+        <button id="admin-notif-btn" onclick="toggleNotificationDrawer()" class="icon-action inline-flex relative" title="Notification centre" aria-label="Open notifications">
           <i data-lucide="bell" class="w-4 h-4"></i>
           <span id="notif-badge" class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-danger-500 text-white font-mono text-[9px] font-bold flex items-center justify-center">3</span>
         </button>
 
-        <button onclick="toggleAiDrawer()" class="icon-action inline-flex icon-action--brand" aria-label="Open AI assistant">
+        <button id="admin-ai-btn" onclick="toggleAiDrawer()" class="icon-action inline-flex icon-action--brand" aria-label="Open AI assistant">
           <i data-lucide="bot" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Ask AI</span>
         </button>
@@ -305,7 +308,7 @@
           <i data-lucide="key" class="w-3.5 h-3.5"></i>
           <span class="hidden md:inline">Credentials</span>
         </button>
-        <button onclick="triggerGlobalSync()" class="icon-action inline-flex icon-action--brand" title="Run a full platform sync" aria-label="Run full sync">
+        <button id="admin-sync-btn" onclick="triggerGlobalSync()" class="icon-action inline-flex icon-action--brand" title="Run a full platform sync" aria-label="Run full sync">
           <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span class="hidden md:inline">Sync</span>
         </button>
@@ -2044,98 +2047,91 @@ What AI projects has he worked on?</textarea>
 
 
   <!-- Interactive 'Ask Raviranjan' AI Assistant Drawer -->
-  <div id="ai-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-elevated border-l border-line shadow-2xl z-50 flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out font-mono text-xs">
-    <!-- Drawer Header -->
-    <div class="h-16 px-5 border-b border-line flex items-center justify-between shrink-0 bg-canvas">
-      <div class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center font-bold text-on-solid shadow-md shadow-cyan-500/20">
-          <i data-lucide="bot" class="w-4 h-4"></i>
-        </div>
-        <div>
-          <span class="font-bold text-white text-sm">Ask Raviranjan</span>
-          <span class="text-[10px] text-cyan-400 block font-mono">Grounded Portfolio RAG</span>
+  <aside id="ai-drawer" class="ds-chat fixed right-0 top-0 bottom-0 w-full sm:w-[420px] border-l border-line shadow-2xl z-50 transform translate-x-full transition-transform duration-300" role="dialog" aria-modal="true" aria-label="Ask AI assistant">
+    <header class="ds-chat__head">
+      <div class="ds-chat__identity">
+        <span class="ds-chat__avatar" aria-hidden="true"><i data-lucide="sparkles"></i></span>
+        <div class="min-w-0">
+          <p class="ds-chat__title">Ask Raviranjan</p>
+          <p class="ds-chat__sub"><span class="ds-dot text-success-400"></span> Portfolio RAG · Neon DB</p>
         </div>
       </div>
-      <button onclick="toggleAiDrawer()" class="text-slate-400 hover:text-white p-1 rounded hover:bg-elevated" aria-label="Close AI assistant">
-        <i data-lucide="x" class="w-4 h-4"></i>
+      <button type="button" onclick="toggleAiDrawer()" class="icon-action inline-flex" aria-label="Close AI assistant">
+        <i data-lucide="x"></i>
       </button>
+    </header>
+
+    <div class="ds-chat__tools">
+      <div class="ds-chat__chips">
+        <button type="button" class="ds-chip" onclick="askPresetQuery('What projects has Raviranjan built?')">Projects</button>
+        <button type="button" class="ds-chip" onclick="askPresetQuery('Explain RakshaGrid.')">RakshaGrid</button>
+        <button type="button" class="ds-chip" onclick="askPresetQuery('What technologies does he know?')">Tech stack</button>
+        <button type="button" class="ds-chip" onclick="askPresetQuery('Show projects involving PostgreSQL.')">PostgreSQL</button>
+        <button type="button" class="ds-chip" onclick="askPresetQuery('What did he learn from his GitHub contributions?')">GitHub PRs</button>
+      </div>
     </div>
 
-    <!-- Suggested Query Chips -->
-    <div class="p-3 border-b border-line bg-canvas overflow-x-auto flex gap-2 shrink-0">
-      <button onclick="askPresetQuery('What projects has Raviranjan built?')" class="px-2.5 py-1 rounded-full bg-elevated border border-line text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-white shrink-0">Projects</button>
-      <button onclick="askPresetQuery('Explain RakshaGrid.')" class="px-2.5 py-1 rounded-full bg-elevated border border-line text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-white shrink-0">Explain RakshaGrid</button>
-      <button onclick="askPresetQuery('What technologies does he know?')" class="px-2.5 py-1 rounded-full bg-elevated border border-line text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-white shrink-0">Tech Stack</button>
-      <button onclick="askPresetQuery('Show projects involving PostgreSQL.')" class="px-2.5 py-1 rounded-full bg-elevated border border-line text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-white shrink-0">PostgreSQL</button>
-      <button onclick="askPresetQuery('What did he learn from his GitHub contributions?')" class="px-2.5 py-1 rounded-full bg-elevated border border-line text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-white shrink-0">GitHub PRs</button>
-    </div>
-
-    <!-- Chat Messages Viewport -->
-    <div id="ai-messages-container" class="flex-1 overflow-y-auto p-4 space-y-4 font-sans text-xs">
-      <div class="flex items-start space-x-2.5">
-        <div class="w-6 h-6 rounded-md bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
-          <i data-lucide="bot" class="w-3.5 h-3.5"></i>
-        </div>
-        <div class="p-3 rounded-lg bg-elevated border border-line text-slate-200 leading-relaxed max-w-[85%]">
-          Hello! I am <strong>Ask AI</strong>, an AI assistant grounded strictly in Raviranjan's portfolio. You can ask me about his engineering projects, architecture decisions, research papers, tech stack, or competitive programming achievements.
+    <div id="ai-messages-container" class="ds-chat__thread" aria-live="polite">
+      <div class="ds-msg ds-msg--ai">
+        <span class="ds-msg__avatar" aria-hidden="true"><i data-lucide="sparkles"></i></span>
+        <div class="ds-msg__body">
+          <div class="ds-msg__meta"><span>Assistant</span></div>
+          <div class="ds-bubble">
+            Ask about projects, architecture decisions, research, the stack or competitive programming.
+            Answers are grounded in this portfolio's own data.
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Chat Input Form -->
-    <div class="p-3 border-t border-line bg-canvas shrink-0">
-      <form onsubmit="handleSendAiMessage(event)" class="flex items-center space-x-2">
-        <input id="ai-chat-input" type="text" placeholder="Ask about projects, stack, or experience..." class="flex-1 bg-elevated border border-line rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 placeholder:text-slate-500 font-mono">
-        <button type="submit" class="px-3.5 py-2 rounded-md bg-cyan-500 text-on-solid font-bold hover:bg-cyan-400 transition-colors flex items-center justify-center shadow-md shadow-cyan-500/20" aria-label="Send message">
-          <i data-lucide="send" class="w-3.5 h-3.5"></i>
-        </button>
+    <div class="ds-chat__composer">
+      <form onsubmit="handleSendAiMessage(event)" autocomplete="off">
+        <div class="ds-composer">
+          <input id="ai-chat-input" type="text" placeholder="Ask about projects, stack or experience…" aria-label="Your question" autocomplete="off">
+          <button type="submit" class="ds-composer__send" aria-label="Send message">
+            <i data-lucide="arrow-up"></i>
+          </button>
+        </div>
       </form>
+      <p class="ds-chat__hint">Grounded answers only — no external knowledge.</p>
     </div>
-  </div>
+  </aside>
 
-
-  <!-- Real-Time Admin Notification Center Drawer -->
-  <div id="notification-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-elevated border-l border-line shadow-2xl z-50 flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out font-mono text-xs">
-    <!-- Header -->
-    <div class="h-16 px-5 border-b border-line flex items-center justify-between shrink-0 bg-canvas">
-      <div class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center font-bold text-white shadow-md shadow-rose-500/20">
-          <i data-lucide="bell" class="w-4 h-4"></i>
-        </div>
-        <div>
-          <span class="font-bold text-white text-sm">Notification Center</span>
-          <span class="text-[10px] text-slate-400 block font-mono">Live SSE Stream Connected</span>
+  <div id="notification-drawer" class="fixed right-0 top-0 bottom-0 w-full sm:max-w-md bg-surface border-l border-line shadow-2xl z-50 flex flex-col transform translate-x-full transition-transform duration-300">
+    <header class="ds-chat__head">
+      <div class="ds-chat__identity">
+        <span class="ds-chat__avatar" aria-hidden="true" style="background:linear-gradient(140deg, rgb(var(--c-w-500)), rgb(var(--c-d-600)))"><i data-lucide="bell"></i></span>
+        <div class="min-w-0">
+          <p class="ds-chat__title">Notifications</p>
+          <p class="ds-chat__sub"><span class="ds-dot text-success-400"></span> Live event stream</p>
         </div>
       </div>
-      <div class="flex items-center space-x-2">
-        <button onclick="markAllNotificationsRead()" class="text-[10px] text-sky-400 hover:underline px-2 py-1">Mark all read</button>
-        <button onclick="toggleNotificationDrawer()" class="text-slate-400 hover:text-white p-1 rounded hover:bg-elevated" aria-label="Close notifications">
-          <i data-lucide="x" class="w-4 h-4"></i>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="markAllNotificationsRead()" class="ds-btn ds-btn--ghost ds-btn--sm">Mark all read</button>
+        <button type="button" onclick="toggleNotificationDrawer()" class="icon-action inline-flex" aria-label="Close notifications">
+          <i data-lucide="x"></i>
         </button>
       </div>
+    </header>
+
+    <div class="p-3 border-b border-line bg-canvas flex gap-1.5 shrink-0 overflow-x-auto">
+      <button onclick="filterNotifications('ALL', event)" class="notif-filter active ds-btn ds-btn--sm">All</button>
+      <button onclick="filterNotifications('UNREAD', event)" class="notif-filter ds-btn ds-btn--sm ds-btn--secondary">Unread</button>
+      <button onclick="filterNotifications('URGENT', event)" class="notif-filter ds-btn ds-btn--sm ds-btn--secondary">Urgent</button>
+      <button onclick="filterNotifications('CRM', event)" class="notif-filter ds-btn ds-btn--sm ds-btn--secondary">CRM</button>
+      <button onclick="filterNotifications('INTEGRATION', event)" class="notif-filter ds-btn ds-btn--sm ds-btn--secondary">Integrations</button>
     </div>
 
-    <!-- Filter Pills -->
-    <div class="p-3 border-b border-line bg-canvas flex gap-1.5 shrink-0 overflow-x-auto text-[10px]">
-      <button onclick="filterNotifications('ALL')" class="notif-filter active px-2.5 py-1 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/30">All</button>
-      <button onclick="filterNotifications('UNREAD')" class="notif-filter px-2.5 py-1 rounded-md bg-elevated text-slate-400 border border-line hover:text-white">Unread</button>
-      <button onclick="filterNotifications('URGENT')" class="notif-filter px-2.5 py-1 rounded-md bg-elevated text-slate-400 border border-line hover:text-white">Urgent / High</button>
-      <button onclick="filterNotifications('CRM')" class="notif-filter px-2.5 py-1 rounded-md bg-elevated text-slate-400 border border-line hover:text-white">CRM Inquiries</button>
-      <button onclick="filterNotifications('INTEGRATION')" class="notif-filter px-2.5 py-1 rounded-md bg-elevated text-slate-400 border border-line hover:text-white">Integrations</button>
-    </div>
-
-    <!-- Event Test Simulator Toolbar -->
-    <div class="p-3 bg-elevated border-b border-line space-y-1.5">
-      <span class="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Simulate Live Real-time Events:</span>
-      <div class="grid grid-cols-2 gap-1.5 text-[10px]">
-        <button onclick="simulateEvent('INQUIRY')" class="p-1.5 rounded bg-elevated hover:bg-elevated border border-line text-rose-300 text-left truncate">+ New Inquiry (WhatsApp)</button>
-        <button onclick="simulateEvent('MILESTONE')" class="p-1.5 rounded bg-elevated hover:bg-elevated border border-line text-amber-300 text-left truncate">+ Milestone (Email)</button>
-        <button onclick="simulateEvent('GITHUB')" class="p-1.5 rounded bg-elevated hover:bg-elevated border border-line text-sky-300 text-left truncate">+ GitHub Ingestion</button>
-        <button onclick="simulateEvent('FAILURE')" class="p-1.5 rounded bg-elevated hover:bg-elevated border border-line text-rose-400 text-left truncate">! Integration Failure</button>
+    <details class="border-b border-line bg-canvas/60 px-3 py-2 shrink-0">
+      <summary class="cursor-pointer text-[10.5px] font-mono uppercase tracking-wider text-faint select-none">Simulate events (dev)</summary>
+      <div class="grid grid-cols-2 gap-1.5 pt-2 text-[11px]">
+        <button onclick="simulateEvent('INQUIRY')" class="ds-btn ds-btn--sm ds-btn--secondary justify-start">New inquiry</button>
+        <button onclick="simulateEvent('MILESTONE')" class="ds-btn ds-btn--sm ds-btn--secondary justify-start">Milestone</button>
+        <button onclick="simulateEvent('GITHUB')" class="ds-btn ds-btn--sm ds-btn--secondary justify-start">GitHub ingestion</button>
+        <button onclick="simulateEvent('FAILURE')" class="ds-btn ds-btn--sm ds-btn--secondary justify-start">Integration failure</button>
       </div>
-    </div>
+    </details>
 
-    <!-- Notification List (Populated 100% from Neon DB) -->
     <div id="notif-items-container" class="flex-1 overflow-y-auto p-4 space-y-3 font-sans text-xs">
       <div class="p-6 text-center text-slate-500 font-mono text-xs">Loading notifications from Neon DB...</div>
     </div>
@@ -2637,7 +2633,7 @@ What AI projects has he worked on?</textarea>
     </div>
   </div>
 
-  <script src="/admin_app.js?v=19"></script>
+  <script src="/admin_app.js?v=20"></script>
 
   <!-- Modal: Audit Log State Diff Viewer -->
   <div id="modal-audit-diff" onclick="if(event.target === this) closeAuditDiffModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">

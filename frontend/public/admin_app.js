@@ -95,7 +95,7 @@ function formatAiMarkdownToHtml(raw) {
 
 // Initialize Lucide Icons
 if (window.lucide) {
-  window.lucide.createIcons();
+  refreshIcons();
 }
 
 // Utility: HTML Escaping
@@ -109,6 +109,34 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+
+// ---------------------------------------------------------------------------
+// UI busy states: every action button spins while its work is in flight.
+// ---------------------------------------------------------------------------
+function refreshIcons() {
+  if (!window.lucide || typeof window.lucide.createIcons !== 'function') return;
+  window.lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
+}
+
+function setBusy(el, busy) {
+  if (!el) return;
+  el.classList.toggle('is-busy', Boolean(busy));
+  el.setAttribute('aria-busy', busy ? 'true' : 'false');
+}
+
+let adminSyncInFlight = false;
+
+async function withBusy(el, task) {
+  if (!el) return task();
+  if (el.getAttribute('aria-busy') === 'true') return undefined;
+  setBusy(el, true);
+  try {
+    return await task();
+  } finally {
+    setBusy(el, false);
+    refreshIcons();
+  }
+}
 
 function toggleAdminMobileSidebar(forceState) {
   const sidebar = document.getElementById('admin-sidebar');
@@ -180,7 +208,7 @@ function switchView(viewName) {
   }
 
   if (window.lucide) {
-    window.lucide.createIcons();
+    refreshIcons();
   }
 }
 
@@ -237,7 +265,7 @@ function showToast(message, type = 'info') {
     '<span class="flex-1">' + message + '</span>';
 
   container.appendChild(toast);
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 
   requestAnimationFrame(() => {
     toast.classList.remove('translate-y-2', 'opacity-0');
@@ -711,17 +739,47 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleAiDrawer() {
   const drawer = document.getElementById('ai-drawer');
   if (!drawer) return;
+  const willOpen = drawer.classList.contains('translate-x-full');
   drawer.classList.toggle('translate-x-full');
-  if (!drawer.classList.contains('translate-x-full')) {
-    const input = document.getElementById('ai-chat-input');
-    if (input) input.focus();
-  }
+  if (!willOpen) return;
+  const input = document.getElementById('ai-chat-input');
+  if (input) setTimeout(() => input.focus(), 260);
+  const btn = document.getElementById('admin-ai-btn');
+  setBusy(btn, true);
+  setTimeout(() => {
+    setBusy(btn, false);
+    refreshIcons();
+  }, 420);
 }
 
 function askPresetQuery(queryText) {
   const input = document.getElementById('ai-chat-input');
   if (input) input.value = queryText;
   handleSendAiMessage();
+}
+
+function adminChatNode(role, html, metaText) {
+  const wrap = document.createElement('div');
+  wrap.className = 'ds-msg ds-msg--' + (role === 'user' ? 'user' : 'ai');
+  const avatar = document.createElement('span');
+  avatar.className = 'ds-msg__avatar';
+  avatar.setAttribute('aria-hidden', 'true');
+  avatar.innerHTML = '<i data-lucide="' + (role === 'user' ? 'user' : 'sparkles') + '"></i>';
+  const body = document.createElement('div');
+  body.className = 'ds-msg__body';
+  if (metaText) {
+    const meta = document.createElement('div');
+    meta.className = 'ds-msg__meta';
+    meta.innerHTML = metaText;
+    body.appendChild(meta);
+  }
+  const bubble = document.createElement('div');
+  bubble.className = 'ds-bubble';
+  bubble.innerHTML = html;
+  body.appendChild(bubble);
+  wrap.appendChild(avatar);
+  wrap.appendChild(body);
+  return wrap;
 }
 
 async function handleSendAiMessage(e) {
@@ -733,52 +791,38 @@ async function handleSendAiMessage(e) {
   const query = input.value.trim();
   if (!query) return;
 
-  const userBubble = document.createElement('div');
-  userBubble.className = 'flex justify-end';
-  userBubble.innerHTML = `
-    <div class="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-200 leading-relaxed max-w-[85%] font-sans">
-      ${escapeHtml(query)}
-    </div>
-  `;
-  container.appendChild(userBubble);
+  container.appendChild(adminChatNode('user', escapeHtml(query)));
   input.value = '';
   container.scrollTop = container.scrollHeight;
+
+  const typing = adminChatNode('ai', '<span class="ds-typing"><i></i><i></i><i></i></span>', '<span>Assistant</span>');
+  container.appendChild(typing);
+  container.scrollTop = container.scrollHeight;
+  refreshIcons();
 
   try {
     const res = await fetch('/api/ai/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: query,
-        sessionId: 'admin-console',
-        pageUrl: '/admin'
-      })
+      body: JSON.stringify({ query: query, sessionId: 'admin-console', pageUrl: '/admin' })
     });
     const json = await res.json().catch(() => ({}));
-    const d = json?.data || {};
-    const answer = d.answer || "Connected to Neon DB RAG Engine.";
+    const d = (json && json.data) || {};
+    const answer = d.answer || 'No answer was returned for that query.';
     const formatted = escapeHtml(answer)
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-[10px]">&nearr;</span></a>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
       .replace(/\n/g, '<br>');
-
-    const aiBubble = document.createElement('div');
-    aiBubble.className = 'flex items-start space-x-2.5 animate-in fade-in duration-200';
-    aiBubble.innerHTML = `
-      <div class="w-6 h-6 rounded-md bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
-        <i data-lucide="bot" class="w-3.5 h-3.5"></i>
-      </div>
-      <div class="p-3 rounded-lg bg-elevated border border-line text-slate-200 leading-relaxed max-w-[85%] font-sans">
-        ${formatted}
-      </div>
-    `;
-    container.appendChild(aiBubble);
-    if (window.lucide) window.lucide.createIcons();
-    container.scrollTop = container.scrollHeight;
-    loadAdminDashboardMetrics();
-    loadAiConfig();
+    const meta = '<span>Assistant</span>' + (d.latencyMs ? '<span aria-hidden="true">·</span><span>' + d.latencyMs + 'ms</span>' : '');
+    typing.remove();
+    container.appendChild(adminChatNode('ai', formatted, meta));
   } catch (err) {
-    showToast("AI query error: " + err.message, "warning");
+    typing.remove();
+    container.appendChild(adminChatNode('ai', 'I could not reach the RAG engine. Check the backend connection and try again.', '<span>Assistant</span><span aria-hidden="true">·</span><span>Offline</span>'));
   }
+
+  container.scrollTop = container.scrollHeight;
+  refreshIcons();
 }
 
 async function saveAiSettings() {
@@ -809,17 +853,35 @@ async function saveAiSettings() {
 function toggleNotificationDrawer() {
   const drawer = document.getElementById('notification-drawer');
   if (!drawer) return;
+  const willOpen = drawer.classList.contains('translate-x-full');
   drawer.classList.toggle('translate-x-full');
+  if (!willOpen) return;
+
+  const btn = document.getElementById('admin-notif-btn');
+  const list = document.getElementById('notif-items-container');
+  if (list && !list.dataset.loaded) {
+    list.innerHTML =
+      '<div class="space-y-2">' +
+      Array.from({ length: 3 })
+        .map(() => '<div class="ds-skeleton h-20 w-full"></div>')
+        .join('') +
+      '</div>';
+  }
+  withBusy(btn, async () => {
+    await loadAdminNotifications();
+    if (list) list.dataset.loaded = '1';
+  });
 }
 
-function filterNotifications(filterType) {
-  document.querySelectorAll('.notif-filter').forEach(btn => {
-    btn.classList.remove('active', 'bg-sky-500/10', 'text-sky-400', 'border-sky-500/30');
-    btn.classList.add('bg-elevated', 'text-slate-400');
+function filterNotifications(filterType, evt) {
+  document.querySelectorAll('.notif-filter').forEach((btn) => {
+    btn.classList.remove('is-active', 'active', 'ds-btn--primary');
+    btn.classList.add('ds-btn--secondary');
   });
-  if (event && event.target) {
-    event.target.classList.add('active', 'bg-sky-500/10', 'text-sky-400', 'border-sky-500/30');
-    event.target.classList.remove('bg-elevated', 'text-slate-400');
+  const target = (evt && evt.currentTarget) || (typeof event !== 'undefined' && event && event.target);
+  if (target) {
+    target.classList.add('is-active', 'ds-btn--primary');
+    target.classList.remove('ds-btn--secondary');
   }
 
   const items = document.querySelectorAll('.notif-item');
@@ -951,7 +1013,7 @@ function simulateEvent(eventType) {
 
   container.insertBefore(card, container.firstChild);
   incrementBadge();
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 }
 
 
@@ -1094,7 +1156,7 @@ function openAddProjectModal() {
     if (submitBtn) submitBtn.textContent = "Save & Publish Project";
     modal.classList.remove("hidden");
   }
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 }
 
 function closeAddProjectModal() {
@@ -3314,7 +3376,7 @@ async function openChangePasswordModal() {
     }
   } catch (_) {}
 
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 }
 
 function closeChangePasswordModal() {
@@ -3475,30 +3537,48 @@ async function loadAdminIntegrationsCenter() {
 }
 
 async function triggerGlobalSync() {
-  showToast('Synchronizing GitHub, LeetCode, and GFG with Neon DB...', 'info');
+  const btn = document.getElementById('admin-sync-btn');
+  if (adminSyncInFlight) {
+    showToast('Sync already running — hang on a moment.', 'info');
+    return;
+  }
+  adminSyncInFlight = true;
+  setBusy(btn, true);
+  showToast('Synchronizing GitHub, LeetCode and GFG with Neon DB…', 'info');
+
   try {
     const res = await fetch('/api/activity/sync', { method: 'POST' });
     if (res.ok) {
-      showToast('All external platforms synchronized to Neon DB!', 'success');
-      await loadAdminDashboardMetrics();
-      await loadAdminIntegrationsCenter();
-      await loadAdminGitHub();
-      await loadAdminLeetCode();
-      await loadAdminGfg();
+      showToast('All external platforms synchronized.', 'success');
+      await Promise.all([
+        loadAdminDashboardMetrics(),
+        loadAdminIntegrationsCenter(),
+        loadAdminGitHub(),
+        loadAdminLeetCode(),
+        loadAdminGfg()
+      ].map((p) => Promise.resolve(p).catch(() => null)));
       return;
     }
-  } catch (err) {}
+  } catch (err) {
+    /* fall through to per-provider sync */
+  }
 
   try {
     const headers = await getAuthHeaders();
     for (const p of ['GITHUB', 'LEETCODE', 'GFG']) {
       await fetch(`/api/admin/integrations/${p}/sync?mode=MANUAL`, { method: 'POST', headers }).catch(() => {});
     }
-    showToast('External platforms synchronized to Neon DB!', 'success');
-    await loadAdminDashboardMetrics();
-    await loadAdminIntegrationsCenter();
+    showToast('External platforms synchronized to Neon DB.', 'success');
+    await Promise.all([
+      loadAdminDashboardMetrics(),
+      loadAdminIntegrationsCenter()
+    ].map((p) => Promise.resolve(p).catch(() => null)));
   } catch (e) {
-    showToast('Sync completed.', 'info');
+    showToast('Sync finished with warnings.', 'warning');
+  } finally {
+    adminSyncInFlight = false;
+    setBusy(btn, false);
+    refreshIcons();
   }
 }
 
@@ -3589,7 +3669,7 @@ function syncAdminThemeIcon() {
     btn.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
     btn.setAttribute('title', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
   }
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 }
 
 window.addEventListener('themechange', syncAdminThemeIcon);
@@ -3951,7 +4031,7 @@ function openAuditDiffModal(index) {
   if (newEl) newEl.textContent = formatPrettyJson(log.newState);
 
   modal.classList.remove('hidden');
-  if (window.lucide) window.lucide.createIcons();
+  refreshIcons();
 }
 
 function closeAuditDiffModal() {
@@ -4194,15 +4274,10 @@ async function markNotificationReadById(id, btn) {
   } catch (e) {}
 }
 
-const origToggleNotificationDrawer = toggleNotificationDrawer;
-toggleNotificationDrawer = function() {
-  const drawer = document.getElementById('notification-drawer');
-  if (!drawer) return;
-  drawer.classList.toggle('translate-x-full');
-  if (!drawer.classList.contains('translate-x-full')) {
-    loadAdminNotifications();
-  }
-};
+// NOTE: this used to reassign toggleNotificationDrawer with a version that had no
+// loading feedback. The single implementation defined near the top now opens the
+// drawer, paints skeletons and spins the bell while notifications load, so the
+// override is intentionally gone.
 
 markAllNotificationsRead = async function() {
   try {
