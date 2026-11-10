@@ -10,19 +10,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: '#090a0f',
-        surface: '#11131a',
+        background: '#09090b',
+        surface: '#18181b',
         'surface-elevated': '#171a23',
-        border: '#232733',
-        'border-focus': '#3b4255',
-        primary: '#38bdf8',
-        'primary-hover': '#0284c7',
+        border: '#27272a',
+        'border-focus': '#3f3f46',
+        primary: '#3b82f6',
+        'primary-hover': '#2563eb',
         accent: '#10b981',
         warning: '#f59e0b',
         danger: '#ef4444',
-        text: '#f1f5f9',
-        'text-muted': '#94a3b8',
-        'text-subtle': '#64748b',
+        text: '#f4f4f5',
+        'text-muted': '#a1a1aa',
+        'text-subtle': '#71717a',
       },
       fontFamily: {
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],

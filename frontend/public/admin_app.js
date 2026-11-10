@@ -3,7 +3,7 @@ function formatAiMarkdownToHtml(raw) {
   return escapeHtml(raw)
     .replace(/\n/g, '<br>')
     .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
-    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-[10px]">&nearr;</span></a>');
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-[10px]">&nearr;</span></a>');
 }
 
 // ============================================================================
@@ -130,14 +130,14 @@ function switchView(viewName) {
   toggleAdminMobileSidebar(false);
   document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
   document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.classList.remove('active', 'text-sky-400', 'bg-sky-500/10', 'border', 'border-sky-500/30');
-    btn.classList.add('text-slate-400');
+    btn.classList.remove('active', 'text-blue-400', 'bg-blue-500/10', 'border', 'border-blue-500/30');
+    btn.classList.add('text-zinc-400');
   });
 
   const activeBtn = document.querySelector(`[data-nav="${viewName}"]`);
   if (activeBtn) {
-    activeBtn.classList.add('active', 'text-sky-400', 'bg-sky-500/10', 'border', 'border-sky-500/30');
-    activeBtn.classList.remove('text-slate-400');
+    activeBtn.classList.add('active', 'text-blue-400', 'bg-blue-500/10', 'border', 'border-blue-500/30');
+    activeBtn.classList.remove('text-zinc-400');
   }
 
   const breadcrumb = document.getElementById('current-view-breadcrumb');
@@ -187,12 +187,12 @@ function switchView(viewName) {
 // Project Editor Tab Switching
 function switchEditorTab(tabId) {
   document.querySelectorAll('.editor-tab').forEach(t => {
-    t.classList.remove('active', 'text-sky-400', 'border-b-2', 'border-sky-400');
-    t.classList.add('text-slate-400');
+    t.classList.remove('active', 'text-blue-400', 'border-b-2', 'border-blue-400');
+    t.classList.add('text-zinc-400');
   });
   if (event && event.target) {
-    event.target.classList.add('active', 'text-sky-400', 'border-b-2', 'border-sky-400');
-    event.target.classList.remove('text-slate-400');
+    event.target.classList.add('active', 'text-blue-400', 'border-b-2', 'border-blue-400');
+    event.target.classList.remove('text-zinc-400');
   }
 
   document.querySelectorAll('.editor-content').forEach(c => c.classList.add('hidden'));
@@ -209,9 +209,9 @@ function updateMarkdownPreview() {
   const input = inputEl.value;
   let html = input
     .replace(/^# (.*$)/gim, '<h1 class="text-lg font-bold text-white font-mono">$1</h1>')
-    .replace(/^## (.*$)/gim, '<h2 class="text-base font-bold text-sky-400 font-mono mt-3">$1</h2>')
-    .replace(/^### (.*$)/gim, '<h3 class="text-sm font-semibold text-slate-200 font-mono mt-2">$1</h3>')
-    .replace(/```java([\\s\\S]*?)```/gim, '<pre class="bg-[#141822] p-3 rounded border border-[#202533] text-[11px] font-mono text-emerald-300 overflow-x-auto">$1</pre>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-base font-bold text-blue-400 font-mono mt-3">$1</h2>')
+    .replace(/^### (.*$)/gim, '<h3 class="text-sm font-semibold text-zinc-200 font-mono mt-2">$1</h3>')
+    .replace(/```java([\\s\\S]*?)```/gim, '<pre class="bg-[#141822] p-3 rounded border border-[#27272a] text-[11px] font-mono text-emerald-300 overflow-x-auto">$1</pre>')
     .replace(/\\n/gim, '<br>');
 
   outputEl.innerHTML = html;
@@ -226,8 +226,8 @@ function showToast(message, type = 'info') {
   const colors = {
     success: 'border-emerald-500/40 bg-[#0e1713] text-emerald-300',
     warning: 'border-amber-500/40 bg-[#17140e] text-amber-300',
-    info: 'border-sky-500/40 bg-[#0e151a] text-sky-300',
-  }[type] || 'border-slate-500/40 bg-[#11131a] text-slate-300';
+    info: 'border-blue-500/40 bg-[#0e151a] text-blue-300',
+  }[type] || 'border-zinc-500/40 bg-[#18181b] text-zinc-300';
 
   toast.className = `p-3 rounded-lg border shadow-xl flex items-center space-x-2 text-xs font-mono pointer-events-auto transition-all transform duration-200 translate-y-2 opacity-0 ${colors}`;
   toast.innerHTML = `<i data-lucide="info" class="w-4 h-4"></i><span>${message}</span>`;
@@ -277,9 +277,9 @@ function populateCommandResults() {
   ];
 
   results.innerHTML = commands.map(c => `
-    <div onclick="switchView('${c.view}'); toggleCommandPalette()" class="p-2 rounded hover:bg-[#1c2230] cursor-pointer flex items-center justify-between text-slate-300 hover:text-white">
+    <div onclick="switchView('${c.view}'); toggleCommandPalette()" class="p-2 rounded hover:bg-[#1c2230] cursor-pointer flex items-center justify-between text-zinc-300 hover:text-white">
       <span>${c.label}</span>
-      <span class="text-[10px] text-slate-500">↵ Select</span>
+      <span class="text-[10px] text-zinc-500">↵ Select</span>
     </div>
   `).join('');
 }
@@ -447,27 +447,27 @@ async function loadAdminActivity() {
       const items = (json?.data?.content || json?.data || []).slice(0, 5);
       cachedAdminActivities = items;
       if (items.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center text-slate-500">No activity records in Neon DB yet.</div>`;
+        container.innerHTML = `<div class="p-4 text-center text-zinc-500">No activity records in Neon DB yet.</div>`;
         return;
       }
       container.innerHTML = items.map(act => {
         const plat = act.sourcePlatform || "SYSTEM";
         const badgeColor = plat === "LEETCODE"
           ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-          : (plat === "GFG" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-sky-500/10 text-sky-400 border-sky-500/20");
+          : (plat === "GFG" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-blue-500/10 text-blue-400 border-blue-500/20");
         const dateStr = act.occurredAt ? new Date(act.occurredAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "";
         return `
-          <div class="p-3.5 rounded-lg bg-[#10121a] border border-[#1f2430] flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-sky-500/30 transition-all">
+          <div class="p-3.5 rounded-lg bg-[#18181b] border border-[#27272a] flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-blue-500/30 transition-all">
             <div class="flex items-start space-x-3">
               <span class="px-2 py-0.5 rounded text-[9px] font-bold border ${badgeColor} shrink-0 mt-0.5">${escapeHtml(plat)}</span>
               <div>
-                <p class="font-medium text-slate-200">${escapeHtml(act.title)}</p>
-                <p class="text-[11px] text-slate-400">${escapeHtml(act.description || "")}</p>
+                <p class="font-medium text-zinc-200">${escapeHtml(act.title)}</p>
+                <p class="text-[11px] text-zinc-400">${escapeHtml(act.description || "")}</p>
               </div>
             </div>
             <div class="flex items-center space-x-2.5 shrink-0 self-end sm:self-center">
-              <span class="text-[10px] text-slate-500">${dateStr}</span>
-              ${act.id ? `<button type="button" onclick="handleEditActivityItem('${act.id}')" class="text-sky-400 hover:underline text-[11px]">Edit</button>` : ''}
+              <span class="text-[10px] text-zinc-500">${dateStr}</span>
+              ${act.id ? `<button type="button" onclick="handleEditActivityItem('${act.id}')" class="text-blue-400 hover:underline text-[11px]">Edit</button>` : ''}
               ${act.id ? `<button type="button" onclick="handleDeleteActivityItem('${act.id}')" class="text-rose-400 hover:underline text-[11px]">Delete</button>` : ''}
             </div>
           </div>
@@ -551,7 +551,7 @@ async function loadAdminDsa() {
       const json = await res.json();
       cachedAdminDsaProblems = json?.data || [];
       if (cachedAdminDsaProblems.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center text-slate-500">No DSA problem notes in Neon DB. Use the form on the left to add one.</div>`;
+        container.innerHTML = `<div class="p-4 text-center text-zinc-500">No DSA problem notes in Neon DB. Use the form on the left to add one.</div>`;
         return;
       }
       container.innerHTML = cachedAdminDsaProblems.map(p => {
@@ -559,14 +559,14 @@ async function loadAdminDsa() {
           ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
           : (p.difficulty === "EASY" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20");
         return `
-          <div class="p-3 bg-[#141822] border border-[#202533] rounded flex justify-between items-center">
+          <div class="p-3 bg-[#141822] border border-[#27272a] rounded flex justify-between items-center">
             <div>
               <span class="font-bold text-white">${escapeHtml(p.title)}</span>
-              <span class="text-[10px] text-slate-400 block">${escapeHtml(p.platform)} · Time: ${escapeHtml(p.timeComplexity || "O(n)")} · Space: ${escapeHtml(p.spaceComplexity || "O(1)")}</span>
+              <span class="text-[10px] text-zinc-400 block">${escapeHtml(p.platform)} · Time: ${escapeHtml(p.timeComplexity || "O(n)")} · Space: ${escapeHtml(p.spaceComplexity || "O(1)")}</span>
             </div>
             <div class="flex items-center space-x-2">
               <span class="text-[9px] px-2 py-0.5 rounded border ${diffColor}">${escapeHtml(p.difficulty || "MEDIUM")}</span>
-              <button type="button" onclick="openEditDsaProblem('${p.id}')" class="text-sky-400 hover:underline text-[11px]">Edit</button>
+              <button type="button" onclick="openEditDsaProblem('${p.id}')" class="text-blue-400 hover:underline text-[11px]">Edit</button>
               <button type="button" onclick="handleDeleteDsaProblem('${p.id}')" class="text-rose-400 hover:underline text-[11px]">Delete</button>
             </div>
           </div>
@@ -664,19 +664,19 @@ function prependUnifiedActivity(type, title, desc) {
 
   const card = document.createElement('div');
   const typeColors = {
-    'GITHUB_COMMIT': 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+    'GITHUB_COMMIT': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     'LEETCODE_SOLVED': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
     'GFG_SOLVED': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     'BLOG_PUBLISHED': 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-  }[type] || 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+  }[type] || 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20';
 
-  card.className = 'p-3.5 rounded-lg bg-[#10121a] border border-[#1f2430] flex items-center justify-between hover:border-sky-500/30 transition-all animate-in fade-in duration-300';
+  card.className = 'p-3.5 rounded-lg bg-[#18181b] border border-[#27272a] flex items-center justify-between hover:border-blue-500/30 transition-all animate-in fade-in duration-300';
   card.innerHTML = `
     <div class="flex items-center space-x-3">
       <span class="px-2 py-0.5 rounded text-[9px] font-bold border ${typeColors}">${type}</span>
       <div>
-        <p class="font-medium text-slate-200">${title}</p>
-        <p class="text-[11px] text-slate-400">${desc}</p>
+        <p class="font-medium text-zinc-200">${title}</p>
+        <p class="text-[11px] text-zinc-400">${desc}</p>
       </div>
     </div>
     <span class="text-[10px] text-emerald-400 font-bold">Just now (Live SSE)</span>
@@ -732,7 +732,7 @@ async function handleSendAiMessage(e) {
   const userBubble = document.createElement('div');
   userBubble.className = 'flex justify-end';
   userBubble.innerHTML = `
-    <div class="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-200 leading-relaxed max-w-[85%] font-sans">
+    <div class="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-200 leading-relaxed max-w-[85%] font-sans">
       ${escapeHtml(query)}
     </div>
   `;
@@ -754,16 +754,16 @@ async function handleSendAiMessage(e) {
     const d = json?.data || {};
     const answer = d.answer || "Connected to Neon DB RAG Engine.";
     const formatted = escapeHtml(answer)
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-[10px]">&nearr;</span></a>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-[10px]">&nearr;</span></a>')
       .replace(/\n/g, '<br>');
 
     const aiBubble = document.createElement('div');
     aiBubble.className = 'flex items-start space-x-2.5 animate-in fade-in duration-200';
     aiBubble.innerHTML = `
-      <div class="w-6 h-6 rounded-md bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
+      <div class="w-6 h-6 rounded-md bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
         <i data-lucide="bot" class="w-3.5 h-3.5"></i>
       </div>
-      <div class="p-3 rounded-lg bg-[#141822] border border-[#202533] text-slate-200 leading-relaxed max-w-[85%] font-sans">
+      <div class="p-3 rounded-lg bg-[#141822] border border-[#27272a] text-zinc-200 leading-relaxed max-w-[85%] font-sans">
         ${formatted}
       </div>
     `;
@@ -810,12 +810,12 @@ function toggleNotificationDrawer() {
 
 function filterNotifications(filterType) {
   document.querySelectorAll('.notif-filter').forEach(btn => {
-    btn.classList.remove('active', 'bg-sky-500/10', 'text-sky-400', 'border-sky-500/30');
-    btn.classList.add('bg-[#161924]', 'text-slate-400');
+    btn.classList.remove('active', 'bg-blue-500/10', 'text-blue-400', 'border-blue-500/30');
+    btn.classList.add('bg-[#1d1d21]', 'text-zinc-400');
   });
   if (event && event.target) {
-    event.target.classList.add('active', 'bg-sky-500/10', 'text-sky-400', 'border-sky-500/30');
-    event.target.classList.remove('bg-[#161924]', 'text-slate-400');
+    event.target.classList.add('active', 'bg-blue-500/10', 'text-blue-400', 'border-blue-500/30');
+    event.target.classList.remove('bg-[#1d1d21]', 'text-zinc-400');
   }
 
   const items = document.querySelectorAll('.notif-item');
@@ -845,7 +845,7 @@ function markSingleRead(btn) {
   if (item) {
     item.setAttribute('data-read', 'true');
     item.classList.add('opacity-75');
-    btn.outerHTML = '<span class="text-slate-600">Read</span>';
+    btn.outerHTML = '<span class="text-zinc-600">Read</span>';
     decrementBadge();
     showToast('Notification marked as read', 'info');
   }
@@ -922,7 +922,7 @@ function simulateEvent(eventType) {
     showToast('Integration failure alert: Circuit breaker tripped, serving cached data', 'warning');
   }
 
-  card.className = 'notif-item p-3.5 rounded-lg bg-[#141822] border border-sky-500/40 space-y-2 transition-all animate-in fade-in duration-300';
+  card.className = 'notif-item p-3.5 rounded-lg bg-[#141822] border border-blue-500/40 space-y-2 transition-all animate-in fade-in duration-300';
   card.setAttribute('data-type', type);
   card.setAttribute('data-priority', priority);
   card.setAttribute('data-read', 'false');
@@ -933,15 +933,15 @@ function simulateEvent(eventType) {
     <div class="flex items-center justify-between font-mono text-[10px]">
       <div class="flex items-center space-x-1.5">
         <span class="px-1.5 py-0.5 rounded font-bold border ${pColor}">${priority}</span>
-        <span class="text-slate-400">${dispatchNote}</span>
+        <span class="text-zinc-400">${dispatchNote}</span>
       </div>
       <span class="text-emerald-400 font-bold">Just now (Live SSE)</span>
     </div>
     <p class="font-bold text-white text-xs font-mono">${title}</p>
-    <p class="text-slate-400 text-[11px] leading-relaxed">${msg}</p>
-    <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-[10px] font-mono">
-      <span class="text-sky-400">SSE Real-time Broadcast</span>
-      <button onclick="markSingleRead(this)" class="text-slate-500 hover:text-slate-300">Mark read</button>
+    <p class="text-zinc-400 text-[11px] leading-relaxed">${msg}</p>
+    <div class="pt-2 border-t border-[#27272a] flex items-center justify-between text-[10px] font-mono">
+      <span class="text-blue-400">SSE Real-time Broadcast</span>
+      <button onclick="markSingleRead(this)" class="text-zinc-500 hover:text-zinc-300">Mark read</button>
     </div>
   `;
 
@@ -1223,11 +1223,11 @@ function addSocialLinkPrompt() {
   const list = document.getElementById("social-links-list");
   if (list) {
     const item = document.createElement("div");
-    item.className = "p-2.5 rounded bg-[#10121a] border border-[#232938] flex items-center justify-between";
+    item.className = "p-2.5 rounded bg-[#18181b] border border-[#27272a] flex items-center justify-between";
     item.innerHTML = `
       <div>
         <span class="text-white font-semibold">${escapeHtml(platform)}</span>
-        <span class="text-slate-500 block text-[10px]">${escapeHtml(url)}</span>
+        <span class="text-zinc-500 block text-[10px]">${escapeHtml(url)}</span>
       </div>
       <span class="text-emerald-400 text-[10px]">Active</span>
     `;
@@ -1329,7 +1329,7 @@ function renderAdminProjectsTable(projects) {
   }
 
   if (!projects || projects.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500 font-mono text-xs">No projects in Neon DB. Click "+ Create New Project" to add your project directly into Neon DB.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-zinc-500 font-mono text-xs">No projects in Neon DB. Click "+ Create New Project" to add your project directly into Neon DB.</td></tr>`;
     return;
   }
 
@@ -1345,22 +1345,22 @@ function renderAdminProjectsTable(projects) {
       <tr class="hover:bg-[#141822]/70 transition-colors">
         <td class="py-3 px-4">
           <div class="font-medium text-white">${escapeHtml(p.title)}</div>
-          <div class="text-[10px] text-slate-500">slug: ${escapeHtml(p.slug)}</div>
+          <div class="text-[10px] text-zinc-500">slug: ${escapeHtml(p.slug)}</div>
         </td>
         <td class="py-3 px-4">
           <span class="px-2 py-0.5 rounded text-[10px] ${status === "PUBLISHED" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}">${escapeHtml(status)}</span>
         </td>
         <td class="py-3 px-4">
           <div class="flex items-center space-x-2">
-            <span class="text-sky-400 font-bold">${prog}%</span>
-            <div class="w-16 h-1.5 rounded-full bg-[#1f2430]"><div class="h-full bg-sky-400 rounded-full" style="width: ${prog}%"></div></div>
+            <span class="text-blue-400 font-bold">${prog}%</span>
+            <div class="w-16 h-1.5 rounded-full bg-[#27272a]"><div class="h-full bg-blue-400 rounded-full" style="width: ${prog}%"></div></div>
           </div>
         </td>
-        <td class="py-3 px-4 text-slate-300 text-[11px]">${escapeHtml(techList)}</td>
-        <td class="py-3 px-4 text-slate-400 text-[11px]">${escapeHtml(p.architectureStyle || "Modular Architecture")}</td>
+        <td class="py-3 px-4 text-zinc-300 text-[11px]">${escapeHtml(techList)}</td>
+        <td class="py-3 px-4 text-zinc-400 text-[11px]">${escapeHtml(p.architectureStyle || "Modular Architecture")}</td>
         <td class="py-3 px-4 text-right space-x-2.5 whitespace-nowrap">
           <button type="button" onclick="open13TabEditorForProject('${pid}')" class="text-emerald-400 hover:text-emerald-300 font-mono text-[11px]" title="Deep 13-Tab Architecture Editor">13-Tab Editor</button>
-          <button type="button" onclick="openEditProjectModalById('${pid}')" class="text-sky-400 hover:text-sky-300 font-mono text-[11px]" title="Edit Project in Neon DB">Edit</button>
+          <button type="button" onclick="openEditProjectModalById('${pid}')" class="text-blue-400 hover:text-blue-300 font-mono text-[11px]" title="Edit Project in Neon DB">Edit</button>
           <button type="button" onclick="handleDeleteProject('${pid}')" class="text-rose-400 hover:text-rose-300 font-mono text-[11px]" title="Delete Project from Neon DB">Delete</button>
         </td>
       </tr>
@@ -1622,20 +1622,20 @@ async function loadAdminCareer() {
       const dataEdu = await resEdu.json();
       cachedAdminEducations = dataEdu?.data || [];
       if (cachedAdminEducations.length === 0) {
-        eduContainer.innerHTML = '<div class="p-4 rounded-lg bg-[#10121a] border border-[#232938] text-center text-slate-500 text-xs">No education records in Neon DB yet. Click "+ Add Degree" to record one.</div>';
+        eduContainer.innerHTML = '<div class="p-4 rounded-lg bg-[#18181b] border border-[#27272a] text-center text-zinc-500 text-xs">No education records in Neon DB yet. Click "+ Add Degree" to record one.</div>';
       } else {
         eduContainer.innerHTML = cachedAdminEducations.map(edu => `
-          <div class="p-4 rounded-lg bg-[#10121a] border border-[#232938] space-y-2 text-xs font-mono">
+          <div class="p-4 rounded-lg bg-[#18181b] border border-[#27272a] space-y-2 text-xs font-mono">
             <div class="flex items-center justify-between">
               <span class="text-white font-bold">${escapeHtml(edu.degree)}</span>
               <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${escapeHtml(edu.grade || 'Enrolled')}</span>
             </div>
-            <p class="text-slate-400 text-[11px]">${escapeHtml(edu.institution)}</p>
-            <p class="text-slate-300 font-sans text-xs leading-relaxed">${escapeHtml(edu.description || '')}</p>
-            <div class="pt-2 flex items-center justify-between text-slate-500 text-[10px]">
+            <p class="text-zinc-400 text-[11px]">${escapeHtml(edu.institution)}</p>
+            <p class="text-zinc-300 font-sans text-xs leading-relaxed">${escapeHtml(edu.description || '')}</p>
+            <div class="pt-2 flex items-center justify-between text-zinc-500 text-[10px]">
               <span>Timeline: ${edu.startDate || ''} – ${edu.endDate || 'Present'}</span>
               <div class="space-x-2">
-                <button type="button" onclick="openCareerModal('education', '${edu.id}')" class="text-sky-400 hover:underline">Edit</button>
+                <button type="button" onclick="openCareerModal('education', '${edu.id}')" class="text-blue-400 hover:underline">Edit</button>
                 <button type="button" onclick="handleDeleteEducation('${edu.id}')" class="text-rose-400 hover:underline">Delete</button>
               </div>
             </div>
@@ -1659,36 +1659,36 @@ async function loadAdminCareer() {
 
     if (internContainer) {
       if (internships.length === 0) {
-        internContainer.innerHTML = '<div class="col-span-2 p-4 rounded-lg bg-[#10121a] border border-[#232938] text-center text-slate-500 text-xs">No internships in Neon DB yet. Click "+ Add Internship" to add one.</div>';
+        internContainer.innerHTML = '<div class="col-span-2 p-4 rounded-lg bg-[#18181b] border border-[#27272a] text-center text-zinc-500 text-xs">No internships in Neon DB yet. Click "+ Add Internship" to add one.</div>';
       } else {
         internContainer.innerHTML = internships.map(exp => {
           const isPursuing = Boolean(exp.current) || !exp.endDate;
           const reportUrl = exp.achievements && String(exp.achievements).startsWith('http') ? exp.achievements : '';
           return `
-            <div class="p-4 rounded-xl bg-[#10121a] border ${isPursuing ? 'border-amber-500/30' : 'border-emerald-500/30'} space-y-2.5 text-xs font-mono flex flex-col justify-between">
+            <div class="p-4 rounded-xl bg-[#18181b] border ${isPursuing ? 'border-amber-500/30' : 'border-emerald-500/30'} space-y-2.5 text-xs font-mono flex flex-col justify-between">
               <div class="space-y-1.5">
                 <div class="flex items-start justify-between gap-2">
                   <div>
                     <span class="text-white font-bold text-sm block">${escapeHtml(exp.role)}</span>
-                    <span class="text-cyan-400 text-xs">${escapeHtml(exp.company)}</span>
-                    <span class="text-slate-400 text-[11px]"> · ${escapeHtml(exp.location || 'Remote')}</span>
+                    <span class="text-blue-400 text-xs">${escapeHtml(exp.company)}</span>
+                    <span class="text-zinc-400 text-[11px]"> · ${escapeHtml(exp.location || 'Remote')}</span>
                   </div>
                   <span class="text-[10px] px-2 py-0.5 rounded shrink-0 ${isPursuing ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'}">
                     ${isPursuing ? 'Pursuing / Ongoing' : 'Completed'}
                   </span>
                 </div>
-                <p class="text-slate-300 font-sans text-xs leading-relaxed">${escapeHtml(exp.description || '')}</p>
-                ${exp.technologies ? `<div class="text-[10px] text-slate-400">Stack: <span class="text-slate-200">${escapeHtml(exp.technologies)}</span></div>` : ''}
+                <p class="text-zinc-300 font-sans text-xs leading-relaxed">${escapeHtml(exp.description || '')}</p>
+                ${exp.technologies ? `<div class="text-[10px] text-zinc-400">Stack: <span class="text-zinc-200">${escapeHtml(exp.technologies)}</span></div>` : ''}
                 <div class="flex flex-wrap gap-2 pt-1 text-[10px]">
-                  ${exp.offerLetterUrl ? `<a href="${escapeHtml(exp.offerLetterUrl)}" target="_blank" class="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 hover:underline">Offer Letter ↗</a>` : '<span class="text-slate-500">No Offer Letter URL</span>'}
+                  ${exp.offerLetterUrl ? `<a href="${escapeHtml(exp.offerLetterUrl)}" target="_blank" class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:underline">Offer Letter ↗</a>` : '<span class="text-zinc-500">No Offer Letter URL</span>'}
                   ${exp.certificateUrl ? `<a href="${escapeHtml(exp.certificateUrl)}" target="_blank" class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:underline">Certificate ↗</a>` : '<span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Certificate Pending (Click Edit to Add)</span>'}
                   ${reportUrl ? `<a href="${escapeHtml(reportUrl)}" target="_blank" class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:underline">Project Report ↗</a>` : ''}
                 </div>
               </div>
-              <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-slate-500 text-[10px]">
+              <div class="pt-2 border-t border-[#27272a] flex items-center justify-between text-zinc-500 text-[10px]">
                 <span>Timeline: ${exp.startDate || ''} – ${exp.endDate || 'Present'}</span>
                 <div class="space-x-2">
-                  <button type="button" onclick="openCareerModal('internship', '${exp.id}')" class="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30 hover:bg-sky-500/20">Edit / Add Certificate</button>
+                  <button type="button" onclick="openCareerModal('internship', '${exp.id}')" class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500/20">Edit / Add Certificate</button>
                   <button type="button" onclick="handleDeleteExperience('${exp.id}')" class="text-rose-400 hover:underline">Delete</button>
                 </div>
               </div>
@@ -1700,20 +1700,20 @@ async function loadAdminCareer() {
 
     if (expContainer) {
       if (workExps.length === 0) {
-        expContainer.innerHTML = '<div class="p-4 rounded-lg bg-[#10121a] border border-[#232938] text-center text-slate-500 text-xs">No general experience records in Neon DB yet. Click "+ Add Experience" to record one.</div>';
+        expContainer.innerHTML = '<div class="p-4 rounded-lg bg-[#18181b] border border-[#27272a] text-center text-zinc-500 text-xs">No general experience records in Neon DB yet. Click "+ Add Experience" to record one.</div>';
       } else {
         expContainer.innerHTML = workExps.map(exp => `
-          <div class="p-4 rounded-lg bg-[#10121a] border border-[#232938] space-y-2 text-xs font-mono">
+          <div class="p-4 rounded-lg bg-[#18181b] border border-[#27272a] space-y-2 text-xs font-mono">
             <div class="flex items-center justify-between">
               <span class="text-white font-bold">${escapeHtml(exp.role)}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">${exp.current ? 'Current' : 'Completed'}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">${exp.current ? 'Current' : 'Completed'}</span>
             </div>
-            <p class="text-slate-400 text-[11px]">${escapeHtml(exp.company)} · ${escapeHtml(exp.location || 'India')}</p>
-            <p class="text-slate-300 font-sans text-xs leading-relaxed">${escapeHtml(exp.description || '')}</p>
-            <div class="pt-2 flex items-center justify-between text-slate-500 text-[10px]">
+            <p class="text-zinc-400 text-[11px]">${escapeHtml(exp.company)} · ${escapeHtml(exp.location || 'India')}</p>
+            <p class="text-zinc-300 font-sans text-xs leading-relaxed">${escapeHtml(exp.description || '')}</p>
+            <div class="pt-2 flex items-center justify-between text-zinc-500 text-[10px]">
               <span>Timeline: ${exp.startDate || ''} – ${exp.endDate || 'Present'}</span>
               <div class="space-x-2">
-                <button type="button" onclick="openCareerModal('experience', '${exp.id}')" class="text-sky-400 hover:underline">Edit</button>
+                <button type="button" onclick="openCareerModal('experience', '${exp.id}')" class="text-blue-400 hover:underline">Edit</button>
                 <button type="button" onclick="handleDeleteExperience('${exp.id}')" class="text-rose-400 hover:underline">Delete</button>
               </div>
             </div>
@@ -1862,16 +1862,16 @@ async function loadAdminCredentials() {
       const resA = await fetch('/api/achievements');
       cachedAdminAchievements = (await resA.json())?.data || [];
       if (cachedAdminAchievements.length === 0) {
-        achContainer.innerHTML = `<div class="p-4 text-center text-slate-500">No achievements in Neon DB. Click "+ Add Achievement" above.</div>`;
+        achContainer.innerHTML = `<div class="p-4 text-center text-zinc-500">No achievements in Neon DB. Click "+ Add Achievement" above.</div>`;
       } else {
         achContainer.innerHTML = cachedAdminAchievements.map(a => `
-          <div class="p-3 rounded bg-[#10121a] border border-[#232938] flex items-center justify-between gap-2">
+          <div class="p-3 rounded bg-[#18181b] border border-[#27272a] flex items-center justify-between gap-2">
             <div>
               <span class="text-white font-bold">${escapeHtml(a.title)}</span>
-              <span class="text-slate-400 block text-[10px]">${escapeHtml(a.organization || '')} · ${escapeHtml(a.description || a.category || '')}</span>
+              <span class="text-zinc-400 block text-[10px]">${escapeHtml(a.organization || '')} · ${escapeHtml(a.description || a.category || '')}</span>
             </div>
             <div class="flex items-center space-x-2 shrink-0">
-              <button type="button" onclick="openCredentialModal('achievement', '${a.id}')" class="text-sky-400 hover:underline text-[11px]">Edit</button>
+              <button type="button" onclick="openCredentialModal('achievement', '${a.id}')" class="text-blue-400 hover:underline text-[11px]">Edit</button>
               <button type="button" onclick="handleDeleteAchievement('${a.id}')" class="text-rose-400 hover:underline text-[11px]">Delete</button>
             </div>
           </div>
@@ -1883,16 +1883,16 @@ async function loadAdminCredentials() {
       const resC = await fetch('/api/certifications');
       cachedAdminCertifications = (await resC.json())?.data || [];
       if (cachedAdminCertifications.length === 0) {
-        certContainer.innerHTML = `<div class="p-4 text-center text-slate-500">No certifications in Neon DB. Click "+ Add Certification" above.</div>`;
+        certContainer.innerHTML = `<div class="p-4 text-center text-zinc-500">No certifications in Neon DB. Click "+ Add Certification" above.</div>`;
       } else {
         certContainer.innerHTML = cachedAdminCertifications.map(c => `
-          <div class="p-3 rounded bg-[#10121a] border border-[#232938] flex items-center justify-between gap-2">
+          <div class="p-3 rounded bg-[#18181b] border border-[#27272a] flex items-center justify-between gap-2">
             <div>
               <span class="text-white font-bold">${escapeHtml(c.title)}</span>
-              <span class="text-slate-400 block text-[10px]">${escapeHtml(c.issuer || '')} ${c.credentialId ? '· ID: ' + escapeHtml(c.credentialId) : ''}</span>
+              <span class="text-zinc-400 block text-[10px]">${escapeHtml(c.issuer || '')} ${c.credentialId ? '· ID: ' + escapeHtml(c.credentialId) : ''}</span>
             </div>
             <div class="flex items-center space-x-2 shrink-0">
-              <button type="button" onclick="openCredentialModal('certification', '${c.id}')" class="text-sky-400 hover:underline text-[11px]">Edit</button>
+              <button type="button" onclick="openCredentialModal('certification', '${c.id}')" class="text-blue-400 hover:underline text-[11px]">Edit</button>
               <button type="button" onclick="handleDeleteCertification('${c.id}')" class="text-rose-400 hover:underline text-[11px]">Delete</button>
             </div>
           </div>
@@ -2012,18 +2012,18 @@ async function loadAdminResearch() {
     cachedAdminResearch = data?.data?.content || data?.data || [];
 
     if (!cachedAdminResearch || cachedAdminResearch.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-mono text-xs">No research papers in Neon DB. Click "+ New Paper" to publish one.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-zinc-500 font-mono text-xs">No research papers in Neon DB. Click "+ New Paper" to publish one.</td></tr>`;
       return;
     }
 
     tbody.innerHTML = cachedAdminResearch.map(paper => `
-      <tr class="hover:bg-[#141824] transition-colors">
+      <tr class="hover:bg-[#1d1d21] transition-colors">
         <td class="p-3.5 font-bold text-white">${escapeHtml(paper.title)}</td>
-        <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] ${paper.status === "PUBLISHED" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"}">${escapeHtml(paper.status || "PUBLISHED")}</span></td>
-        <td class="p-3.5 text-slate-300 font-sans max-w-xs truncate">${escapeHtml(paper.abstractText || "")}</td>
-        <td class="p-3.5 text-slate-500">${paper.publishedDate || "2026"}</td>
+        <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] ${paper.status === "PUBLISHED" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-blue-500/10 text-blue-400 border border-blue-500/20"}">${escapeHtml(paper.status || "PUBLISHED")}</span></td>
+        <td class="p-3.5 text-zinc-300 font-sans max-w-xs truncate">${escapeHtml(paper.abstractText || "")}</td>
+        <td class="p-3.5 text-zinc-500">${paper.publishedDate || "2026"}</td>
         <td class="p-3.5 text-right space-x-2 whitespace-nowrap">
-          <button type="button" onclick="openResearchModal('${paper.id}')" class="text-sky-400 hover:underline">Edit</button>
+          <button type="button" onclick="openResearchModal('${paper.id}')" class="text-blue-400 hover:underline">Edit</button>
           <button type="button" onclick="handleDeleteResearch('${paper.id}')" class="text-rose-400 hover:underline">Delete</button>
         </td>
       </tr>
@@ -2165,21 +2165,21 @@ async function loadAdminSkills() {
       const skillCount = cat.skills ? cat.skills.length : 0;
       const skillsHtml = skillCount > 0
         ? (cat.skills || []).map(s => `
-            <span class="text-[11px] font-mono px-2.5 py-1 rounded bg-[#161924] text-slate-200 border border-[#232938] flex items-center gap-2">
-              <span>${escapeHtml(s.name)} <span class="text-sky-400 text-[10px]">(${s.proficiency || 85}%)</span></span>
-              <button type="button" onclick="openSkillModal('${s.id}')" class="text-sky-400 hover:text-sky-300 text-[10px]" title="Edit skill">Edit</button>
+            <span class="text-[11px] font-mono px-2.5 py-1 rounded bg-[#1d1d21] text-zinc-200 border border-[#27272a] flex items-center gap-2">
+              <span>${escapeHtml(s.name)} <span class="text-blue-400 text-[10px]">(${s.proficiency || 85}%)</span></span>
+              <button type="button" onclick="openSkillModal('${s.id}')" class="text-blue-400 hover:text-blue-300 text-[10px]" title="Edit skill">Edit</button>
               <button type="button" onclick="handleDeleteSkill('${s.id}')" class="text-rose-400 hover:text-rose-300 font-bold px-0.5" title="Delete skill">&times;</button>
             </span>
           `).join("")
-        : `<div class="w-full py-2 text-center text-slate-500 font-mono text-[11px]">No skills in this category yet. <button type="button" onclick="openSkillModal(null, '${escapeHtml(cat.name)}')" class="text-sky-400 hover:underline font-bold">+ Add First Skill</button></div>`;
+        : `<div class="w-full py-2 text-center text-zinc-500 font-mono text-[11px]">No skills in this category yet. <button type="button" onclick="openSkillModal(null, '${escapeHtml(cat.name)}')" class="text-blue-400 hover:underline font-bold">+ Add First Skill</button></div>`;
 
       return `
-        <div class="saas-card p-5 space-y-3 border border-[#1f2430] rounded-xl bg-[#10121a]">
-          <div class="flex items-center justify-between border-b border-[#1f2430] pb-2">
+        <div class="saas-card p-5 space-y-3 border border-[#27272a] rounded-xl bg-[#18181b]">
+          <div class="flex items-center justify-between border-b border-[#27272a] pb-2">
             <span class="text-xs font-bold text-white font-mono uppercase">${escapeHtml(cat.name)}</span>
             <div class="flex items-center gap-2">
-              <span class="text-[10px] text-slate-400">${skillCount} Skills</span>
-              <button type="button" onclick="openSkillModal(null, '${escapeHtml(cat.name)}')" class="px-2 py-0.5 rounded bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 text-[10px] font-mono transition-colors">
+              <span class="text-[10px] text-zinc-400">${skillCount} Skills</span>
+              <button type="button" onclick="openSkillModal(null, '${escapeHtml(cat.name)}')" class="px-2 py-0.5 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 text-[10px] font-mono transition-colors">
                 + Add
               </button>
             </div>
@@ -2291,26 +2291,26 @@ async function loadAdminLab() {
     const data = await res.json();
     cachedAdminLabs = data?.data?.content || data?.data || [];
     if (cachedAdminLabs.length === 0) {
-      container.innerHTML = `<div class="col-span-3 p-6 text-center text-slate-500 font-mono text-xs">No lab experiments in Neon DB. Click "+ New Experiment" to add one.</div>`;
+      container.innerHTML = `<div class="col-span-3 p-6 text-center text-zinc-500 font-mono text-xs">No lab experiments in Neon DB. Click "+ New Experiment" to add one.</div>`;
       return;
     }
     container.innerHTML = cachedAdminLabs.map((lab, idx) => `
       <div class="saas-card p-5 space-y-3 font-mono flex flex-col justify-between">
         <div class="space-y-2">
           <div class="flex items-center justify-between text-[10px]">
-            <span class="text-cyan-400 font-bold">LAB-0${idx + 1}</span>
+            <span class="text-blue-400 font-bold">LAB-0${idx + 1}</span>
             <span class="text-emerald-400">${escapeHtml(lab.status || "ACTIVE")}</span>
           </div>
           <h3 class="font-bold text-white text-sm">${escapeHtml(lab.title)}</h3>
-          <p class="text-slate-400 text-xs font-sans leading-relaxed">${escapeHtml(lab.description || lab.objective || "")}</p>
-          <div class="text-[11px] text-slate-300 pt-1">
-            <span class="text-slate-500">Tech:</span> ${escapeHtml(lab.technologies || "Java 21")}
+          <p class="text-zinc-400 text-xs font-sans leading-relaxed">${escapeHtml(lab.description || lab.objective || "")}</p>
+          <div class="text-[11px] text-zinc-300 pt-1">
+            <span class="text-zinc-500">Tech:</span> ${escapeHtml(lab.technologies || "Java 21")}
           </div>
         </div>
-        <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-[11px]">
-          <a href="${escapeHtml(lab.githubUrl || "#")}" target="_blank" class="text-sky-400 hover:underline">GitHub ↗</a>
+        <div class="pt-2 border-t border-[#27272a] flex items-center justify-between text-[11px]">
+          <a href="${escapeHtml(lab.githubUrl || "#")}" target="_blank" class="text-blue-400 hover:underline">GitHub ↗</a>
           <div class="space-x-2">
-            <button type="button" onclick="openLabModal('${lab.id}')" class="text-sky-400 hover:underline">Edit</button>
+            <button type="button" onclick="openLabModal('${lab.id}')" class="text-blue-400 hover:underline">Edit</button>
             <button type="button" onclick="handleDeleteLab('${lab.id}')" class="text-rose-400 hover:underline">Delete</button>
           </div>
         </div>
@@ -2415,7 +2415,7 @@ async function loadAdminStories() {
     const data = await res.json();
     cachedAdminStories = data?.data?.content || data?.data || [];
     if (cachedAdminStories.length === 0) {
-      container.innerHTML = `<div class="col-span-2 p-6 text-center text-slate-500 font-mono text-xs">No contribution stories in Neon DB. Click "+ New Story" to add one.</div>`;
+      container.innerHTML = `<div class="col-span-2 p-6 text-center text-zinc-500 font-mono text-xs">No contribution stories in Neon DB. Click "+ New Story" to add one.</div>`;
       return;
     }
     container.innerHTML = cachedAdminStories.map(s => `
@@ -2426,12 +2426,12 @@ async function loadAdminStories() {
             <span class="text-[10px] text-purple-400">${escapeHtml(s.externalContributionId || "Merged PR")}</span>
           </div>
           <h4 class="text-white font-semibold text-xs">${escapeHtml(s.title)}</h4>
-          <p class="text-slate-400 text-xs font-sans leading-relaxed">${escapeHtml(s.whatIContributed || s.problem || "")}</p>
+          <p class="text-zinc-400 text-xs font-sans leading-relaxed">${escapeHtml(s.whatIContributed || s.problem || "")}</p>
         </div>
-        <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-[11px]">
-          <a href="${escapeHtml(s.prUrl || "#")}" target="_blank" class="text-sky-400 hover:underline">PR Link ↗</a>
+        <div class="pt-2 border-t border-[#27272a] flex items-center justify-between text-[11px]">
+          <a href="${escapeHtml(s.prUrl || "#")}" target="_blank" class="text-blue-400 hover:underline">PR Link ↗</a>
           <div class="space-x-2">
-            <button type="button" onclick="openStoryModal('${s.id}')" class="text-sky-400 hover:underline">Edit</button>
+            <button type="button" onclick="openStoryModal('${s.id}')" class="text-blue-400 hover:underline">Edit</button>
             <button type="button" onclick="handleDeleteStory('${s.id}')" class="text-rose-400 hover:underline">Delete</button>
           </div>
         </div>
@@ -2479,17 +2479,17 @@ async function loadAdminArticles() {
       const json = await res.json();
       cachedAdminArticles = json?.data?.content || json?.data || [];
       if (cachedAdminArticles.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">No articles in Neon DB yet. Use the editor above to publish one.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-zinc-500">No articles in Neon DB yet. Use the editor above to publish one.</td></tr>`;
         return;
       }
       tbody.innerHTML = cachedAdminArticles.map(a => `
-        <tr class="hover:bg-[#141824] transition-colors">
+        <tr class="hover:bg-[#1d1d21] transition-colors">
           <td class="p-3 font-bold text-white">${escapeHtml(a.title)}</td>
-          <td class="p-3 text-slate-400">${escapeHtml(a.slug)}</td>
+          <td class="p-3 text-zinc-400">${escapeHtml(a.slug)}</td>
           <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${escapeHtml(a.status || "PUBLISHED")}</span></td>
-          <td class="p-3 text-slate-300 max-w-xs truncate font-sans">${escapeHtml(a.summary || "")}</td>
+          <td class="p-3 text-zinc-300 max-w-xs truncate font-sans">${escapeHtml(a.summary || "")}</td>
           <td class="p-3 text-right space-x-2 whitespace-nowrap">
-            <button type="button" onclick="openEditArticle('${a.id}')" class="text-sky-400 hover:underline">Edit</button>
+            <button type="button" onclick="openEditArticle('${a.id}')" class="text-blue-400 hover:underline">Edit</button>
             <button type="button" onclick="handleDeleteArticle('${a.id}')" class="text-rose-400 hover:underline">Delete</button>
           </td>
         </tr>
@@ -2575,12 +2575,12 @@ let currentAdminCrmFilter = 'ALL';
 function filterAdminCrm(filterType, btnEl) {
   currentAdminCrmFilter = filterType;
   document.querySelectorAll('.crm-filter-btn').forEach(btn => {
-    btn.classList.remove('active', 'bg-sky-500/10', 'text-sky-400', 'border-sky-500/30');
-    btn.classList.add('bg-[#161924]', 'text-slate-400', 'border-[#232938]');
+    btn.classList.remove('active', 'bg-blue-500/10', 'text-blue-400', 'border-blue-500/30');
+    btn.classList.add('bg-[#1d1d21]', 'text-zinc-400', 'border-[#27272a]');
   });
   if (btnEl) {
-    btnEl.classList.add('active', 'bg-sky-500/10', 'text-sky-400', 'border-sky-500/30');
-    btnEl.classList.remove('bg-[#161924]', 'text-slate-400', 'border-[#232938]');
+    btnEl.classList.add('active', 'bg-blue-500/10', 'text-blue-400', 'border-blue-500/30');
+    btnEl.classList.remove('bg-[#1d1d21]', 'text-zinc-400', 'border-[#27272a]');
   }
   renderAdminCrmList();
 }
@@ -2632,7 +2632,7 @@ function renderAdminCrmList() {
   });
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="p-6 rounded-xl bg-[#10121a] border border-[#1f2430] text-center text-slate-500">No contact inquiries match the selected filter in Neon DB.</div>`;
+    container.innerHTML = `<div class="p-6 rounded-xl bg-[#18181b] border border-[#27272a] text-center text-zinc-500">No contact inquiries match the selected filter in Neon DB.</div>`;
     return;
   }
 
@@ -2681,32 +2681,32 @@ function renderAdminCrmList() {
     }
 
     return `
-      <div class="p-4 rounded-xl bg-[#10121a] border ${isSpam || isAbusive ? 'border-rose-500/30' : 'border-[#1f2430]'} space-y-3">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 border-b border-[#1f2430] pb-2.5">
+      <div class="p-4 rounded-xl bg-[#18181b] border ${isSpam || isAbusive ? 'border-rose-500/30' : 'border-[#27272a]'} space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 border-b border-[#27272a] pb-2.5">
           <div class="flex flex-wrap items-center gap-2">
             <span class="font-bold text-white text-sm">${escapeHtml(inq.name || "Visitor")}</span>
-            <span class="text-cyan-400 text-xs">&lt;${escapeHtml(inq.email || "")}&gt;</span>
-            ${inq.company ? `<span class="text-slate-400 text-[11px]">· ${escapeHtml(inq.company)}</span>` : ""}
-            <span class="px-2 py-0.5 rounded text-[10px] bg-sky-500/10 text-sky-400 border border-sky-500/20">${escapeHtml(inq.status || "NEW")}</span>
+            <span class="text-blue-400 text-xs">&lt;${escapeHtml(inq.email || "")}&gt;</span>
+            ${inq.company ? `<span class="text-zinc-400 text-[11px]">· ${escapeHtml(inq.company)}</span>` : ""}
+            <span class="px-2 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20">${escapeHtml(inq.status || "NEW")}</span>
             <span class="px-2 py-0.5 rounded text-[10px] border ${modBadgeClass}">${escapeHtml(intent)} · ${escapeHtml(modStatus)} (${confPct})</span>
             ${isRepeat ? `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30">Repeat #${inq.repeatCount || 2}</span>` : ""}
             ${isDisposable ? `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/30">Disposable Email</span>` : ""}
           </div>
-          <span class="text-[11px] text-slate-500">${timeStr}</span>
+          <span class="text-[11px] text-zinc-500">${timeStr}</span>
         </div>
 
-        <p class="text-slate-200 font-sans text-xs leading-relaxed whitespace-pre-wrap">${escapeHtml(inq.message || "")}</p>
+        <p class="text-zinc-200 font-sans text-xs leading-relaxed whitespace-pre-wrap">${escapeHtml(inq.message || "")}</p>
 
         <!-- Contact Intelligence & AI Moderation Metadata Bar -->
-        <div class="p-2.5 rounded-lg bg-[#141824] border border-[#232938] grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] text-slate-400">
+        <div class="p-2.5 rounded-lg bg-[#1d1d21] border border-[#27272a] grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] text-zinc-400">
           <div class="space-y-0.5">
-            <div><strong class="text-slate-300">GeoIP & Origin:</strong> ${locationStr} ${inq.referrer ? `· <span class="text-slate-400">Ref: ${escapeHtml(inq.referrer)}</span>` : ''}</div>
-            <div><strong class="text-slate-300">Client IP:</strong> <span class="text-emerald-400 font-mono">${escapeHtml(inq.ipAddress || "Scrubbed / Redacted")}</span> ${inq.browserHash ? `· <strong class="text-slate-300">Browser Hash:</strong> <code class="text-cyan-300 font-mono">${escapeHtml(String(inq.browserHash))}</code>` : ""}</div>
-            ${inq.userAgent ? `<div class="truncate" title="${escapeHtml(inq.userAgent)}"><strong class="text-slate-300">User-Agent:</strong> ${escapeHtml(inq.userAgent)}</div>` : ""}
+            <div><strong class="text-zinc-300">GeoIP & Origin:</strong> ${locationStr} ${inq.referrer ? `· <span class="text-zinc-400">Ref: ${escapeHtml(inq.referrer)}</span>` : ''}</div>
+            <div><strong class="text-zinc-300">Client IP:</strong> <span class="text-emerald-400 font-mono">${escapeHtml(inq.ipAddress || "Scrubbed / Redacted")}</span> ${inq.browserHash ? `· <strong class="text-zinc-300">Browser Hash:</strong> <code class="text-blue-300 font-mono">${escapeHtml(String(inq.browserHash))}</code>` : ""}</div>
+            ${inq.userAgent ? `<div class="truncate" title="${escapeHtml(inq.userAgent)}"><strong class="text-zinc-300">User-Agent:</strong> ${escapeHtml(inq.userAgent)}</div>` : ""}
           </div>
           <div class="space-y-0.5">
-            <div><strong class="text-slate-300">AI Moderation Reason:</strong> ${escapeHtml(inq.moderationReason || "Verified inquiry")}</div>
-            <div><strong class="text-slate-300">Recommended Action:</strong> <span class="text-cyan-400">${escapeHtml(inq.recommendedAction || "ALLOW_AND_LOG")}</span></div>
+            <div><strong class="text-zinc-300">AI Moderation Reason:</strong> ${escapeHtml(inq.moderationReason || "Verified inquiry")}</div>
+            <div><strong class="text-zinc-300">Recommended Action:</strong> <span class="text-blue-400">${escapeHtml(inq.recommendedAction || "ALLOW_AND_LOG")}</span></div>
           </div>
         </div>
 
@@ -2716,7 +2716,7 @@ function renderAdminCrmList() {
             <button type="button" onclick="handleUpdateInquiryModeration('${inq.id}', 'REVIEWED', 'CONTACTED')" class="px-2.5 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] transition-colors">
               ✓ Mark Reviewed
             </button>
-            <button type="button" onclick="handleUpdateInquiryModeration('${inq.id}', 'FALSE_POSITIVE', 'NEW')" class="px-2.5 py-1 rounded bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[11px] transition-colors">
+            <button type="button" onclick="handleUpdateInquiryModeration('${inq.id}', 'FALSE_POSITIVE', 'NEW')" class="px-2.5 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[11px] transition-colors">
               ★ Mark Genuine (False Positive)
             </button>
             <button type="button" onclick="handleUpdateInquiryModeration('${inq.id}', 'CONFIRMED_SPAM', 'REJECTED')" class="px-2.5 py-1 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] transition-colors">
@@ -2893,7 +2893,7 @@ async function loadProjectInto13TabEditor(projectId) {
   if (badgeEl) {
     badgeEl.innerText = project.status || 'PUBLISHED';
     badgeEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded ' +
-      (project.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20');
+      (project.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20');
   }
 
   renderEditorMilestones(project.milestones || []);
@@ -2905,18 +2905,18 @@ function renderEditorMilestones(milestones) {
   const listEl = document.getElementById('pe-milestones-list');
   if (!listEl) return;
   if (!milestones || milestones.length === 0) {
-    listEl.innerHTML = `<div class="p-4 rounded bg-[#10121a] border border-[#1f2430] text-center text-slate-500">No milestones recorded in Neon DB for this project yet. Use "+ Add Milestone" above.</div>`;
+    listEl.innerHTML = `<div class="p-4 rounded bg-[#18181b] border border-[#27272a] text-center text-zinc-500">No milestones recorded in Neon DB for this project yet. Use "+ Add Milestone" above.</div>`;
     return;
   }
   listEl.innerHTML = milestones.map(m => `
-    <div class="p-3 rounded-lg bg-[#131620] border border-[#202533] flex items-center justify-between">
+    <div class="p-3 rounded-lg bg-[#18181b] border border-[#27272a] flex items-center justify-between">
       <div>
         <div class="flex items-center space-x-2">
           <span class="font-bold text-white">${escapeHtml(m.title)}</span>
-          <span class="text-[10px] px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">${escapeHtml(m.versionTag || 'v1.0')}</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">${escapeHtml(m.versionTag || 'v1.0')}</span>
           <span class="text-[10px] px-2 py-0.5 rounded ${m.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">${escapeHtml(m.status || 'COMPLETED')}</span>
         </div>
-        <p class="text-[11px] text-slate-400 mt-1">${escapeHtml(m.description || '')}</p>
+        <p class="text-[11px] text-zinc-400 mt-1">${escapeHtml(m.description || '')}</p>
       </div>
       <button type="button" onclick="handleDeleteProjectMilestone('${m.id}')" class="text-rose-400 hover:underline text-xs">Delete</button>
     </div>
@@ -2966,17 +2966,17 @@ function renderEditorChangelogs(changelogs) {
   const listEl = document.getElementById('pe-changelogs-list');
   if (!listEl) return;
   if (!changelogs || changelogs.length === 0) {
-    listEl.innerHTML = `<div class="p-4 rounded bg-[#10121a] border border-[#1f2430] text-center text-slate-500">No changelog entries recorded in Neon DB for this project yet. Use "+ Log Release" above.</div>`;
+    listEl.innerHTML = `<div class="p-4 rounded bg-[#18181b] border border-[#27272a] text-center text-zinc-500">No changelog entries recorded in Neon DB for this project yet. Use "+ Log Release" above.</div>`;
     return;
   }
   listEl.innerHTML = changelogs.map(c => `
-    <div class="p-3 rounded-lg bg-[#131620] border border-[#202533] flex items-center justify-between">
+    <div class="p-3 rounded-lg bg-[#18181b] border border-[#27272a] flex items-center justify-between">
       <div>
         <div class="flex items-center space-x-2">
           <span class="font-bold text-emerald-400">${escapeHtml(c.versionTag)}</span>
-          ${c.commitHash ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-[#161924] text-slate-400 font-mono">#${escapeHtml(c.commitHash)}</span>` : ''}
+          ${c.commitHash ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-[#1d1d21] text-zinc-400 font-mono">#${escapeHtml(c.commitHash)}</span>` : ''}
         </div>
-        <p class="text-[11px] text-slate-300 mt-1">${escapeHtml(c.releaseSummary || '')}</p>
+        <p class="text-[11px] text-zinc-300 mt-1">${escapeHtml(c.releaseSummary || '')}</p>
       </div>
       <button type="button" onclick="handleDeleteProjectChangelog('${c.id}')" class="text-rose-400 hover:underline text-xs">Delete</button>
     </div>
@@ -3024,11 +3024,11 @@ function renderEditorDecisions(decisions) {
   const listEl = document.getElementById('pe-decisions-list');
   if (!listEl) return;
   if (!decisions || decisions.length === 0) {
-    listEl.innerHTML = `<div class="p-4 rounded bg-[#10121a] border border-[#1f2430] text-center text-slate-500">No Architectural Decision Records (ADRs) in Neon DB for this project yet. Use "+ Save ADR" above.</div>`;
+    listEl.innerHTML = `<div class="p-4 rounded bg-[#18181b] border border-[#27272a] text-center text-zinc-500">No Architectural Decision Records (ADRs) in Neon DB for this project yet. Use "+ Save ADR" above.</div>`;
     return;
   }
   listEl.innerHTML = decisions.map(d => `
-    <div class="p-3 rounded-lg bg-[#131620] border border-[#202533] space-y-1">
+    <div class="p-3 rounded-lg bg-[#18181b] border border-[#27272a] space-y-1">
       <div class="flex items-center justify-between">
         <span class="font-bold text-white">${escapeHtml(d.decisionTitle)}</span>
         <div class="flex items-center space-x-2">
@@ -3036,8 +3036,8 @@ function renderEditorDecisions(decisions) {
           <button type="button" onclick="handleDeleteProjectDecision('${d.id}')" class="text-rose-400 hover:underline text-xs">Delete</button>
         </div>
       </div>
-      <p class="text-[11px] text-slate-400"><strong>Context:</strong> ${escapeHtml(d.problemContext || '')}</p>
-      <p class="text-[11px] text-sky-300"><strong>Decision:</strong> ${escapeHtml(d.decisionTaken || '')}</p>
+      <p class="text-[11px] text-zinc-400"><strong>Context:</strong> ${escapeHtml(d.problemContext || '')}</p>
+      <p class="text-[11px] text-blue-300"><strong>Decision:</strong> ${escapeHtml(d.decisionTaken || '')}</p>
     </div>
   `).join('');
 }
@@ -3199,20 +3199,20 @@ function renderHomepageBuilderList() {
   const container = document.getElementById('admin-homepage-sections-list');
   if (!container) return;
   container.innerHTML = currentHomepageSections.map((sec, idx) => `
-    <div class="p-3.5 rounded-lg bg-[#10121a] border border-[#1f2430] flex items-center justify-between hover:border-sky-500/40 transition-colors">
+    <div class="p-3.5 rounded-lg bg-[#18181b] border border-[#27272a] flex items-center justify-between hover:border-blue-500/40 transition-colors">
       <div class="flex items-center space-x-3">
-        <span class="w-6 h-6 rounded bg-[#161924] border border-[#232938] text-sky-400 flex items-center justify-center font-bold">${idx + 1}</span>
+        <span class="w-6 h-6 rounded bg-[#1d1d21] border border-[#27272a] text-blue-400 flex items-center justify-center font-bold">${idx + 1}</span>
         <div>
-          <span class="text-white font-bold">${escapeHtml(sec.title)} <span class="text-[10px] text-slate-500">#${escapeHtml(sec.id)}</span></span>
-          <span class="text-[10px] text-slate-400 block">${escapeHtml(sec.desc || '')}</span>
+          <span class="text-white font-bold">${escapeHtml(sec.title)} <span class="text-[10px] text-zinc-500">#${escapeHtml(sec.id)}</span></span>
+          <span class="text-[10px] text-zinc-400 block">${escapeHtml(sec.desc || '')}</span>
         </div>
       </div>
       <div class="flex items-center space-x-2">
-        <button type="button" onclick="moveHomepageSection(${idx}, -1)" class="px-2 py-1 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-slate-300" title="Move Up">↑</button>
-        <button type="button" onclick="moveHomepageSection(${idx}, 1)" class="px-2 py-1 rounded bg-[#161924] hover:bg-[#1e2333] border border-[#232938] text-slate-300" title="Move Down">↓</button>
+        <button type="button" onclick="moveHomepageSection(${idx}, -1)" class="px-2 py-1 rounded bg-[#1d1d21] hover:bg-[#1e2333] border border-[#27272a] text-zinc-300" title="Move Up">↑</button>
+        <button type="button" onclick="moveHomepageSection(${idx}, 1)" class="px-2 py-1 rounded bg-[#1d1d21] hover:bg-[#1e2333] border border-[#27272a] text-zinc-300" title="Move Down">↓</button>
         <label class="flex items-center space-x-1.5 pl-2 cursor-pointer">
-          <input type="checkbox" ${sec.visible !== false ? 'checked' : ''} onchange="toggleHomepageSection(${idx}, this.checked)" class="w-4 h-4 accent-sky-500 rounded">
-          <span class="text-[10px] text-slate-400">Visible</span>
+          <input type="checkbox" ${sec.visible !== false ? 'checked' : ''} onchange="toggleHomepageSection(${idx}, this.checked)" class="w-4 h-4 accent-blue-500 rounded">
+          <span class="text-[10px] text-zinc-400">Visible</span>
         </label>
       </div>
     </div>
@@ -3553,7 +3553,7 @@ async function exportAnalyticsCsv() {
 // ADMIN THEME TOGGLE (DARK / LIGHT MODE)
 // ==========================================
 function initAdminTheme() {
-  const saved = localStorage.getItem('admin_theme') || 'dark';
+  const saved = localStorage.getItem('admin_theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
   applyAdminTheme(saved);
 }
 
@@ -3667,10 +3667,10 @@ async function loadAdminDashboardMetrics() {
     const feed = document.getElementById("dash-audit-feed");
     if (feed && Array.isArray(m.recentMutations)) {
       if (m.recentMutations.length === 0) {
-        feed.innerHTML = `<div class="p-4 text-center text-slate-500 font-mono text-xs">No activity records yet. Click "Sync External Data" to pull live telemetry.</div>`;
+        feed.innerHTML = `<div class="p-4 text-center text-zinc-500 font-mono text-xs">No activity records yet. Click "Sync External Data" to pull live telemetry.</div>`;
       } else {
         feed.innerHTML = m.recentMutations.map(act => {
-          let badgeColor = "text-sky-400 bg-sky-500/10 border-sky-500/20";
+          let badgeColor = "text-blue-400 bg-blue-500/10 border-blue-500/20";
           if (act.sourcePlatform === "LEETCODE") badgeColor = "text-amber-400 bg-amber-500/10 border-amber-500/20";
           else if (act.sourcePlatform === "GFG") badgeColor = "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
           else if (act.sourcePlatform === "GITHUB") badgeColor = "text-purple-400 bg-purple-500/10 border-purple-500/20";
@@ -3678,17 +3678,17 @@ async function loadAdminDashboardMetrics() {
           cachedAdminActivities = m.recentMutations;
           const timeStr = act.occurredAt ? new Date(act.occurredAt).toLocaleDateString([], { month: "short", day: "numeric" }) : "recent";
           return `
-            <div class="p-3 rounded-lg bg-[#141822] border border-[#1f2430] flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-sky-500/30 transition-colors">
+            <div class="p-3 rounded-lg bg-[#141822] border border-[#27272a] flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-blue-500/30 transition-colors">
               <div class="flex items-start space-x-3">
                 <span class="px-2 py-0.5 rounded text-[10px] font-mono border ${badgeColor} shrink-0 mt-0.5">${escapeHtml(act.sourcePlatform || "SYSTEM")}</span>
                 <div>
                   <p class="text-white font-medium">${escapeHtml(act.title)}</p>
-                  <p class="text-[11px] text-slate-400 truncate max-w-md">${escapeHtml(act.description || "")}</p>
+                  <p class="text-[11px] text-zinc-400 truncate max-w-md">${escapeHtml(act.description || "")}</p>
                 </div>
               </div>
               <div class="flex items-center space-x-2 shrink-0 self-end sm:self-center font-mono text-[11px]">
-                <span class="text-slate-500">${timeStr}</span>
-                ${act.id ? `<button type="button" onclick="handleEditActivityItem('${act.id}')" class="text-sky-400 hover:underline">Edit</button>` : ''}
+                <span class="text-zinc-500">${timeStr}</span>
+                ${act.id ? `<button type="button" onclick="handleEditActivityItem('${act.id}')" class="text-blue-400 hover:underline">Edit</button>` : ''}
                 ${act.id ? `<button type="button" onclick="handleDeleteActivityItem('${act.id}')" class="text-rose-400 hover:underline">Delete</button>` : ''}
               </div>
             </div>
@@ -3700,18 +3700,18 @@ async function loadAdminDashboardMetrics() {
     const milestonesContainer = document.getElementById("dash-project-milestones-list");
     if (milestonesContainer && Array.isArray(m.projectMilestones)) {
       if (m.projectMilestones.length === 0) {
-        milestonesContainer.innerHTML = `<div class="text-slate-500 text-xs font-mono">No active projects in Neon DB. Create a project in the Projects tab.</div>`;
+        milestonesContainer.innerHTML = `<div class="text-zinc-500 text-xs font-mono">No active projects in Neon DB. Create a project in the Projects tab.</div>`;
       } else {
         milestonesContainer.innerHTML = m.projectMilestones.map(pm => {
           const pVal = pm.progress !== undefined ? pm.progress : 85;
           return `
             <div>
               <div class="flex justify-between mb-1.5">
-                <span class="text-slate-300">${escapeHtml(pm.title)}</span>
-                <span class="text-sky-400 font-bold">${pVal}%</span>
+                <span class="text-zinc-300">${escapeHtml(pm.title)}</span>
+                <span class="text-blue-400 font-bold">${pVal}%</span>
               </div>
-              <div class="h-2 rounded-full bg-[#1b202d] overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full" style="width: ${pVal}%"></div>
+              <div class="h-2 rounded-full bg-[#222226] overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full" style="width: ${pVal}%"></div>
               </div>
             </div>
           `;
@@ -3738,21 +3738,21 @@ function applyAdminAccentThemeColor(hex) {
     document.head.appendChild(styleEl);
   }
   styleEl.innerHTML = `
-    html body .bg-sky-500, html body .bg-cyan-500,
-    html.light body .bg-sky-500, html.light body .bg-cyan-500 {
+    html body .bg-blue-500, html body .bg-blue-500,
+    html.light body .bg-blue-500, html.light body .bg-blue-500 {
       background-color: ${hex} !important;
       color: #ffffff !important;
     }
-    html body .text-sky-400, html body .text-cyan-400,
-    html.light body .text-sky-400, html.light body .text-cyan-400 {
+    html body .text-blue-400, html body .text-blue-400,
+    html.light body .text-blue-400, html.light body .text-blue-400 {
       color: ${hex} !important;
     }
-    html body .border-sky-500\/30, html body .border-cyan-500\/30,
-    html.light body .border-sky-500\/30, html.light body .border-cyan-500\/30 {
+    html body .border-blue-500\/30, html body .border-blue-500\/30,
+    html.light body .border-blue-500\/30, html.light body .border-blue-500\/30 {
       border-color: ${hex}66 !important;
     }
-    html body .bg-sky-500\/10, html body .bg-cyan-500\/10,
-    html.light body .bg-sky-500\/10, html.light body .bg-cyan-500\/10 {
+    html body .bg-blue-500\/10, html body .bg-blue-500\/10,
+    html.light body .bg-blue-500\/10, html.light body .bg-blue-500\/10 {
       background-color: ${hex}1f !important;
       color: ${hex} !important;
     }
@@ -3772,8 +3772,8 @@ async function loadSiteSettings() {
     };
 
     setV('setting-site-title', settings.siteTitle || settings.SITE_TITLE);
-    setV('setting-theme-color-picker', settings.themeColor || '#38bdf8');
-    setV('setting-theme-color-text', settings.themeColor || '#38bdf8');
+    setV('setting-theme-color-picker', settings.themeColor || '#3b82f6');
+    setV('setting-theme-color-text', settings.themeColor || '#3b82f6');
     if (settings.themeColor) applyAdminAccentThemeColor(settings.themeColor);
     setV('setting-meta-desc', settings.metaDescription || settings.SITE_DESCRIPTION);
     setV('setting-availability', settings.availabilityStatus);
@@ -3818,7 +3818,7 @@ async function handleSaveSiteSettings(e) {
     saveBtn.innerText = 'Saving to Neon DB...';
   }
   const title = document.getElementById('setting-site-title')?.value?.trim() || '';
-  const theme = document.getElementById('setting-theme-color-text')?.value?.trim() || '#38bdf8';
+  const theme = document.getElementById('setting-theme-color-text')?.value?.trim() || '#3b82f6';
   const desc = document.getElementById('setting-meta-desc')?.value?.trim() || '';
   const avail = document.getElementById('setting-availability')?.value?.trim() || '';
   const availCardTitle = document.getElementById('setting-avail-card-title')?.value?.trim() || 'Open to Opportunities';
@@ -3903,22 +3903,22 @@ async function loadAdminAuditLogs() {
       const json = await res.json();
       cachedAdminAuditLogs = (json?.data || []).slice(0, 5);
       if (cachedAdminAuditLogs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No edit audits recorded yet. Save your Profile, Settings, or Projects to generate an audit record.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-zinc-500">No edit audits recorded yet. Save your Profile, Settings, or Projects to generate an audit record.</td></tr>`;
         return;
       }
       tbody.innerHTML = cachedAdminAuditLogs.map((log, idx) => {
         const ts = log.timestamp ? new Date(log.timestamp).toLocaleString([], { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
         const act = (log.action || 'UPDATE').toUpperCase();
-        const actColor = act === 'DELETE' ? 'text-rose-400' : (act === 'CREATE' || act === 'PUBLISH' ? 'text-emerald-400' : 'text-sky-400');
+        const actColor = act === 'DELETE' ? 'text-rose-400' : (act === 'CREATE' || act === 'PUBLISH' ? 'text-emerald-400' : 'text-blue-400');
         return `
           <tr class="hover:bg-[#141822]/60 transition-colors">
-            <td class="py-2.5 px-4 text-slate-400">${escapeHtml(ts)}</td>
+            <td class="py-2.5 px-4 text-zinc-400">${escapeHtml(ts)}</td>
             <td class="py-2.5 px-4 text-white font-semibold">${escapeHtml(log.principal || 'raviranjan')}</td>
             <td class="py-2.5 px-4 ${actColor} font-bold">${escapeHtml(act)}</td>
-            <td class="py-2.5 px-4 text-slate-200">${escapeHtml(log.entity || 'Portfolio Entity')}</td>
-            <td class="py-2.5 px-4 text-slate-500">${escapeHtml(log.clientIp || '127.0.0.1')}</td>
+            <td class="py-2.5 px-4 text-zinc-200">${escapeHtml(log.entity || 'Portfolio Entity')}</td>
+            <td class="py-2.5 px-4 text-zinc-500">${escapeHtml(log.clientIp || '127.0.0.1')}</td>
             <td class="py-2.5 px-4 text-right">
-              <button type="button" onclick="openAuditDiffModal(${idx})" class="px-2.5 py-1 rounded bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 font-semibold text-[11px]">View Diff</button>
+              <button type="button" onclick="openAuditDiffModal(${idx})" class="px-2.5 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-semibold text-[11px]">View Diff</button>
             </td>
           </tr>
         `;
@@ -3949,10 +3949,10 @@ function openAuditDiffModal(index) {
   if (metaEl) {
     const ts = log.timestamp ? new Date(log.timestamp).toLocaleString() : '';
     metaEl.innerHTML = `
-      <div><span class="text-slate-500 block text-[10px]">PRINCIPAL</span><span class="text-white font-bold">${escapeHtml(log.principal || 'raviranjan')}</span></div>
-      <div><span class="text-slate-500 block text-[10px]">ACTION</span><span class="text-sky-400 font-bold">${escapeHtml(log.action || 'UPDATE')}</span></div>
-      <div><span class="text-slate-500 block text-[10px]">ENTITY</span><span class="text-white">${escapeHtml(log.entity || '')}</span></div>
-      <div><span class="text-slate-500 block text-[10px]">TIMESTAMP / IP</span><span class="text-slate-300">${escapeHtml(ts)} (${escapeHtml(log.clientIp || '127.0.0.1')})</span></div>
+      <div><span class="text-zinc-500 block text-[10px]">PRINCIPAL</span><span class="text-white font-bold">${escapeHtml(log.principal || 'raviranjan')}</span></div>
+      <div><span class="text-zinc-500 block text-[10px]">ACTION</span><span class="text-blue-400 font-bold">${escapeHtml(log.action || 'UPDATE')}</span></div>
+      <div><span class="text-zinc-500 block text-[10px]">ENTITY</span><span class="text-white">${escapeHtml(log.entity || '')}</span></div>
+      <div><span class="text-zinc-500 block text-[10px]">TIMESTAMP / IP</span><span class="text-zinc-300">${escapeHtml(ts)} (${escapeHtml(log.clientIp || '127.0.0.1')})</span></div>
     `;
   }
 
@@ -4017,7 +4017,7 @@ async function loadAiConfig() {
       const listEl = document.getElementById('admin-ai-query-logs-list');
       if (listEl) {
         if (!Array.isArray(logs) || logs.length === 0) {
-          listEl.innerHTML = `<div class="p-4 text-center text-slate-500">No visitor AI conversations recorded yet. Ask a question in "Ask AI" to see live logs with IP and Device info here!</div>`;
+          listEl.innerHTML = `<div class="p-4 text-center text-zinc-500">No visitor AI conversations recorded yet. Ask a question in "Ask AI" to see live logs with IP and Device info here!</div>`;
         } else {
           listEl.innerHTML = logs.map(l => {
             const timeStr = l.createdAt ? new Date(l.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
@@ -4030,24 +4030,24 @@ async function loadAiConfig() {
               ? formatAiMarkdownToHtml(l.answer || '')
               : escapeHtml(l.answer || '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
             return `
-              <div class="p-3.5 rounded-lg bg-[#141822] border border-[#202533] space-y-2">
-                <div class="flex flex-wrap items-center justify-between gap-1 text-[10px] text-slate-400 border-b border-[#1f2430] pb-1.5">
+              <div class="p-3.5 rounded-lg bg-[#141822] border border-[#27272a] space-y-2">
+                <div class="flex flex-wrap items-center justify-between gap-1 text-[10px] text-zinc-400 border-b border-[#27272a] pb-1.5">
                   <div class="flex flex-wrap items-center gap-1.5">
-                    <span class="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold">${escapeHtml(l.detectedLanguage || 'ENGLISH')}</span>
+                    <span class="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">${escapeHtml(l.detectedLanguage || 'ENGLISH')}</span>
                     <span class="text-emerald-400 font-mono font-semibold">IP: ${escapeHtml(l.clientIp || '127.0.0.1')}</span>
                     <span class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-mono">${escapeHtml(geoText)}</span>
                   </div>
                   <div class="flex items-center gap-2">
-                    <span class="text-slate-400">${l.latencyMs || 25}ms · ${timeStr}</span>
+                    <span class="text-zinc-400">${l.latencyMs || 25}ms · ${timeStr}</span>
                     <button type="button" onclick="handleDeleteAiLog('${l.id}')" class="text-rose-400 hover:underline text-[10px]">Delete</button>
                   </div>
                 </div>
                 <p class="text-white font-bold text-xs">Q: "${escapeHtml(l.userQuery)}"</p>
-                <div class="text-slate-200 font-sans text-[11px] leading-relaxed bg-[#10121a] p-2.5 rounded-lg border border-[#1f2430] space-y-1">${formattedAnswer}</div>
-                <div class="text-[9px] text-slate-400 flex flex-wrap justify-between gap-2 pt-0.5">
+                <div class="text-zinc-200 font-sans text-[11px] leading-relaxed bg-[#18181b] p-2.5 rounded-lg border border-[#27272a] space-y-1">${formattedAnswer}</div>
+                <div class="text-[9px] text-zinc-400 flex flex-wrap justify-between gap-2 pt-0.5">
                   <span><strong>Device:</strong> ${escapeHtml(shortUa)}</span>
-                  <span><strong>Hash:</strong> <code class="text-cyan-300 font-mono">${escapeHtml(displayHash)}</code></span>
-                  <span><strong>Origin:</strong> <code class="text-slate-300 font-mono">${escapeHtml(displayOrigin)}</code></span>
+                  <span><strong>Hash:</strong> <code class="text-blue-300 font-mono">${escapeHtml(displayHash)}</code></span>
+                  <span><strong>Origin:</strong> <code class="text-zinc-300 font-mono">${escapeHtml(displayOrigin)}</code></span>
                 </div>
               </div>
             `;
@@ -4158,7 +4158,7 @@ function renderAdminNotifications(items) {
   const container = document.getElementById('notif-items-container');
   if (!container) return;
   if (!Array.isArray(items) || items.length === 0) {
-    container.innerHTML = `<div class="p-6 text-center text-slate-500 font-mono text-xs">No notifications in Neon DB yet. When a recruiter submits the Contact Form, it will appear here immediately!</div>`;
+    container.innerHTML = `<div class="p-6 text-center text-zinc-500 font-mono text-xs">No notifications in Neon DB yet. When a recruiter submits the Contact Form, it will appear here immediately!</div>`;
     return;
   }
 
@@ -4168,24 +4168,24 @@ function renderAdminNotifications(items) {
     const type = n.type || (n.title && n.title.toLowerCase().includes('inquiry') ? 'CRM' : 'SYSTEM');
     const pColor = priority === 'URGENT'
       ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-      : 'bg-sky-500/10 text-sky-400 border-sky-500/20';
+      : 'bg-blue-500/10 text-blue-400 border-blue-500/20';
     const timeStr = n.createdAt ? new Date(n.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
 
     return `
-      <div class="notif-item p-3.5 rounded-lg bg-[#141822] border border-[#232938] space-y-2 hover:border-sky-500/30 transition-all ${isRead ? 'opacity-70' : ''}" data-type="${escapeHtml(type)}" data-priority="${escapeHtml(priority)}" data-read="${isRead}">
+      <div class="notif-item p-3.5 rounded-lg bg-[#141822] border border-[#27272a] space-y-2 hover:border-blue-500/30 transition-all ${isRead ? 'opacity-70' : ''}" data-type="${escapeHtml(type)}" data-priority="${escapeHtml(priority)}" data-read="${isRead}">
         <div class="flex items-center justify-between font-mono text-[10px]">
           <div class="flex items-center space-x-1.5">
             <span class="px-1.5 py-0.5 rounded border font-bold ${pColor}">${escapeHtml(priority)}</span>
-            <span class="text-slate-400">${escapeHtml(type)}</span>
+            <span class="text-zinc-400">${escapeHtml(type)}</span>
           </div>
-          <span class="text-slate-500">${timeStr}</span>
+          <span class="text-zinc-500">${timeStr}</span>
         </div>
         <p class="font-bold text-white text-xs font-mono">${escapeHtml(n.title)}</p>
-        <p class="text-slate-300 text-[11px] leading-relaxed">${escapeHtml(n.message || '')}</p>
-        <div class="pt-2 border-t border-[#1f2430] flex items-center justify-between text-[10px] font-mono">
-          <a href="#crm" onclick="switchView('${(type === 'CRM' || type === 'NEW_CONTACT_INQUIRY' || type === 'CONTACT_INQUIRY') ? 'crm' : 'dashboard'}'); toggleNotificationDrawer(); return false;" class="text-sky-400 hover:underline">Open Module ↗</a>
+        <p class="text-zinc-300 text-[11px] leading-relaxed">${escapeHtml(n.message || '')}</p>
+        <div class="pt-2 border-t border-[#27272a] flex items-center justify-between text-[10px] font-mono">
+          <a href="#crm" onclick="switchView('${(type === 'CRM' || type === 'NEW_CONTACT_INQUIRY' || type === 'CONTACT_INQUIRY') ? 'crm' : 'dashboard'}'); toggleNotificationDrawer(); return false;" class="text-blue-400 hover:underline">Open Module ↗</a>
           <div class="flex items-center space-x-3">
-            ${isRead ? '<span class="text-slate-500">Read</span>' : `<button type="button" onclick="markNotificationReadById('${n.id}', this)" class="text-emerald-400 hover:underline">Mark read</button>`}
+            ${isRead ? '<span class="text-zinc-500">Read</span>' : `<button type="button" onclick="markNotificationReadById('${n.id}', this)" class="text-emerald-400 hover:underline">Mark read</button>`}
             <button type="button" onclick="deleteNotificationById('${n.id}')" class="text-rose-400 hover:underline">Delete</button>
           </div>
         </div>
@@ -4320,9 +4320,9 @@ function initDynamicAdminCommandPalette() {
     const query = q.toLowerCase().trim();
     const matched = modules.filter(m => m.label.toLowerCase().includes(query) || m.tag.toLowerCase().includes(query));
     cmdResults.innerHTML = matched.map(m => `
-      <div onclick="${m.action === 'password' ? 'toggleCommandPalette(); openChangePasswordModal();' : `switchView('${m.view}'); toggleCommandPalette();`}" class="p-2 rounded hover:bg-[#161924] cursor-pointer flex justify-between items-center text-slate-300 hover:text-white">
+      <div onclick="${m.action === 'password' ? 'toggleCommandPalette(); openChangePasswordModal();' : `switchView('${m.view}'); toggleCommandPalette();`}" class="p-2 rounded hover:bg-[#1d1d21] cursor-pointer flex justify-between items-center text-zinc-300 hover:text-white">
         <span>${escapeHtml(m.label)}</span>
-        <span class="text-[10px] text-sky-400 font-mono">${escapeHtml(m.tag)}</span>
+        <span class="text-[10px] text-blue-400 font-mono">${escapeHtml(m.tag)}</span>
       </div>
     `).join('');
   };
