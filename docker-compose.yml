@@ -1,22 +1,59 @@
 version: '3.8'
 
 services:
+  # 1. PostgreSQL with pgvector (Optional local database alternative to Neon Cloud)
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: raviranjan-postgres
+    environment:
+      POSTGRES_DB: raviranjan_os
+      POSTGRES_USER: neondb_owner
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neondb_owner -d raviranjan_os"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis Caching Engine
+  redis:
+    image: redis:7-alpine
+    container_name: raviranjan-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # 3. Spring Boot Backend Service (Java 21)
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: raviranjan-backend
     ports:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/raviranjan_os}
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-postgres}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-postgres}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-neondb_owner}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-password123}
+      - APP_JWT_SECRET=${APP_JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      - GITHUB_USERNAME=raviranjankrmaurya
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
+  # 4. Express Node.js & Static Frontend Reverse Proxy
   frontend:
     build:
       context: ./frontend
+      dockerfile: Dockerfile
+    container_name: raviranjan-frontend
     ports:
       - "3000:3000"
     environment:
@@ -25,3 +62,6 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+
+volumes:
+  postgres_data:
