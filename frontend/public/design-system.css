@@ -783,6 +783,15 @@ canvas {
   color: rgb(var(--c-faint));
 }
 
+/* `.hidden` must win over the primitives below that set their own display */
+.ds-error-text.hidden,
+.ds-empty.hidden,
+.ds-table-wrap.hidden,
+.ds-toast.hidden,
+.ds-badge.hidden {
+  display: none;
+}
+
 .ds-error-text {
   margin-top: 6px;
   font-size: 11.5px;

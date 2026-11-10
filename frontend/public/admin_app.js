@@ -1308,33 +1308,57 @@ document.addEventListener("DOMContentLoaded", loadAdminProfileData);
 // DYNAMIC REST API & NEON DB PERSISTENCE MODULE FOR ADMIN CMS
 // =========================================================================
 
-function isJwtExpiredOrInvalid(token) {
-  if (!token || typeof token !== "string") return true;
-  const parts = token.split(".");
-  if (parts.length !== 3) return true;
+function decodeJwtPayload(token) {
+  if (!token || typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
   try {
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const payload = JSON.parse(atob(base64));
-    if (!payload.exp) return false;
-    const nowSec = Math.floor(Date.now() / 1000);
-    return payload.exp <= (nowSec + 60); // Refresh if expiring within 60s
+    // base64url → base64, then pad. Without padding atob() throws, which used
+    // to make every fresh login look "expired" and bounce the admin straight
+    // back to the sign-in gate.
+    let b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4 !== 0) b64 += '=';
+    const binary = atob(b64);
+    let json = '';
+    for (let i = 0; i < binary.length; i++) {
+      json += '%' + ('00' + binary.charCodeAt(i).toString(16)).slice(-2);
+    }
+    return JSON.parse(decodeURIComponent(json));
   } catch (e) {
-    return true;
+    return null;
   }
 }
 
-async function getAdminToken(forceRefresh = false) {
-  let token = localStorage.getItem("raviranjan_auth_token");
-  if (forceRefresh || isJwtExpiredOrInvalid(token)) {
-    token = null;
+function isJwtExpiredOrInvalid(token) {
+  if (!token || typeof token !== 'string') return true;
+  const payload = decodeJwtPayload(token);
+  // Unknown shape: let the server decide instead of logging the user out.
+  if (!payload) return false;
+  if (!payload.exp) return false;
+  return payload.exp * 1000 <= Date.now() + 60000;
+}
+
+function authFailure(message) {
+  if (window.adminSession) window.adminSession.clear();
+  else {
     localStorage.removeItem("raviranjan_auth_token");
+    localStorage.removeItem("raviranjan_refresh_token");
     localStorage.removeItem("raviranjan_admin_authenticated");
   }
-  return token;
+  if (typeof enforceAdminGate === 'function') {
+    enforceAdminGate(message || 'Your session expired. Sign in again to continue.');
+  }
 }
 
-async function getAuthHeaders(forceRefresh = false) {
-  const token = await getAdminToken(forceRefresh);
+async function getAdminToken() {
+  // Never clears the session here: a request that was already in flight when
+  // the admin signed in must not wipe the fresh token (that race was what made
+  // the sign-in window re-appear right after a successful login).
+  return localStorage.getItem("raviranjan_auth_token");
+}
+
+async function getAuthHeaders() {
+  const token = await getAdminToken();
   const headers = { "Content-Type": "application/json" };
   if (token) {
     headers["Authorization"] = "Bearer " + token;
@@ -3680,10 +3704,10 @@ window.addEventListener('themechange', syncAdminThemeIcon);
 async function loadAdminDashboardMetrics() {
   try {
     let headers = await getAuthHeaders();
+    const hadToken = Boolean(headers.Authorization);
     let res = await fetch("/api/admin/dashboard/metrics", { headers }).catch(() => null);
-    if (res && (res.status === 401 || res.status === 403)) {
-      headers = await getAuthHeaders(true);
-      res = await fetch("/api/admin/dashboard/metrics", { headers }).catch(() => null);
+    if (res && (res.status === 401 || res.status === 403) && hadToken) {
+      authFailure();
     }
 
     let m = null;
@@ -3869,14 +3893,14 @@ async function loadSiteSettings() {
   }
 }
 
-window.lockAndLogoutAdmin = function() {
-  if (typeof logoutAdmin === 'function') {
-    logoutAdmin();
-  } else {
+window.lockAndLogoutAdmin = function () {
+  if (window.adminSession) window.adminSession.clear();
+  else {
     localStorage.removeItem('raviranjan_auth_token');
     localStorage.removeItem('raviranjan_admin_authenticated');
-    window.location.href = '/';
+    localStorage.removeItem('raviranjan_admin_user');
   }
+  window.location.href = '/';
 };
 
 async function handleSaveSiteSettings(e) {

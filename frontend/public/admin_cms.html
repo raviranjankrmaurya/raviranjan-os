@@ -50,38 +50,200 @@
   <link rel="stylesheet" href="/design-system.css?v=3">
   <link rel="stylesheet" href="/admin_styles.css?v=20">
   <script src="/theme.js?v=3"></script>
+
+  <!-- ============================================================
+       Admin session bootstrap
+       Must run before admin_app.js so the gate, the sign-in handler
+       and the session helpers exist on first paint.
+       ============================================================ -->
+  <script>
+  (function () {
+    var TOKEN_KEY = 'raviranjan_auth_token';
+    var REFRESH_KEY = 'raviranjan_refresh_token';
+    var FLAG_KEY = 'raviranjan_admin_authenticated';
+    var USER_KEY = 'raviranjan_admin_user';
+    var loginInFlight = false;
+
+    function ls(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+    function lsSet(key, value) { try { localStorage.setItem(key, value); } catch (e) {} }
+    function lsDel(key) { try { localStorage.removeItem(key); } catch (e) {} }
+
+    window.adminSession = {
+      token: function () { return ls(TOKEN_KEY); },
+      username: function () { return ls(USER_KEY) || 'admin'; },
+      isAuthenticated: function () { return ls(FLAG_KEY) === 'true' && Boolean(ls(TOKEN_KEY)); },
+      save: function (data, fallbackUser) {
+        lsSet(TOKEN_KEY, data.accessToken);
+        if (data.refreshToken) lsSet(REFRESH_KEY, data.refreshToken);
+        lsSet(FLAG_KEY, 'true');
+        lsSet(USER_KEY, data.username || fallbackUser || 'admin');
+      },
+      clear: function () {
+        lsDel(TOKEN_KEY); lsDel(REFRESH_KEY); lsDel(FLAG_KEY); lsDel(USER_KEY);
+      }
+    };
+
+    window.isSessionValid = function () {
+      return window.adminSession.isAuthenticated();
+    };
+
+    function gate() { return document.getElementById('admin-direct-login-gate'); }
+
+    window.showGateError = function (message) {
+      var box = document.getElementById('gate-admin-error');
+      if (!box) return;
+      box.textContent = message || '';
+      box.classList.toggle('hidden', !message);
+    };
+
+    function setGateBusy(busy) {
+      var btn = document.getElementById('gate-admin-btn');
+      if (!btn) return;
+      btn.classList.toggle('is-busy', Boolean(busy));
+      btn.setAttribute('aria-busy', busy ? 'true' : 'false');
+      btn.disabled = Boolean(busy);
+    }
+
+    function syncSidebarIdentity() {
+      var user = window.adminSession.username();
+      var nameEl = document.getElementById('admin-sidebar-username');
+      var monoEl = document.getElementById('admin-sidebar-monogram');
+      if (nameEl) nameEl.textContent = user;
+      if (monoEl) monoEl.textContent = String(user).substring(0, 2).toUpperCase();
+    }
+
+    window.enforceAdminGate = function (message) {
+      var el = gate();
+      if (!el) return;
+      if (window.adminSession.isAuthenticated()) {
+        el.classList.add('hidden');
+        el.setAttribute('aria-hidden', 'true');
+        syncSidebarIdentity();
+        return;
+      }
+      el.classList.remove('hidden');
+      el.removeAttribute('aria-hidden');
+      if (message) window.showGateError(message);
+      var input = document.getElementById('gate-admin-username');
+      if (input && !input.value) setTimeout(function () { input.focus(); }, 80);
+    };
+
+    window.handleDirectAdminGateLogin = async function (event) {
+      if (event) event.preventDefault();
+      if (loginInFlight) return;
+
+      var userInput = document.getElementById('gate-admin-username');
+      var passInput = document.getElementById('gate-admin-password');
+      var username = (userInput && userInput.value || '').trim();
+      var password = (passInput && passInput.value) || '';
+
+      if (!username || !password) {
+        window.showGateError('Enter both the username and the password.');
+        return;
+      }
+
+      loginInFlight = true;
+      setGateBusy(true);
+      window.showGateError('');
+
+      try {
+        var res = await fetch('/api/v1/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, password: password })
+        });
+
+        var json = null;
+        try { json = await res.json(); } catch (e) { json = null; }
+        var data = (json && (json.data || json)) || {};
+        var token = data.accessToken || data.access_token || data.token;
+
+        if (res.ok && token) {
+          window.adminSession.save(data, username);
+          window.enforceAdminGate();
+          if (passInput) passInput.value = '';
+          if (typeof showToast === 'function') {
+            showToast('Signed in as ' + (data.username || username), 'success');
+          }
+          ['loadAdminDashboardMetrics', 'loadAdminProjects', 'loadAdminIdentityMetadata', 'loadAdminNotifications', 'loadSiteSettings']
+            .forEach(function (fn) {
+              if (typeof window[fn] === 'function') {
+                try { window[fn](); } catch (e) {}
+              }
+            });
+          return;
+        }
+
+        if (res.status === 401 || res.status === 403) {
+          window.showGateError((json && json.message) || 'Invalid username or password.');
+        } else if (res.status === 429) {
+          window.showGateError('Too many attempts. Wait a minute, then try again.');
+        } else if (res.ok) {
+          window.showGateError('The API answered but returned no token. Check the backend logs.');
+        } else {
+          window.showGateError((json && (json.message || json.error)) || ('Sign-in failed (HTTP ' + res.status + ').'));
+        }
+      } catch (err) {
+        window.showGateError('Cannot reach the API (' + err.message + '). The backend may be waking up — try again in a few seconds.');
+      } finally {
+        loginInFlight = false;
+        setGateBusy(false);
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', function () {
+      window.enforceAdminGate();
+      var userInput = document.getElementById('gate-admin-username');
+      if (userInput && window.adminSession.isAuthenticated()) userInput.value = window.adminSession.username();
+    });
+
+    // Keep tabs in sync: signing out in one tab locks the others.
+    window.addEventListener('storage', function (event) {
+      if (event.key === FLAG_KEY || event.key === TOKEN_KEY) window.enforceAdminGate();
+    });
+  })();
+  </script>
+
 </head>
 <body class="bg-canvas text-ink font-sans antialiased overflow-hidden flex h-screen">
 
   
-  <!-- Built-in Mobile & Desktop Admin Login Gate Overlay on /admin -->
-  <div id="admin-direct-login-gate" class="fixed inset-0 z-[100] bg-canvas/95 backdrop-blur-2xl flex items-center justify-center p-4">
-    <div class="w-full max-w-sm bg-surface border border-line rounded-2xl shadow-2xl p-6 space-y-4 font-mono text-xs">
-      <div class="flex items-center justify-between border-b border-line pb-3">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center font-bold text-white text-xs">R</div>
-          <div>
-            <span class="text-white font-bold text-sm block font-sans">Admin OS Login</span>
-            <span class="text-[10px] text-slate-400">Mobile & Desktop Gateway</span>
+  <!-- Admin sign-in gate (/admin) -->
+  <div id="admin-direct-login-gate" class="fixed inset-0 z-[100] bg-canvas/95 backdrop-blur-2xl flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="w-full max-w-[380px] bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden">
+      <div class="p-5 pb-4 border-b border-line">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="ds-mark" aria-hidden="true">R</span>
+            <div>
+              <p id="gate-title" class="ds-chat__title">Admin sign in</p>
+              <p class="ds-chat__sub"><span class="ds-dot text-success-400"></span> Neon DB · SUPER_ADMIN</p>
+            </div>
           </div>
+          <a href="/" class="ds-btn ds-btn--ghost ds-btn--sm">Portfolio</a>
         </div>
-        <a href="/" class="text-slate-400 hover:text-white text-[11px] px-2 py-1 rounded bg-elevated border border-line">← Portfolio</a>
       </div>
-      <form onsubmit="handleDirectAdminGateLogin(event)" autocomplete="off" class="space-y-3">
-        <div id="gate-admin-error" class="hidden p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-[11px]"></div>
+
+      <form onsubmit="handleDirectAdminGateLogin(event)" autocomplete="off" class="p-5 space-y-3.5">
+        <div id="gate-admin-error" class="hidden ds-error-text p-2.5 rounded-lg bg-danger-500/10 border border-danger-500/25" role="alert"></div>
+
         <div>
-          <label class="block text-[10px] text-slate-400 uppercase mb-1">Admin Username</label>
-          <input type="text" id="gate-admin-username" required autocomplete="off" placeholder="Enter username" class="w-full p-2.5 rounded-lg bg-elevated border border-line text-white focus:outline-none focus:border-sky-400">
+          <label class="ds-label" for="gate-admin-username">Username</label>
+          <input type="text" id="gate-admin-username" required autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="raviranjankr" class="ds-input">
         </div>
+
         <div>
-          <label class="block text-[10px] text-slate-400 uppercase mb-1">Passphrase</label>
-          <input type="password" id="gate-admin-password" required autocomplete="new-password" placeholder="Enter password" class="w-full p-2.5 rounded-lg bg-elevated border border-line text-white focus:outline-none focus:border-sky-400">
+          <label class="ds-label" for="gate-admin-password">Password</label>
+          <input type="password" id="gate-admin-password" required autocomplete="current-password" placeholder="••••••••" class="ds-input">
         </div>
-        <button type="submit" id="gate-admin-btn" class="w-full py-2.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-on-solid font-bold text-xs transition-colors cursor-pointer">
-          Unlock Admin OS
+
+        <button type="submit" id="gate-admin-btn" class="ds-btn ds-btn--primary ds-btn--block ds-btn--lg">
+          Unlock admin console
         </button>
-        <div class="flex items-center justify-between pt-1 text-[11px]">
-          <button type="button" onclick="openChangePasswordModal();" class="text-amber-400 hover:underline">Forgot / Update Password (OTP)?</button>
+
+        <div class="flex items-center justify-between pt-1">
+          <button type="button" onclick="openChangePasswordModal()" class="text-[11.5px] text-brand-400 hover:underline">Forgot password (OTP)</button>
+          <span class="text-[11px] text-faint">Secured by JWT</span>
         </div>
       </form>
     </div>
