@@ -1,21 +1,21 @@
-# Multi-stage Dockerfile for Raviranjan.OS Java 21 Backend
+# Multi-stage Dockerfile for Raviranjan.OS Spring Boot Backend
+
+# Stage 1: Build JAR with Maven & Java 21
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
-WORKDIR /app
+WORKDIR /workspace
+
 COPY pom.xml .
 COPY src ./src
-# Build application jar (skip tests if running in headless container)
-RUN mvn clean package -DskipTests || true
+RUN mvn clean package -DskipTests -Dmaven.test.skip=true
 
-FROM eclipse-temurin:21-jre-alpine AS runner
+# Stage 2: Minimal Java 21 JRE Runtime
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
 
-COPY --from=builder /app/target/*.jar app.jar || true
+COPY --from=builder /workspace/target/*.jar app.jar
 
 EXPOSE 8080
-ENV SPRING_PROFILES_ACTIVE=prod
-ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC"
-
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=dev", "app.jar"]

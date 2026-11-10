@@ -1,129 +1,101 @@
-# Architecture Specification — Raviranjan.OS (v3.2)
+# Raviranjan.OS — Production System Architecture & Technical Specification
 
-## 1. System Overview
-Raviranjan.OS is an enterprise-grade developer operating system and live telemetry platform engineered for Raviranjan Kumar. It bridges high-throughput Spring Boot microservices with a modern, high-contrast reactive web interface and a comprehensive 15-module Executive Admin CMS.
-
-```
-                           [ Public Client / Browser ]
-                                        |
-                         +--------------+--------------+
-                         |                             |
-                 (Vercel Edge Proxy)          (Direct localhost)
-                         |                             |
-                         +--------------+--------------+
-                                        |
-                             [ Express Gateway: 3000 ]
-                                        |
-                     +------------------+------------------+
-                     |                                     |
-               Static Assets                        /api Proxy
-          (index.html, admin_cms.html)                     |
-                                                           v
-                                            [ Spring Boot Backend: 8080 ]
-                                            - Java 21 Virtual Threads
-                                            - JWT Security Filter Chain
-                                            - Flyway DB Migrations
-                                            - GitHubProvider Telemetry
-                                                           |
-                                      +--------------------+--------------------+
-                                      |                                         |
-                            (Neon PostgreSQL DB)                          (External APIs)
-                            - contact_inquiries                          - GitHub REST & Scrape
-                            - ai_query_logs                              - LeetCode GraphQL
-                            - projects (NOT NULL slug)                   - GeeksforGeeks Telemetry
-                            - developer_profile & settings
-```
+**Version:** 1.0.0-PROD-SPEC  
+**Status:** Approved  
+**Author:** Raviranjan / Systems Architect  
+**Platform:** Raviranjan.OS (Personal Developer Operating System)
 
 ---
 
-## 2. Core Modules & Endpoints
+## Executive Summary
 
-### 2.1 Public User Portfolio (`index.html`)
-- **Hero & Identity**: Real-time terminal command box (`curl -s https://raviranjan.dev/api/v1/profile | jq`), 3 hero cards (`01 - IDENTITY`, `02 - CORE TECH MATRIX`, `03 - AVAILABILITY`).
-- **Telemetry Engine**: 100% real live sync with GitHub (144 contributions in the last year), LeetCode (31 solved, 11-day streak), and GeeksforGeeks (234 score, 68 solved).
-- **Skills Matrix**: 5 dedicated sections:
-  1. Languages & Core Runtimes
-  2. Backend & Microservices
-  3. Databases, Storage & Vectors
-  4. DevOps, Containers & Systems
-  5. AI, RAG & LLM Engineering
-- **AI Intelligence Widget**: Connected to `POST /api/ai/chat`. Transmits client IP, geolocation, and browser user agent. Enforces rate-limiting (max 10 queries per 10 mins).
-- **Contact & CRM**: Connected to `POST /api/contact`. Transmits client IP, geolocation, browser user agent, subject, and message. Enforces rate-limiting (max 3 messages per 10 mins).
-
-### 2.2 Executive Admin CMS (`admin_cms.html`)
-- **Restricted Access Gate**: Unauthorized visits to `/admin` show strictly:
-  `"Restricted, sorry you don’t have permission to load this page."`
-  Zero credentials or OTP inputs exposed. Secret unlock via triple-click on portfolio logo or typing `admin` on the keyboard.
-- **Homepage Builder**: Direct in-place editing of headlines, taglines, badges, 3 hero cards, and live CSS theme colors (`--brand`, `--surface`, `--bg`, `--text-main`, `--border`).
-- **Profile & Bio Editor**: Live customization of developer bio, contact details, social URLs, and the terminal curl command.
-- **AI Config & User Chat Logs**: Live audit table tracking every visitor chat query, AI response, IP address, location, browser OS, and working delete buttons.
-- **Inquiries & CRM Leads**: Live table of contact form submissions with client IP, location, browser, and working delete buttons.
-- **Universal CRUD Engine with "Are you sure?" Modal**:
-  - Deleting any Project, Skill, Lab Experiment, DSA Note, Career Entry, Achievement, Writing Article, Research Paper, Story, Inquiry, or AI Log triggers an **"Are you sure?" confirmation popup modal** before deletion.
-  - Project creation automatically generates valid `slug` (`title.toLowerCase().replace(...)`) to satisfy PostgreSQL `slug VARCHAR(255) NOT NULL UNIQUE`.
-  - Skills Matrix editor allows in-place adding, editing, and deleting across all 5 sections without redirecting to `project-editor`.
+Raviranjan.OS is a unified developer platform combining a public technical portfolio, a personal CMS, project progress tracking, a technical writing engine, an engineering lab, and a multi-platform integration subsystem. It enforces strict separation between manual content authored via the admin CMS and synchronized external telemetry from platforms like GitHub, LeetCode, and GeeksforGeeks.
 
 ---
 
-## 3. Database Schema (Neon PostgreSQL)
+## 1. System Architecture & Tech Stack
 
-```sql
--- 1. Contact Inquiries Table
-CREATE TABLE contact_inquiries (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    subject VARCHAR(255),
-    message TEXT NOT NULL,
-    user_ip VARCHAR(64),
-    location VARCHAR(255),
-    browser TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+### 1.1 Technology Decisions
 
--- 2. AI Query Audit Logs
-CREATE TABLE ai_query_logs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id VARCHAR(128),
-    user_query TEXT NOT NULL,
-    ai_response TEXT NOT NULL,
-    user_ip VARCHAR(64),
-    location VARCHAR(255),
-    browser TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+| Tier | Technology | Rationale |
+| :--- | :--- | :--- |
+| **Frontend Framework** | Next.js (App Router, React 18/19, TypeScript) | Server Components for instant initial paint, Client Components for interactive telemetry dashboards and CMS. |
+| **UI & Styling** | Tailwind CSS + shadcn/ui | Minimal, dark-first, dense developer aesthetic inspired by Linear and Vercel. |
+| **Client State & Data Fetching** | TanStack Query v5 | Automated caching, background refetching, and optimistic mutations for admin CRUD. |
+| **Visualizations** | Recharts | Composable SVG-based activity heatmaps, commit charts, and problem-solving distributions. |
+| **Animations** | Framer Motion | Subtle micro-interactions, layout transitions, and status indicator pulses. |
+| **Backend Framework** | Java 21 + Spring Boot 3.3.x | Enterprise-grade concurrency (Virtual Threads), robust security filters, strong typing, and rich JPA ecosystem. |
+| **Security & Auth** | Spring Security + JJWT | Dual-token authentication (HttpOnly refresh cookie + short-lived JWT) and method-level RBAC. |
+| **Relational Database** | PostgreSQL 16 | ACID compliance, JSONB capabilities for schema flexibility, and reliable indexing. |
+| **Cache & Distributed Bus** | Redis 7 | L2 cache for public endpoints, distributed rate-limiting tokens, and pub/sub message bus. |
+| **Realtime Telemetry** | Server-Sent Events (SSE) | Lightweight, single-direction HTTP streaming for live developer activity and sync logs. |
+| **Artificial Intelligence** | Spring AI | RAG (Retrieval-Augmented Generation) query engine over verified portfolio knowledge chunks. |
+| **Container & CI/CD** | Docker, Docker Compose, GitHub Actions | Isolated local development, immutable production multi-stage builds, automated linting and testing. |
 
--- 3. Projects Repository
-CREATE TABLE projects (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    slug VARCHAR(255) NOT NULL UNIQUE,
-    title VARCHAR(255) NOT NULL,
-    category VARCHAR(64) NOT NULL,
-    technologies VARCHAR(255),
-    description TEXT,
-    status VARCHAR(32) DEFAULT 'ACTIVE',
-    github_url VARCHAR(512),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+---
 
--- 4. Developer Profile & Theme Settings
-CREATE TABLE site_settings (
-    id VARCHAR(64) PRIMARY KEY,
-    brand_color VARCHAR(16) DEFAULT '#10b981',
-    card_color VARCHAR(16) DEFAULT '#0f172a',
-    bg_color VARCHAR(16) DEFAULT '#030712',
-    text_color VARCHAR(16) DEFAULT '#f8fafc',
-    border_color VARCHAR(16) DEFAULT '#1e293b',
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+## 2. Invariant Architectural Principles
+
+### 2.1 Content Provenance Separation
+1. **Manual Content Subsystem**: Everything authored by the developer (articles, research papers, project case studies, architectural decision records, career milestones) is managed exclusively via the Admin CMS (`/admin`), stored in PostgreSQL, and exposed through `/api/v1/public/**`.
+2. **External Data Integration Subsystem**: Third-party activity (commits, pull requests, algorithmic problem counts, live telemetry) is ingested exclusively through `IntegrationProvider` implementations, normalized into standard entities, and stored in PostgreSQL with Redis caching.
+3. **No Frontend Hardcoding**: Every UI section on the public site reads dynamically from API endpoints. If an external service is unavailable, stale-while-revalidate data is shown with a degraded health badge.
+
+---
+
+## 3. Database Schema Overview (27 Functional Domains)
+
+The database schema is managed via Flyway migrations and partitioned into logical schemas:
+
+1. `core`: `profiles`, `social_links`, `site_settings`, `homepage_sections`
+2. `projects`: `projects`, `project_milestones`, `project_tasks`, `project_changelogs`, `project_technical_decisions`, `engineering_lab`
+3. `career`: `skill_categories`, `skills`, `experiences`, `educations`, `achievements`, `certifications`, `dsa_notes`
+4. `publications`: `articles`, `article_tags`, `article_tag_mappings`, `research`, `research_tags`, `research_tag_mappings`
+5. `integrations`: `integration_configs`, `integration_sync_logs`, `github_repos`, `github_contributions`, `leetcode_stats`, `gfg_stats`, `unified_activities`, `contribution_stories`
+6. `operations`: `contact_inquiries`, `whatsapp_conversations`, `whatsapp_messages`, `notifications`, `site_analytics`, `audit_logs`, `ai_interactions`
+
+---
+
+## 4. Integration Provider Abstraction
+
+Each external service implements:
+
+```java
+public interface IntegrationProvider<C extends ProviderConfig, D extends SyncResult> {
+    ProviderType getProviderType();
+    ConnectionStatus connect(C config);
+    void disconnect();
+    D sync();
+    ProviderHealth getStatus();
+    Instant getLastSyncTimestamp();
+    void handleError(Throwable throwable, SyncContext context);
+    RetryPolicy getRetryPolicy();
+}
 ```
 
+- **GitHubProvider**: Reads public repositories, stars, commit distribution, and PRs.
+- **LeetCodeProvider**: Ingests total solved counts, ranking, and difficulty distribution via GraphQL.
+- **GFGProvider**: Ingests verified contest scores, coding scores, and problem counts.
+- **WhatsAppProvider**: Dispatches notification alerts and ingests recruiter messages via Meta Cloud API.
+- **EmailProvider**: Sends automated confirmations and notifications.
+- **AnalyticsProvider**: Tracks privacy-friendly, anonymized visitor events.
+- **AIProvider**: Answers recruiter queries using grounded RAG knowledge retrieval.
+
 ---
 
-## 4. Security & Compliance
-- **JWT Authentication**: RS256 / HS256 stateless tokens with 24-hour expiration.
-- **Rate-Limiting**:
-  - Public Contact: Max 3 messages in 10 minutes per IP/session.
-  - Public AI Chat: Max 10 messages in 10 minutes per IP/session.
-  - Admin OTP Generation: Max 2 attempts in 10 minutes.
-- **Audit Stream**: Real-time telemetry tracking Flyway V5 migrations, database connection pools, and GitHub commits.
+## 5. Security & RBAC Model
+
+- `ROLE_PUBLIC`: Access to `/api/v1/public/**` (read-only, cached).
+- `ROLE_RECRUITER`: Access to `/api/v1/public/recruiter/**` and verified dossier downloads.
+- `ROLE_ADMIN`: Access to `/api/v1/admin/**` and `/api/v1/integrations/**` (full CRUD, configuration, sync triggering).
+
+---
+
+## 6. Implementation Phases
+
+- **Phase 1**: Core Foundation & Infrastructure (Database, Docker Compose, Spring Boot setup, Security).
+- **Phase 2**: Domain Models, Repositories, Services, and Admin CRUD APIs.
+- **Phase 3**: Integration Engine, External Providers (GitHub, LeetCode, GFG), and Unified Activity Stream.
+- **Phase 4**: Next.js Frontend Architecture, Design System, and Public Portfolio Routes.
+- **Phase 5**: Admin CMS Dashboard, Live Telemetry, Real-time SSE, and CRM Module.
+- **Phase 6**: AI Portfolio Assistant, Production Hardening, and CI/CD Automation.
