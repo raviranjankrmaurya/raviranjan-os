@@ -203,7 +203,9 @@
     var nativeFetch = window.fetch ? window.fetch.bind(window) : null;
     if (!nativeFetch || !FALLBACK) return;
 
-    var useDirect = false;
+    var useDirect = false;      // resolved decision
+    var probe = null;           // shared one-shot probe promise
+    var probing = false;
 
     function isRelativeApi(url) {
       return typeof url === 'string' && (url === '/api' || url.indexOf('/api/') === 0 || url.indexOf('/api?') === 0);
@@ -213,8 +215,9 @@
       return FALLBACK + url;
     }
 
-    // A proxy miss looks like: 404/405, a 5xx with an HTML body, or any
-    // 2xx that is HTML (the SPA shell being served for /api/...).
+    // A proxy miss looks like: 404 / 405, or any 2xx that is HTML (the SPA shell
+    // being served for /api/...). A 5xx means the proxy exists but the backend is
+    // unhappy, so we stay on the same origin and let the UI show its error state.
     function looksUnproxied(res) {
       if (!res) return true;
       var type = (res.headers && res.headers.get && (res.headers.get('content-type') || '')) || '';
@@ -223,37 +226,54 @@
       return false;
     }
 
+    // One shared probe so a burst of parallel calls makes a single decision
+    // instead of every request discovering the same thing.
+    function resolveMode() {
+      if (useDirect || probe) return probe || Promise.resolve(useDirect);
+      probe = nativeFetch('/api', { cache: 'no-store' })
+        .then(function (res) {
+          if (looksUnproxied(res)) {
+            useDirect = true;
+            console.info('[Raviranjan.OS] /api is not proxied on this host — calling ' + FALLBACK + ' directly.');
+          }
+          return useDirect;
+        })
+        .catch(function () {
+          useDirect = true;
+          console.info('[Raviranjan.OS] /api unreachable on this host — calling ' + FALLBACK + ' directly.');
+          return true;
+        })
+        .then(function (direct) {
+          probing = false;
+          return direct;
+        });
+      return probe;
+    }
+
     window.fetch = function (input, init) {
       var url = typeof input === 'string' ? input : (input && input.url) || '';
 
       if (!isRelativeApi(url)) return nativeFetch(input, init);
 
-      if (useDirect) {
-        try {
-          return nativeFetch(directUrl(url), init);
-        } catch (e) {
-          return nativeFetch(input, init);
-        }
+      if (useDirect) return nativeFetch(directUrl(url), init);
+
+      // While the very first decision is being made, queue behind it.
+      if (probing) {
+        return resolveMode().then(function (direct) {
+          return nativeFetch(direct ? directUrl(url) : input, init);
+        });
       }
 
-      return nativeFetch(input, init).then(
-        function (res) {
-          if (!looksUnproxied(res)) return res;
-          useDirect = true;
-          console.info('[Raviranjan.OS] /api is not proxied on this host — using ' + FALLBACK + ' directly.');
-          return nativeFetch(directUrl(url), init).catch(function () {
-            return res;
-          });
-        },
-        function (err) {
-          // Network-level failure (no server behind /api at all)
-          useDirect = true;
-          console.info('[Raviranjan.OS] /api unreachable on this host — using ' + FALLBACK + ' directly.');
-          return nativeFetch(directUrl(url), init).catch(function () {
-            throw err;
-          });
-        }
-      );
+      if (probe) {
+        return probe.then(function (direct) {
+          return nativeFetch(direct ? directUrl(url) : input, init);
+        });
+      }
+
+      probing = true;
+      return resolveMode().then(function (direct) {
+        return nativeFetch(direct ? directUrl(url) : input, init);
+      });
     };
 
     window.DS_API_BASE = FALLBACK;
