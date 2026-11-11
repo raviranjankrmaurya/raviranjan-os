@@ -3,7 +3,7 @@ function formatAiMarkdownToHtml(raw) {
   return escapeHtml(raw)
     .replace(/\n/g, '<br>')
     .replace(/\*\*(.*?)\*\*/g, '<strong class="text-fg">$1</strong>')
-    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-xs">&nearr;</span></a>');
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-xs">&nearr;</span></a>');
 }
 
 function getOrCreateBrowserFingerprint() {
@@ -249,9 +249,9 @@ function showToast(message, type = "info") {
   if (!container) return;
 
   const toast = document.createElement("div");
-  const borderCol = type === "success" ? "border-emerald-500/40 text-emerald-300" : "border-blue-500/40 text-blue-300";
+  const borderCol = type === "success" ? "border-emerald-500/40 text-emerald-300" : "border-indigo-500/40 text-indigo-300";
   toast.className = `p-3 rounded-lg bg-card border ${borderCol} shadow-xl text-xs flex items-center space-x-2 animate-fade-in pointer-events-auto`;
-  toast.innerHTML = `<span class="w-2 h-2 rounded-full ${type ==="success" ? "bg-emerald-400" : "bg-blue-400"}"></span><span>${escapeHtml(message)}</span>`;
+  toast.innerHTML = `<span class="w-2 h-2 rounded-full ${type ==="success" ? "bg-emerald-400" : "bg-indigo-400"}"></span><span>${escapeHtml(message)}</span>`;
   container.appendChild(toast);
 
   setTimeout(() => {
@@ -424,7 +424,7 @@ function fetchDynamicProjects() {
           title: p.title,
           version: p.version || "v1.0",
           status: p.status || "PUBLISHED",
-          statusClass: p.status === "PUBLISHED" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-blue-500/10 text-blue-400 border-blue-500/20",
+          statusClass: p.status === "PUBLISHED" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
           progress: p.progress !== undefined ? p.progress : (p.progressPercentage || 85),
           category: cat,
           description: p.shortSummary || p.fullDescription || p.description || "",
@@ -474,7 +474,7 @@ function renderProjects(items) {
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <span class="text-xs px-2 py-0.5 rounded ${p.statusClass}">${escapeHtml(p.status)}</span>
-            <span class="text-xs text-fg-2">Progress: <strong class="text-blue-400">${p.progress}%</strong></span>
+            <span class="text-xs text-fg-2">Progress: <strong class="text-indigo-400">${p.progress}%</strong></span>
           </div>
           <div>
             <h3 class="text-lg font-bold text-fg flex items-center justify-between">
@@ -492,7 +492,7 @@ function renderProjects(items) {
               <span>${p.progress}%</span>
             </div>
             <div class="w-full bg-raised rounded-full h-1.5 overflow-hidden">
-              <div class="bg-blue-600 h-1.5 rounded-full" style="width: ${p.progress}%"></div>
+              <div class="bg-indigo-600 h-1.5 rounded-full" style="width: ${p.progress}%"></div>
             </div>
           </div>
 
@@ -502,7 +502,7 @@ function renderProjects(items) {
         </div>
 
         <div class="pt-4 border-t border-line flex items-center justify-between text-xs">
-          <button onclick="openProjectDetail('${escapeHtml(p.slug)}')" class="text-blue-400 hover:text-blue-300 flex items-center gap-1 font-medium rounded-lg">
+          <button onclick="openProjectDetail('${escapeHtml(p.slug)}')" class="text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium rounded-lg">
             <span>Read Case Study & ADRs</span>
             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </button>
@@ -551,13 +551,13 @@ function renderActivity(items) {
     if (!a.platformClass) {
       if (plat === "LEETCODE") pClass = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
       else if (plat === "GFG") pClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-      else if (plat === "PROJECT") pClass = "bg-blue-500/10 text-blue-400 border border-blue-500/20";
+      else if (plat === "PROJECT") pClass = "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20";
     }
 
     const dateLabel = a.occurredAt ? new Date(a.occurredAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "";
     const metaText = a.meta || `${a.description || ""}${dateLabel ? " · " + dateLabel : ""}`;
     const linkHtml = a.externalUrl
-      ? `<a href="${escapeHtml(a.externalUrl)}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline text-xs shrink-0">View ↗</a>`
+      ? `<a href="${escapeHtml(a.externalUrl)}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline text-xs shrink-0">View ↗</a>`
       : "";
 
     return `
@@ -833,12 +833,12 @@ function handleCommandSearch(val) {
 // Project Category Filtering
 function filterProjects(cat) {
   document.querySelectorAll(".proj-filter").forEach(btn => {
-    btn.classList.remove("bg-blue-500/10", "text-blue-400", "border-blue-500/30");
+    btn.classList.remove("bg-indigo-500/10", "text-indigo-400", "border-indigo-500/30");
     btn.classList.add("bg-card", "text-fg-2");
   });
 
   if (event && event.target) {
-    event.target.classList.add("bg-blue-500/10", "text-blue-400", "border-blue-500/30");
+    event.target.classList.add("bg-indigo-500/10", "text-indigo-400", "border-indigo-500/30");
     event.target.classList.remove("bg-card", "text-fg-2");
   }
 
@@ -959,7 +959,7 @@ function openProjectDetail(slug) {
 
   const milestonesHtml = (p.milestones || []).map(m => {
     const icon = m.status === "done" ? "✓" : (m.status === "in-progress" ? "◐" : "○");
-    const color = m.status === "done" ? "text-emerald-400" : (m.status === "in-progress" ? "text-blue-400" : "text-fg-3");
+    const color = m.status === "done" ? "text-emerald-400" : (m.status === "in-progress" ? "text-indigo-400" : "text-fg-3");
     return `<div class="flex items-center space-x-2 text-xs">
       <span class="${color} font-bold w-4">${icon}</span>
       <span class="${m.status ==="done" ? "text-fg" : "text-fg-2"}">${escapeHtml(m.name)}</span>
@@ -967,45 +967,45 @@ function openProjectDetail(slug) {
   }).join("");
 
   const techBadges = (p.technologies || []).map(t =>
-    `<span class="px-2 py-0.5 rounded bg-raised border border-line text-xs text-blue-300">${escapeHtml(t)}</span>`
+    `<span class="px-2 py-0.5 rounded bg-raised border border-line text-xs text-indigo-300">${escapeHtml(t)}</span>`
   ).join("");
 
   body.innerHTML = `
     <div class="space-y-4 text-xs font-sans">
       <div>
-        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">1. Problem Statement & Overview</h4>
+        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">1. Problem Statement & Overview</h4>
         <p class="text-fg leading-relaxed">${escapeHtml(p.problem)}</p>
       </div>
 
       <div>
-        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">2. Engineered Solution</h4>
+        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">2. Engineered Solution</h4>
         <p class="text-fg leading-relaxed">${escapeHtml(p.solution)}</p>
       </div>
 
       <div>
-        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">3. System Architecture</h4>
+        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">3. System Architecture</h4>
         <p class="text-fg leading-relaxed bg-raised p-3 rounded border border-line">${escapeHtml(p.architecture)}</p>
       </div>
 
       <div>
-        <h4 class="text-blue-400 font-bold uppercase text-xs mb-2">4. Milestone Progress Matrix</h4>
+        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-2">4. Milestone Progress Matrix</h4>
         <div class="space-y-1.5 bg-raised p-3 rounded-xl border border-line">
           ${milestonesHtml}
         </div>
       </div>
 
       <div>
-        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">5. Architectural Decision Record (ADR)</h4>
+        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">5. Architectural Decision Record (ADR)</h4>
         <p class="text-fg bg-raised p-3 rounded border border-line leading-relaxed">${escapeHtml(p.adr)}</p>
       </div>
 
       <div>
-        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">6. Key Engineering Lessons</h4>
+        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">6. Key Engineering Lessons</h4>
         <p class="text-fg leading-relaxed">${escapeHtml(p.learned)}</p>
       </div>
 
       <div>
-        <h4 class="text-blue-400 font-bold uppercase text-xs mb-1">7. Technology Stack</h4>
+        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">7. Technology Stack</h4>
         <div class="flex flex-wrap gap-1.5 pt-1">${techBadges}</div>
       </div>
 
@@ -1121,7 +1121,7 @@ async function fetchDynamicDsaNotes() {
 
         if (tabsBar) {
           tabsBar.innerHTML = dynamicDsaNotesList.map((n, i) => `
-            <button onclick="showDsaNote('${escapeHtml(n.key)}')" id="dsa-tab-${escapeHtml(n.key)}" class="px-2.5 py-1 rounded-lg ${i === 0 ? 'bg-raised text-blue-400 border border-blue-500/30' : 'bg-card text-fg-2 hover:text-fg'}">
+            <button onclick="showDsaNote('${escapeHtml(n.key)}')" id="dsa-tab-${escapeHtml(n.key)}" class="px-2.5 py-1 rounded-lg ${i === 0 ? 'bg-raised text-indigo-400 border border-indigo-500/30' : 'bg-card text-fg-2 hover:text-fg'}">
               ${escapeHtml(n.tabLabel)}
             </button>
           `).join("");
@@ -1152,7 +1152,7 @@ function showDsaNote(key) {
     const tab = document.getElementById(`dsa-tab-${k}`);
     if (tab) {
       if (String(k) === String(key)) {
-        tab.className = 'px-2.5 py-1 rounded-lg bg-raised text-blue-400 border border-blue-500/30';
+        tab.className = 'px-2.5 py-1 rounded-lg bg-raised text-indigo-400 border border-indigo-500/30';
       } else {
         tab.className = 'px-2.5 py-1 rounded-lg bg-card text-fg-2 hover:text-fg';
       }
@@ -1176,7 +1176,7 @@ function showDsaNote(key) {
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div class="p-2 rounded bg-raised border border-line">
             <span class="text-fg-3 text-xs">Time Complexity</span>
-            <div class="text-blue-400 font-bold mt-0.5">${escapeHtml(note.timeComp)}</div>
+            <div class="text-indigo-400 font-bold mt-0.5">${escapeHtml(note.timeComp)}</div>
           </div>
           <div class="p-2 rounded bg-raised border border-line">
             <span class="text-fg-3 text-xs">Space Complexity</span>
@@ -1237,7 +1237,7 @@ function setPublicAiLanguage(lang) {
     const btn = document.getElementById("ai-lang-" + l);
     if (btn) {
       if (l === lang) {
-        btn.className = "px-2 py-0.5 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/40 text-xs";
+        btn.className = "px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs";
       } else {
         btn.className = "px-2 py-0.5 rounded-lg bg-raised text-fg-2 border border-line text-xs hover:text-fg";
       }
@@ -1251,7 +1251,7 @@ async function sendAiMessage(query) {
   if (!chatContainer) return;
 
   const userBubble = document.createElement('div');
-  userBubble.className = 'p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-200 text-xs  ml-6';
+  userBubble.className = 'p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-200 text-xs  ml-6';
   userBubble.innerText = query;
   chatContainer.appendChild(userBubble);
   chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -1308,10 +1308,10 @@ async function sendAiMessage(query) {
       }
       const rawAns = d?.answer || evaluatePortfolioRag(query);
       const formattedAns = escapeHtml(rawAns)
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-fg">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-xs">&nearr;</span></a>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-fg">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-xs">&nearr;</span></a>')
         .replace(/\n/g, '<br>');
       aiBubble.innerHTML = `
-        <div class="flex items-center justify-between text-xs text-blue-400 border-b border-line pb-1 mb-1">
+        <div class="flex items-center justify-between text-xs text-indigo-400 border-b border-line pb-1 mb-1">
           <span>🤖 Ask AI · Grounded on Neon DB</span>
           <span class="text-fg-3">${d?.latencyMs || 45}ms</span>
         </div>
@@ -1343,11 +1343,11 @@ function evaluatePortfolioRag(query) {
     <p class="mt-1 text-fg">
       Raviranjan.OS includes a private headless CMS for managing live projects, skills, research, and integration sync adapters.
     </p>
-    <div class="mt-3 p-3 rounded-xl bg-card border border-blue-500/30 space-y-2">
-      <div class="text-xs text-blue-400 font-semibold uppercase tracking-wider">ADMIN ACCESS UNLOCK</div>
+    <div class="mt-3 p-3 rounded-xl bg-card border border-indigo-500/30 space-y-2">
+      <div class="text-xs text-indigo-400 font-semibold uppercase tracking-wider">ADMIN ACCESS UNLOCK</div>
       <p class="text-xs text-fg-2">Click the button below to open the private passphrase modal and authenticate, or go directly to <code>/admin</code>.</p>
       <div class="flex flex-wrap items-center gap-2 pt-1">
-        <button onclick="openAdminAuthModal(); togglePublicAiDrawer();" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
+        <button onclick="openAdminAuthModal(); togglePublicAiDrawer();" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
           <i data-lucide="key" class="w-3.5 h-3.5"></i>
           <span>Unlock Admin Terminal</span>
         </button>
@@ -1366,7 +1366,7 @@ function evaluatePortfolioRag(query) {
       <li><strong>Key Feature:</strong> Calculates incident priority scores and performs sub-10ms geospatial point-in-polygon queries for nearest emergency personnel dispatch.</li>
       <li><strong>Progress:</strong> Currently at 85% completion.</li>
     </ul>
-    <div class="mt-2 text-xs text-blue-400">Source: <a href="#projects" class="underline">Portfolio Projects / RakshaGrid</a></div>`;
+    <div class="mt-2 text-xs text-indigo-400">Source: <a href="#projects" class="underline">Portfolio Projects / RakshaGrid</a></div>`;
   }
 
   if (q.includes('project') || q.includes('built') || q.includes('work')) {
@@ -1378,7 +1378,7 @@ function evaluatePortfolioRag(query) {
       <li><strong>AlgoVault:</strong> Interactive algorithm visualization playground (React, TypeScript, Canvas API).</li>
       <li><strong>Raviranjan.OS:</strong> His full personal developer operating system with Spring Boot and 24 CMS modules.</li>
     </ul>
-    <div class="mt-2 text-xs text-blue-400">Source: <a href="#projects" class="underline">Projects Section</a></div>`;
+    <div class="mt-2 text-xs text-indigo-400">Source: <a href="#projects" class="underline">Projects Section</a></div>`;
   }
 
   if (q.includes('technolog') || q.includes('stack') || q.includes('know') || q.includes('skill')) {
@@ -1398,7 +1398,7 @@ function evaluatePortfolioRag(query) {
       <li><strong>Spring Boot:</strong> Investigated Java 21 carrier thread unpinning under Virtual Thread executors to resolve test harness timeouts.</li>
       <li><strong>FastAPI:</strong> Submitted reproduction tests and guidance for proxy buffering headers with StreamingResponse in Server-Sent Events.</li>
     </ul>
-    <div class="mt-2 text-xs text-blue-400">Source: <a href="#contributions" class="underline">Contribution Stories</a></div>`;
+    <div class="mt-2 text-xs text-indigo-400">Source: <a href="#contributions" class="underline">Contribution Stories</a></div>`;
   }
 
   if (q.includes('postgres') || q.includes('database') || q.includes('sql')) {
@@ -1645,7 +1645,7 @@ async function renderInteractiveResumeSheet() {
         <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-line/60 pb-2">
           <div>
             <div class="font-bold text-fg text-xs">${escapeHtml(ed.degree)}</div>
-            <div class="text-xs text-blue-400">${escapeHtml(ed.institution)}</div>
+            <div class="text-xs text-indigo-400">${escapeHtml(ed.institution)}</div>
             ${ed.description ? `<p class="text-xs text-fg-2 mt-0.5">${escapeHtml(ed.description)}</p>` : ''}
           </div>
           <div class="text-xs text-fg-2">${escapeHtml(ed.startDate || '2023')} — ${escapeHtml(ed.endDate || 'Present')} · ${escapeHtml(ed.grade || 'Enrolled')}</div>
@@ -1660,12 +1660,12 @@ async function renderInteractiveResumeSheet() {
           return `
         <div class="space-y-1 border-b border-line/60 pb-2.5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between">
-            <div class="font-bold text-fg text-xs">${escapeHtml(ex.role)} <span class="text-blue-400 font-normal">@ ${escapeHtml(ex.company)}</span> <span class="text-xs px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-300 ml-1">${statusLabel}</span></div>
+            <div class="font-bold text-fg text-xs">${escapeHtml(ex.role)} <span class="text-indigo-400 font-normal">@ ${escapeHtml(ex.company)}</span> <span class="text-xs px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 ml-1">${statusLabel}</span></div>
             <div class="text-xs text-fg-2">${escapeHtml(ex.startDate || '')} — ${escapeHtml(ex.endDate || 'Present')}</div>
           </div>
           <p class="text-xs text-fg leading-relaxed">${escapeHtml(ex.description || '')}</p>
           <div class="flex flex-wrap gap-3 text-xs pt-0.5">
-            ${ex.offerLetterUrl ? `<a href="${escapeHtml(ex.offerLetterUrl)}" target="_blank" class="text-blue-400 hover:underline">Offer Letter ↗</a>` : ''}
+            ${ex.offerLetterUrl ? `<a href="${escapeHtml(ex.offerLetterUrl)}" target="_blank" class="text-indigo-400 hover:underline">Offer Letter ↗</a>` : ''}
             ${ex.certificateUrl ? `<a href="${escapeHtml(ex.certificateUrl)}" target="_blank" class="text-emerald-400 hover:underline">Completion Certificate ↗</a>` : ''}
             ${ex.achievements && ex.achievements.startsWith('http') ? `<a href="${escapeHtml(ex.achievements)}" target="_blank" class="text-amber-400 hover:underline">Project Report ↗</a>` : ''}
           </div>
@@ -1679,8 +1679,8 @@ async function renderInteractiveResumeSheet() {
       return `
         <div class="space-y-1 border-b border-line/60 pb-2.5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between">
-            <div class="font-bold text-fg text-xs">${escapeHtml(p.title)} <span class="text-xs text-blue-400 ml-1">[${escapeHtml(tList)}]</span></div>
-            ${p.githubRepoUrl ? `<a href="${escapeHtml(p.githubRepoUrl)}" target="_blank" class="text-xs text-blue-400 hover:underline">GitHub ↗</a>` : ''}
+            <div class="font-bold text-fg text-xs">${escapeHtml(p.title)} <span class="text-xs text-indigo-400 ml-1">[${escapeHtml(tList)}]</span></div>
+            ${p.githubRepoUrl ? `<a href="${escapeHtml(p.githubRepoUrl)}" target="_blank" class="text-xs text-indigo-400 hover:underline">GitHub ↗</a>` : ''}
           </div>
           <p class="text-xs text-fg leading-relaxed">${escapeHtml(p.shortSummary || p.fullDescription || '')}</p>
         </div>
@@ -1698,12 +1698,12 @@ async function renderInteractiveResumeSheet() {
         <div class="border-b border-line pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 class="text-2xl font-bold text-fg tracking-tight">${escapeHtml(fullName)}</h1>
-            <p class="text-xs text-blue-400 mt-0.5">${escapeHtml(headline)}</p>
+            <p class="text-xs text-indigo-400 mt-0.5">${escapeHtml(headline)}</p>
           </div>
           <div class="text-xs text-fg space-y-0.5 sm:text-right">
             <div>📧 ${escapeHtml(email)} · 📞 ${escapeHtml(phone)}</div>
             <div>📍 ${escapeHtml(location)}</div>
-            <div class="flex sm:justify-end gap-2 pt-0.5 text-blue-400">
+            <div class="flex sm:justify-end gap-2 pt-0.5 text-indigo-400">
               <a href="${escapeHtml(githubLink)}" target="_blank" class="hover:underline">GitHub</a> ·
               <a href="${escapeHtml(linkedinLink)}" target="_blank" class="hover:underline">LinkedIn</a> ·
               <a href="${escapeHtml(leetcodeLink)}" target="_blank" class="hover:underline">LeetCode</a>
@@ -1713,38 +1713,38 @@ async function renderInteractiveResumeSheet() {
 
         <!-- Executive Summary -->
         <div class="space-y-1.5">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Executive Summary</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 border-b border-line pb-1">Executive Summary</h3>
           <p class="text-xs text-fg leading-relaxed">${escapeHtml(summary)}</p>
         </div>
 
         <!-- Technical Skills -->
         <div class="space-y-1.5">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Technical Skills</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 border-b border-line pb-1">Technical Skills</h3>
           <div class="space-y-1">${skillsHtml}</div>
         </div>
 
         <!-- Experience -->
         <div class="space-y-2">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Work Experience & Engineering Roles</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 border-b border-line pb-1">Work Experience & Engineering Roles</h3>
           <div class="space-y-2">${expHtml}</div>
         </div>
 
         <!-- Key Projects -->
         <div class="space-y-2">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Featured Production Projects</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 border-b border-line pb-1">Featured Production Projects</h3>
           <div class="space-y-2">${projHtml || '<div class="text-xs text-fg-2">Projects synced from Neon DB.</div>'}</div>
         </div>
 
         <!-- Education -->
         <div class="space-y-2">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Education</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 border-b border-line pb-1">Education</h3>
           <div class="space-y-2">${eduHtml}</div>
         </div>
 
         <!-- Achievements & Certifications -->
         ${credsHtml ? `
         <div class="space-y-1.5">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400 border-b border-line pb-1">Achievements & Certifications</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 border-b border-line pb-1">Achievements & Certifications</h3>
           <ul class="list-disc pl-4 space-y-1">${credsHtml}</ul>
         </div>
         ` : ''}
@@ -2099,7 +2099,7 @@ function fetchDynamicSkills() {
         if (allSkills.length > 0) {
           const markup = allSkills.map(s => {
             const isFeatured = s.featured;
-            const borderCls = isFeatured ? 'text-blue-300 border-blue-500/20' : 'text-fg border-line';
+            const borderCls = isFeatured ? 'text-indigo-300 border-indigo-500/20' : 'text-fg border-line';
             return `<span class="text-xs px-2 py-0.5 rounded bg-raised ${borderCls} border" title="${escapeHtml(s.description || s.name)}">${escapeHtml(s.name)}</span>`;
           }).join('');
           if (container) container.innerHTML = markup;
@@ -2204,25 +2204,25 @@ function applyAccentThemeColor(hex) {
     document.head.appendChild(styleEl);
   }
   styleEl.innerHTML = `
-    html body .bg-blue-500, html body .bg-blue-500, html body .accent-bg-btn,
-    html.light body .bg-blue-500, html.light body .bg-blue-500, html.light body .accent-bg-btn {
+    html body .bg-indigo-500, html body .bg-indigo-500, html body .accent-bg-btn,
+    html.light body .bg-indigo-500, html.light body .bg-indigo-500, html.light body .accent-bg-btn {
       background-color: ${hex} !important;
       color: #ffffff !important;
     }
-    html body .from-blue-500, html.light body .from-blue-500 {
+    html body .from-indigo-500, html.light body .from-indigo-500 {
       --tw-gradient-from: ${hex} !important;
       background-image: linear-gradient(to right, ${hex}, #10b981) !important;
     }
-    html body .text-blue-400, html body .text-blue-300, html body .text-blue-400,
-    html.light body .text-blue-400, html.light body .text-blue-300, html.light body .text-blue-400 {
+    html body .text-indigo-400, html body .text-indigo-300, html body .text-indigo-400,
+    html.light body .text-indigo-400, html.light body .text-indigo-300, html.light body .text-indigo-400 {
       color: ${hex} !important;
     }
-    html body .border-blue-500\\/20, html body .border-blue-500\\/30, html body .border-blue-500\\/40, html body .border-blue-500\\/30,
-    html.light body .border-blue-500\\/20, html.light body .border-blue-500\\/30, html.light body .border-blue-500\\/40 {
+    html body .border-indigo-500\\/20, html body .border-indigo-500\\/30, html body .border-indigo-500\\/40, html body .border-indigo-500\\/30,
+    html.light body .border-indigo-500\\/20, html.light body .border-indigo-500\\/30, html.light body .border-indigo-500\\/40 {
       border-color: ${hex}66 !important;
     }
-    html body .bg-blue-500\\/10, html body .bg-blue-500\\/20, html body .bg-blue-500\\/10,
-    html.light body .bg-blue-500\\/10, html.light body .bg-blue-500\\/20, html.light body .bg-blue-500\\/10 {
+    html body .bg-indigo-500\\/10, html body .bg-indigo-500\\/20, html body .bg-indigo-500\\/10,
+    html.light body .bg-indigo-500\\/10, html.light body .bg-indigo-500\\/20, html.light body .bg-indigo-500\\/10 {
       background-color: ${hex}1f !important;
       color: ${hex} !important;
     }
@@ -2294,7 +2294,7 @@ async function loadPublicBrandingSettings() {
         const promptContainer = document.getElementById('hero-ai-prompts-list');
         if (promptContainer && Array.isArray(prompts) && prompts.length > 0) {
           promptContainer.innerHTML = prompts.map(q =>
-            `<button onclick="openAiWithQuery('${escapeHtml(q).replace(/'/g, "\'")}')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-card border border-line text-fg hover:border-blue-500/40 hover:text-fg transition-colors">"${escapeHtml(q)}"</button>`
+            `<button onclick="openAiWithQuery('${escapeHtml(q).replace(/'/g, "\'")}')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-card border border-line text-fg hover:border-indigo-500/40 hover:text-fg transition-colors">"${escapeHtml(q)}"</button>`
           ).join('');
         }
       } catch (e) {}
@@ -2358,7 +2358,7 @@ async function fetchDynamicCareerAndCredentials() {
                 .split(',')
                 .map(t => t.trim())
                 .filter(Boolean)
-                .map(t => `<span class="tech-stack-pill px-2 py-0.5 rounded bg-raised border border-line text-xs text-blue-300 font-medium">${escapeHtml(t)}</span>`)
+                .map(t => `<span class="tech-stack-pill px-2 py-0.5 rounded bg-raised border border-line text-xs text-indigo-300 font-medium">${escapeHtml(t)}</span>`)
                 .join('');
               const reportUrl = e.achievements && String(e.achievements).startsWith('http') ? e.achievements : '';
               return `
@@ -2367,7 +2367,7 @@ async function fetchDynamicCareerAndCredentials() {
                     <div class="flex items-start justify-between gap-2">
                       <div>
                         <span class="font-bold text-fg text-sm block">${escapeHtml(e.role)}</span>
-                        <span class="text-xs text-blue-400 font-semibold">${escapeHtml(e.company)}</span>
+                        <span class="text-xs text-indigo-400 font-semibold">${escapeHtml(e.company)}</span>
                         <span class="text-xs text-fg-2"> · ${escapeHtml(e.location || 'Remote · India')}</span>
                       </div>
                       <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold shrink-0 ${isPursuing ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'}">
@@ -2380,7 +2380,7 @@ async function fetchDynamicCareerAndCredentials() {
                   <div class="pt-2.5 border-t border-line flex flex-wrap items-center justify-between gap-2 text-xs">
                     <span class="text-fg-2">Timeline: <strong class="text-fg">${escapeHtml(e.startDate || '')} — ${escapeHtml(e.endDate || 'Present')}</strong></span>
                     <div class="flex flex-wrap items-center gap-2">
-                      ${e.offerLetterUrl ? `<a href="${escapeHtml(e.offerLetterUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 transition-colors">Offer Letter ↗</a>` : ''}
+                      ${e.offerLetterUrl ? `<a href="${escapeHtml(e.offerLetterUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition-colors">Offer Letter ↗</a>` : ''}
                       ${e.certificateUrl
                         ? `<a href="${escapeHtml(e.certificateUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-colors">Completion Certificate ↗</a>`
                         : `<span class="px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Certificate Pending</span>`}
@@ -2402,7 +2402,7 @@ async function fetchDynamicCareerAndCredentials() {
                 <span class="font-bold text-fg">${escapeHtml(e.role)}</span>
                 <span class="text-xs px-2 py-0.5 rounded ${e.current ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-fg-3/10 text-fg-2'}">${e.current ? 'Current' : 'Completed'}</span>
               </div>
-              <div class="text-xs text-blue-400">${escapeHtml(e.company)} · ${escapeHtml(e.location || 'India')}</div>
+              <div class="text-xs text-indigo-400">${escapeHtml(e.company)} · ${escapeHtml(e.location || 'India')}</div>
               <p class="text-xs text-fg font-sans leading-relaxed">${escapeHtml(e.description || '')}</p>
               <div class="text-xs text-fg-3 pt-1">Timeline: ${escapeHtml(e.startDate || '')} — ${escapeHtml(e.endDate || 'Present')}</div>
             </div>
@@ -2452,7 +2452,7 @@ async function fetchDynamicCareerAndCredentials() {
               <div class="font-bold text-fg">${escapeHtml(c.title)}</div>
               <div class="text-xs text-fg-2">${escapeHtml(c.issuer || '')} ${c.credentialId ? '· ID: ' + escapeHtml(c.credentialId) : ''}</div>
             </div>
-            ${c.credentialUrl ? `<a href="${escapeHtml(c.credentialUrl)}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-400 hover:underline shrink-0">Verify ↗</a>` : `<span class="text-xs text-emerald-400 shrink-0">Verified</span>`}
+            ${c.credentialUrl ? `<a href="${escapeHtml(c.credentialUrl)}" target="_blank" rel="noopener noreferrer" class="text-xs text-indigo-400 hover:underline shrink-0">Verify ↗</a>` : `<span class="text-xs text-emerald-400 shrink-0">Verified</span>`}
           </div>
         `).join('');
     }
@@ -2502,7 +2502,7 @@ async function fetchDynamicContributions() {
       </div>
       <div class="flex items-center justify-between pt-2 border-t border-line text-xs">
         <span class="text-fg-3">${escapeHtml(s.technologies || 'Open Source')}</span>
-        <a href="${escapeHtml(s.prUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline flex items-center gap-1 font-semibold">
+        <a href="${escapeHtml(s.prUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline flex items-center gap-1 font-semibold">
           GitHub Link ↗
         </a>
       </div>
@@ -2534,7 +2534,7 @@ async function fetchDynamicResearch() {
     <div class="saas-card p-5 space-y-3 flex flex-col justify-between">
       <div class="space-y-2">
         <div class="flex items-center justify-between text-xs">
-          <span class="px-2 py-0.5 rounded text-xs ${p.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'} font-semibold">
+          <span class="px-2 py-0.5 rounded text-xs ${p.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'} font-semibold">
             ${escapeHtml(p.status || 'PUBLISHED')}
           </span>
           <span class="text-fg-3">${escapeHtml(p.publishedDate || '2026')}</span>
@@ -2548,7 +2548,7 @@ async function fetchDynamicResearch() {
       <div class="flex items-center justify-between pt-3 border-t border-line text-xs">
         <span class="text-fg-3 text-xs">Author: ${escapeHtml(p.authors || 'Raviranjan Kumar')}</span>
         <div class="flex items-center gap-3">
-          <a href="${escapeHtml(p.githubUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">Code ↗</a>
+          <a href="${escapeHtml(p.githubUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">Code ↗</a>
         </div>
       </div>
     </div>
@@ -2589,7 +2589,7 @@ async function fetchDynamicLab() {
       </div>
       <div class="pt-2 border-t border-line flex items-center justify-between text-xs">
         <span class="text-fg-2">${escapeHtml(lab.technologies || 'Systems')}</span>
-        <a href="${escapeHtml(lab.githubUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">Code ↗</a>
+        <a href="${escapeHtml(lab.githubUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">Code ↗</a>
       </div>
     </div>
   `).join('');
@@ -2622,7 +2622,7 @@ async function fetchDynamicArticles() {
           <span>${escapeHtml(a.publishedAt ? new Date(a.publishedAt).toLocaleDateString([], { month: 'short', year: 'numeric' }) : (a.publishedDate || '2026'))}</span>
           <span>${escapeHtml(a.readingTimeMinutes ? a.readingTimeMinutes + ' min read' : (a.readTime || '6 min read'))}</span>
         </div>
-        <h3 class="text-sm font-semibold text-fg hover:text-blue-400 transition-colors">
+        <h3 class="text-sm font-semibold text-fg hover:text-indigo-400 transition-colors">
           ${escapeHtml(a.title)}
         </h3>
         <p class="text-xs text-fg font-sans leading-relaxed">${escapeHtml(a.summary || a.excerpt || '')}</p>
@@ -2633,7 +2633,7 @@ async function fetchDynamicArticles() {
             <span class="px-1.5 py-0.5 rounded bg-raised text-fg-2 text-xs border border-line">${escapeHtml(t)}</span>
           `).join('')}
         </div>
-        <span class="text-blue-400 hover:underline cursor-pointer">Synced from Neon DB →</span>
+        <span class="text-indigo-400 hover:underline cursor-pointer">Synced from Neon DB →</span>
       </div>
     </div>
   `).join('');
@@ -2844,7 +2844,7 @@ function initHero3dVisual() {
       }
       ctx.strokeStyle = isLight
         ? (r % 3 === 0 ? `rgba(124, 58, 237, ${alpha})` : `rgba(37, 99, 235, ${alpha})`)
-        : (r % 3 === 0 ? `rgba(99, 102, 241, ${alpha})` : `rgba(59, 130, 246, ${alpha})`);
+        : (r % 3 === 0 ? `rgba(99, 102, 241, ${alpha})` : `rgba(99, 102, 241, ${alpha})`);
       ctx.lineWidth = r % 4 === 0 ? 1.25 : 0.8;
       ctx.stroke();
     }
@@ -2862,7 +2862,7 @@ function initHero3dVisual() {
       }
       ctx.strokeStyle = isLight
         ? `rgba(37, 99, 235, ${alpha})`
-        : `rgba(59, 130, 246, ${alpha})`;
+        : `rgba(99, 102, 241, ${alpha})`;
       ctx.lineWidth = 0.65;
       ctx.stroke();
     }
@@ -2878,7 +2878,7 @@ function initHero3dVisual() {
       ctx.arc(px, py, p.size * p.z, 0, Math.PI * 2);
       ctx.fillStyle = isLight
         ? `rgba(37, 99, 235, ${alpha})`
-        : `rgba(59, 130, 246, ${alpha})`;
+        : `rgba(99, 102, 241, ${alpha})`;
       ctx.fill();
     }
 

@@ -1,3 +1,5 @@
+/* styles.css — page component rules. Colours/fonts/radius come from design-system.css. */
+
 /* styles.css — component rules only. All colours come from design-system.css tokens. */
 
 ::-webkit-scrollbar {
@@ -76,75 +78,6 @@
   color: rgb(var(--fg-2)) !important;
 }
 
-:root {
-  --accent-color: rgb(var(--brand-fg));
-  --accent-glow: rgba(59, 130, 246, 0.22);
-  --font-sans: 'Geist', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
-  --font-heading: 'Geist', 'Plus Jakarta Sans', system-ui, sans-serif;
-}
-
-body,
-body[data-font-preset="geist"] {
-  --font-sans: 'Geist', 'Inter', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
-  --font-heading: 'Geist', system-ui, sans-serif;
-  font-family: var(--font-sans);
-}
-
-body[data-font-preset="editorial"] {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
-  --font-heading: 'Instrument Serif', Georgia, serif;
-  font-family: var(--font-sans);
-}
-
-body[data-font-preset="editorial"] h1,
-body[data-font-preset="editorial"] .font-heading {
-  font-family: 'Instrument Serif', Georgia, serif !important;
-  letter-spacing: -0.01em !important;
-  font-weight: 400 !important;
-}
-
-body[data-font-preset="portfolio"] {
-  --font-sans: 'Manrope', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
-  --font-heading: 'Instrument Serif', 'Manrope', serif;
-  font-family: var(--font-sans);
-}
-
-body[data-font-preset="portfolio"] h1,
-body[data-font-preset="portfolio"] .font-heading {
-  font-family: 'Instrument Serif', Georgia, serif !important;
-  letter-spacing: -0.01em !important;
-}
-
-body[data-font-preset="jakarta"] {
-  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-heading: 'Plus Jakarta Sans', system-ui, sans-serif;
-  font-family: var(--font-sans);
-}
-
-body[data-font-preset="agency"] {
-  --font-sans: 'Space Grotesk', 'Inter', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', monospace;
-  --font-heading: 'Instrument Serif', 'Space Grotesk', serif;
-  font-family: var(--font-sans);
-}
-
-.font-sans {
-  font-family: var(--font-sans) !important;
-}
-
-.font-mono {
-  font-family: var(--font-mono) !important;
-}
-
-.font-heading {
-  font-family: var(--font-heading) !important;
-}
-
 @keyframes heroCursorBlink {
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0; }
@@ -165,4 +98,3 @@ body[data-font-preset="agency"] {
   opacity: 0;
   transform: translateY(-4px);
 }
-

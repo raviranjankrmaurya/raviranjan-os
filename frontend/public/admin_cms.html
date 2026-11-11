@@ -31,17 +31,17 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="/admin_styles.css?v=19">
-  <link rel="stylesheet" href="/design-system.css?v=19">
+  <link rel="stylesheet" href="/admin_styles.css?v=20">
+  <link rel="stylesheet" href="/design-system.css?v=20">
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Geist', 'Inter', 'system-ui', 'sans-serif'],
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
             mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
           },
           colors: {
@@ -55,6 +55,8 @@
             brand: { DEFAULT: 'rgb(var(--brand) / <alpha-value>)', hover: 'rgb(var(--brand-hover) / <alpha-value>)', fg: 'rgb(var(--brand-fg) / <alpha-value>)' },
             heat: { 1: 'rgb(var(--heat-1) / <alpha-value>)', 2: 'rgb(var(--heat-2) / <alpha-value>)', 3: 'rgb(var(--heat-3) / <alpha-value>)', 4: 'rgb(var(--heat-4) / <alpha-value>)' },
           },
+          borderRadius: { sm: '6px', DEFAULT: '8px', md: '10px', lg: '12px', xl: '16px', '2xl': '20px', '3xl': '28px' },
+          fontSize: { xs: ['0.8125rem', { lineHeight: '1.25rem' }] },
           borderColor: { DEFAULT: 'rgb(var(--line) / <alpha-value>)' },
           divideColor: { DEFAULT: 'rgb(var(--line) / <alpha-value>)' },
         }
@@ -150,7 +152,7 @@
     <div class="w-full max-w-sm bg-card border border-line rounded-xl shadow-xl p-6 space-y-4 text-xs">
       <div class="flex items-center justify-between border-b border-line pb-3">
         <div class="flex items-center space-x-2.5">
-          <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-xs">R</div>
+          <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-xs">R</div>
           <div>
             <span class="text-fg font-bold text-sm block font-sans">Admin OS Login</span>
             <span class="text-xs text-fg-2">Mobile & Desktop Gateway</span>
@@ -162,13 +164,13 @@
         <div id="gate-admin-error" class="hidden p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs"></div>
         <div>
           <label class="block text-xs text-fg-2 uppercase mb-1">Admin Username</label>
-          <input type="text" id="gate-admin-username" required autocomplete="off" placeholder="Enter username" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <input type="text" id="gate-admin-username" required autocomplete="off" placeholder="Enter username" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
         </div>
         <div>
           <label class="block text-xs text-fg-2 uppercase mb-1">Passphrase</label>
-          <input type="password" id="gate-admin-password" required autocomplete="new-password" placeholder="Enter password" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <input type="password" id="gate-admin-password" required autocomplete="new-password" placeholder="Enter password" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
         </div>
-        <button type="submit" id="gate-admin-btn" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors cursor-pointer">
+        <button type="submit" id="gate-admin-btn" class="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-colors cursor-pointer">
           Unlock Admin OS
         </button>
         <div class="flex items-center justify-between pt-1 text-xs">
@@ -204,13 +206,13 @@
       <!-- Brand Header -->
       <div class="h-16 px-5 border-b border-line flex items-center justify-between shrink-0">
         <div class="flex items-center space-x-3">
-          <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-xs shadow-md">
+          <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-xs shadow-md">
             R
           </div>
           <div>
             <div class="flex items-center gap-1.5">
               <span class="font-semibold text-xs tracking-tight text-fg">Raviranjan.OS</span>
-              <span class="text-xs px-1 py-0.2 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">ADMIN</span>
+              <span class="text-xs px-1 py-0.2 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">ADMIN</span>
             </div>
             <span class="text-xs text-fg-3 block">Personal Developer OS</span>
           </div>
@@ -222,7 +224,7 @@
 
       <!-- Quick Command Bar -->
       <div class="px-3 pt-3 shrink-0">
-        <button onclick="toggleCommandPalette()" class="w-full h-8 px-2.5 rounded-lg bg-card border border-line text-xs text-fg-2 flex items-center justify-between hover:border-blue-500/40 hover:text-fg transition-colors">
+        <button onclick="toggleCommandPalette()" class="w-full h-8 px-2.5 rounded-lg bg-card border border-line text-xs text-fg-2 flex items-center justify-between hover:border-indigo-500/40 hover:text-fg transition-colors">
           <span class="flex items-center gap-2"><i data-lucide="search" class="w-3.5 h-3.5"></i> Jump to...</span>
           <kbd class="font-mono text-xs px-1 py-0.5 rounded bg-raised text-fg-2 border border-line-strong">⌘K</kbd>
         </button>
@@ -231,9 +233,9 @@
       <!-- Navigation Tree -->
       <nav class="flex-1 overflow-y-auto px-2 py-3 space-y-5 text-xs">
         <div>
-          <span class="px-3 text-xs font-semibold text-fg-3 uppercase tracking-wider block mb-1">OPERATING SYSTEM</span>
+          <span class="px-3 text-xs font-semibold text-fg-3 uppercase tracking-wider block mb-1">Operating system</span>
           <div class="space-y-0.5">
-            <button onclick="switchView('dashboard')" data-nav="dashboard" class="nav-btn active w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-blue-400 bg-blue-500/10 border border-blue-500/30">
+            <button onclick="switchView('dashboard')" data-nav="dashboard" class="nav-btn active w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-indigo-400 bg-indigo-500/10 border border-indigo-500/30">
               <div class="flex items-center space-x-2.5"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span></div>
             </button>
             <button onclick="switchView('profile')" data-nav="profile" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-fg-2 hover:text-fg hover:bg-card">
@@ -244,7 +246,7 @@
             </button>
             <button onclick="switchView('ai-control')" data-nav="ai-control" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-fg-2 hover:text-fg hover:bg-card">
               <div class="flex items-center space-x-2.5"><i data-lucide="bot" class="w-4 h-4"></i><span>AI Assistant Config</span></div>
-              <span class="text-xs px-1.5 py-0.2 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">RAG</span>
+              <span class="text-xs px-1.5 py-0.2 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">RAG</span>
             </button>
             <button onclick="switchView('settings')" data-nav="settings" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-fg-2 hover:text-fg hover:bg-card">
               <div class="flex items-center space-x-2.5"><i data-lucide="settings" class="w-4 h-4"></i><span>Site Settings</span></div>
@@ -253,7 +255,7 @@
         </div>
 
         <div>
-          <span class="px-3 text-xs font-semibold text-fg-3 uppercase tracking-wider block mb-1">ENGINEERING</span>
+          <span class="px-3 text-xs font-semibold text-fg-3 uppercase tracking-wider block mb-1">Engineering</span>
           <div class="space-y-0.5">
             <button onclick="switchView('projects')" data-nav="projects" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-fg-2 hover:text-fg hover:bg-card">
               <div class="flex items-center space-x-2.5"><i data-lucide="folder-kanban" class="w-4 h-4"></i><span>Projects</span></div>
@@ -261,7 +263,7 @@
             </button>
             <button onclick="switchView('project-editor')" data-nav="project-editor" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-fg-2 hover:text-fg hover:bg-card">
               <div class="flex items-center space-x-2.5"><i data-lucide="file-code-2" class="w-4 h-4"></i><span>Project Editor</span></div>
-              <span class="text-xs text-blue-400">13 Tabs</span>
+              <span class="text-xs text-indigo-400">13 Tabs</span>
             </button>
             <button onclick="switchView('lab')" data-nav="lab" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-fg-2 hover:text-fg hover:bg-card">
               <div class="flex items-center space-x-2.5"><i data-lucide="flask-conical" class="w-4 h-4"></i><span>Engineering Lab</span></div>
@@ -270,7 +272,7 @@
         </div>
 
         <div>
-          <span class="px-3 text-xs font-semibold text-fg-3 uppercase tracking-wider block mb-1">KNOWLEDGE & CAREER</span>
+          <span class="px-3 text-xs font-semibold text-fg-3 uppercase tracking-wider block mb-1">Knowledge & career</span>
           <div class="space-y-0.5">
             <button onclick="switchView('skills')" data-nav="skills" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-fg-2 hover:text-fg hover:bg-card">
               <div class="flex items-center space-x-2.5"><i data-lucide="cpu" class="w-4 h-4"></i><span>Skills Matrix</span></div>
@@ -288,7 +290,7 @@
         </div>
 
         <div>
-          <span class="px-3 text-xs font-semibold text-fg-3 uppercase tracking-wider block mb-1">WRITING & RESEARCH</span>
+          <span class="px-3 text-xs font-semibold text-fg-3 uppercase tracking-wider block mb-1">Writing & research</span>
           <div class="space-y-0.5">
             <button onclick="switchView('writing')" data-nav="writing" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-fg-2 hover:text-fg hover:bg-card">
               <div class="flex items-center space-x-2.5"><i data-lucide="pen-tool" class="w-4 h-4"></i><span>Technical Writing</span></div>
@@ -303,7 +305,7 @@
         </div>
 
         <div>
-          <span class="px-3 text-xs font-semibold text-fg-3 uppercase tracking-wider block mb-1">OPERATIONS & INTEGRATION</span>
+          <span class="px-3 text-xs font-semibold text-fg-3 uppercase tracking-wider block mb-1">Operations & integration</span>
           <div class="space-y-0.5">
             <button onclick="switchView('gfg')" data-nav="gfg" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-fg-2 hover:text-fg hover:bg-card">
               <div class="flex items-center space-x-2.5"><i data-lucide="terminal" class="w-4 h-4 text-emerald-400"></i><span>GeeksforGeeks (GFG)</span></div>
@@ -313,7 +315,7 @@
               <div class="flex items-center space-x-2.5"><i data-lucide="code" class="w-4 h-4 text-amber-400"></i><span>LeetCode Sync</span></div>
             </button>
             <button onclick="switchView('github')" data-nav="github" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-fg-2 hover:text-fg hover:bg-card">
-              <div class="flex items-center space-x-2.5"><i data-lucide="github" class="w-4 h-4 text-blue-400"></i><span>GitHub Sync</span></div>
+              <div class="flex items-center space-x-2.5"><i data-lucide="github" class="w-4 h-4 text-indigo-400"></i><span>GitHub Sync</span></div>
             </button>
             <button onclick="switchView('activity')" data-nav="activity" class="nav-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg font-medium text-fg-2 hover:text-fg hover:bg-card">
               <div class="flex items-center space-x-2.5"><i data-lucide="activity" class="w-4 h-4 text-purple-400"></i><span>Activity Stream</span></div>
@@ -340,7 +342,7 @@
       <div class="p-3 border-t border-line bg-subtle shrink-0">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2.5">
-            <div id="admin-sidebar-monogram" class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center text-xs font-bold">
+            <div id="admin-sidebar-monogram" class="w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-xs font-bold">
               RK
             </div>
             <div>
@@ -358,7 +360,7 @@
   </aside>
 
   <!-- Main Viewport -->
-  <div class="flex-1 flex flex-col h-full overflow-hidden bg-canvas">
+  <div class="flex-1 flex flex-col h-full overflow-hidden">
     <!-- Top Header (Responsive on Mobile, Tablet & Desktop) -->
     <header class="min-h-[4rem] py-2 border-b border-line bg-subtle/80 backdrop-blur px-3 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2 shrink-0 z-10">
       <div class="flex items-center space-x-2 text-xs text-fg-2">
@@ -371,18 +373,20 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2 text-xs">
-        <!-- Admin Theme Toggle (Dark / Light) -->
-        <button id="admin-theme-toggle" onclick="toggleAdminTheme()" class="p-2 rounded-lg bg-card border border-line text-fg hover:text-fg hover:border-blue-500/40 transition-colors" title="Toggle Light / Dark Mode">
-          <i id="admin-theme-icon" data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
-        </button>
+        <!-- Admin Theme Switch (Light / Dark) -->
+        <span class="hidden" aria-hidden="true"><button id="admin-theme-toggle" tabindex="-1" onclick="toggleAdminTheme()"><i id="admin-theme-icon" data-lucide="sun"></i></button></span>
+        <div class="theme-switch" role="group" aria-label="Theme">
+          <button type="button" data-theme-set="light" aria-pressed="false" aria-label="Light theme"><i data-lucide="sun" aria-hidden="true"></i></button>
+          <button type="button" data-theme-set="dark" aria-pressed="true" aria-label="Dark theme"><i data-lucide="moon" aria-hidden="true"></i></button>
+        </div>
         <!-- Notification Bell Trigger -->
-        <button onclick="toggleNotificationDrawer()" class="relative p-2 rounded-lg bg-card border border-line text-fg hover:text-fg hover:border-blue-500/40 transition-colors" title="Notification Center">
+        <button onclick="toggleNotificationDrawer()" class="btn btn--icon btn--pill relative" aria-label="Notification center" title="Notification Center">
           <i data-lucide="bell" class="w-4 h-4"></i>
-          <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-xs font-bold flex items-center justify-center animate-pulse">3</span>
+          <span id="notif-badge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[12px] leading-none font-semibold flex items-center justify-center ring-2 ring-canvas">3</span>
         </button>
 
-        <button onclick="toggleAiDrawer()" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 transition-colors flex items-center gap-1.5 shadow-sm">
-          <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+        <button onclick="toggleAiDrawer()" class="btn btn--primary btn--pill">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
           <span>Ask AI</span>
         </button>
         <div class="hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded bg-card border border-line text-fg">
@@ -390,14 +394,14 @@
           <span id="admin-db-status-text">Neon DB</span>
         </div>
         <div class="hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded bg-card border border-line text-fg">
-          <span id="admin-redis-dot" class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+          <span id="admin-redis-dot" class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
           <span id="admin-redis-status-text">Redis</span>
         </div>
         <button onclick="openChangePasswordModal()" class="px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-colors flex items-center gap-1.5" title="Update Admin Username & Password">
           <i data-lucide="key" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Credentials</span>
         </button>
-        <button onclick="triggerGlobalSync()" class="px-2.5 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 transition-colors flex items-center gap-1.5">
+        <button onclick="triggerGlobalSync()" class="px-2.5 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition-colors flex items-center gap-1.5">
           <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Sync</span>
         </button>
@@ -405,7 +409,7 @@
     </header>
 
     <!-- Main Content Container with Views -->
-    <main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8" id="view-container">
+    <main class="flex-1 overflow-y-auto p-3 pb-28 sm:p-6 sm:pb-28 lg:p-8" id="view-container">
 
       <!-- VIEW: DASHBOARD -->
       <section id="view-dashboard" class="view-panel space-y-8 max-w-7xl mx-auto">
@@ -422,10 +426,10 @@
 
         <!-- 10 Stat Cards Grid (Live Dynamic Neon DB Telemetry) -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3.5">
-          <div class="p-3.5 rounded-xl bg-card border border-line hover:border-blue-500/30 transition-all stat-card">
+          <div class="p-3.5 rounded-xl bg-card border border-line hover:border-indigo-500/30 transition-all stat-card">
             <div class="flex justify-between items-center text-xs text-fg-2">
               <span>Total Projects</span>
-              <i data-lucide="folder-kanban" class="w-4 h-4 text-blue-400"></i>
+              <i data-lucide="folder-kanban" class="w-4 h-4 text-indigo-400"></i>
             </div>
             <div id="dash-total-projects" class="text-2xl font-bold text-fg my-2">--</div>
             <div id="dash-projects-breakdown" class="text-xs text-fg-3">Loading from Neon DB...</div>
@@ -467,12 +471,12 @@
             <div class="text-xs text-fg-3">Real-time Neon DB Analytics</div>
           </div>
 
-          <div class="p-3.5 rounded-xl bg-card border border-line hover:border-blue-500/30 transition-all stat-card">
+          <div class="p-3.5 rounded-xl bg-card border border-line hover:border-indigo-500/30 transition-all stat-card">
             <div class="flex justify-between items-center text-xs text-fg-2">
               <span>Resume Downloads</span>
-              <i data-lucide="file-text" class="w-4 h-4 text-blue-400"></i>
+              <i data-lucide="file-text" class="w-4 h-4 text-indigo-400"></i>
             </div>
-            <div id="dash-resume-downloads" class="text-2xl font-bold text-blue-400 my-2">--</div>
+            <div id="dash-resume-downloads" class="text-2xl font-bold text-indigo-400 my-2">--</div>
             <div class="text-xs text-fg-3">Recruiter Download Events</div>
           </div>
 
@@ -485,12 +489,12 @@
             <div id="dash-crm-breakdown" class="text-xs text-fg-3">Direct CRM Inquiries</div>
           </div>
 
-          <div class="p-3.5 rounded-xl bg-card border border-line hover:border-blue-500/30 transition-all stat-card">
+          <div class="p-3.5 rounded-xl bg-card border border-line hover:border-indigo-500/30 transition-all stat-card">
             <div class="flex justify-between items-center text-xs text-fg-2">
               <span>AI Queries (RAG)</span>
-              <i data-lucide="bot" class="w-4 h-4 text-blue-400"></i>
+              <i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i>
             </div>
-            <div id="dash-ai-queries" class="text-2xl font-bold text-blue-400 my-2">--</div>
+            <div id="dash-ai-queries" class="text-2xl font-bold text-indigo-400 my-2">--</div>
             <div class="text-xs text-fg-3">Grounded Retrieval Telemetry</div>
           </div>
 
@@ -520,7 +524,7 @@
             <div class="p-5 rounded-xl bg-card border border-line">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-semibold text-fg flex items-center gap-2">
-                  <i data-lucide="clock" class="w-4 h-4 text-blue-400"></i> Recent Audit & Mutation Feed
+                  <i data-lucide="clock" class="w-4 h-4 text-indigo-400"></i> Recent Audit & Mutation Feed
                 </h3>
                 <span class="text-xs text-fg-3">Live PostgreSQL Stream</span>
               </div>
@@ -605,7 +609,7 @@
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               <span>Delete All Projects</span>
             </button>
-            <button onclick="openAddProjectModal()" class="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-lg">
+            <button onclick="openAddProjectModal()" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-lg">
               <i data-lucide="plus" class="w-4 h-4"></i>
               <span>Create New Project</span>
             </button>
@@ -617,7 +621,7 @@
           <div class="flex items-center space-x-3 flex-1 min-w-[240px]">
             <div class="relative w-full max-w-xs">
               <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-fg-3"></i>
-              <input type="text" id="admin-project-search" placeholder="Search by title, technology, slug..." class="w-full bg-raised border border-line rounded-lg pl-9 pr-3 py-1.5 text-xs text-fg focus:outline-none focus:border-blue-500" oninput="filterAdminProjects(this.value)">
+              <input type="text" id="admin-project-search" placeholder="Search by title, technology, slug..." class="w-full bg-raised border border-line rounded-lg pl-9 pr-3 py-1.5 text-xs text-fg focus:outline-none focus:border-indigo-500" oninput="filterAdminProjects(this.value)">
             </div>
             <select id="admin-project-status-filter" class="bg-raised border border-line rounded-lg px-3 py-1.5 text-xs text-fg focus:outline-none" onchange="filterAdminProjectsByStatus(this.value)">
               <option value="ALL">All Statuses</option>
@@ -648,7 +652,7 @@
               <tr>
                 <td colspan="6" class="p-8 text-center text-fg-3 text-xs">
                   <div class="flex items-center justify-center space-x-2">
-                    <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
+                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
                     <span>Loading projects from Neon DB...</span>
                   </div>
                 </td>
@@ -669,17 +673,17 @@
             <p class="text-xs text-fg-2 mt-0.5">Complete architectural breakdown, milestones, decision logs, and media assets saved to Neon DB.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5 text-xs">
-            <select id="pe-project-select" onchange="loadProjectInto13TabEditor(this.value)" class="p-1.5 rounded-lg bg-raised border border-line text-blue-400 text-xs focus:outline-none focus:border-blue-400">
+            <select id="pe-project-select" onchange="loadProjectInto13TabEditor(this.value)" class="p-1.5 rounded-lg bg-raised border border-line text-indigo-400 text-xs focus:outline-none focus:border-indigo-400">
               <option value="">Loading projects...</option>
             </select>
             <button type="button" onclick="save13TabProject('DRAFT')" class="px-3 py-1.5 rounded-lg bg-raised border border-line text-fg hover:text-fg">Save Draft</button>
-            <button type="button" onclick="save13TabProject('PUBLISHED')" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md">Publish to Neon DB</button>
+            <button type="button" onclick="save13TabProject('PUBLISHED')" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md">Publish to Neon DB</button>
           </div>
         </div>
 
         <!-- 13 Editor Tabs Bar -->
         <div class="flex overflow-x-auto border-b border-line text-xs gap-1 pb-1">
-          <button onclick="switchEditorTab('overview')" class="editor-tab active px-3 py-2 text-blue-400 border-b-2 border-blue-400 rounded-lg">1. Overview</button>
+          <button onclick="switchEditorTab('overview')" class="editor-tab active px-3 py-2 text-indigo-400 border-b-2 border-indigo-400 rounded-lg">1. Overview</button>
           <button onclick="switchEditorTab('problem')" class="editor-tab px-3 py-2 text-fg-2 hover:text-fg rounded-lg">2. Problem</button>
           <button onclick="switchEditorTab('solution')" class="editor-tab px-3 py-2 text-fg-2 hover:text-fg rounded-lg">3. Solution</button>
           <button onclick="switchEditorTab('architecture')" class="editor-tab px-3 py-2 text-fg-2 hover:text-fg rounded-lg">4. Architecture</button>
@@ -700,17 +704,17 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-fg-2 mb-1">Project Title *</label>
-              <input type="text" id="pe-title" value="Raviranjan.OS Core Platform" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="text" id="pe-title" value="Raviranjan.OS Core Platform" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">URL Slug *</label>
-              <input type="text" id="pe-slug" value="raviranjan-os-core" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="text" id="pe-slug" value="raviranjan-os-core" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label class="block text-fg-2 mb-1">Category</label>
-              <select id="pe-category" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <select id="pe-category" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
                 <option value="FULL_STACK">Full Stack</option>
                 <option value="BACKEND">Backend System</option>
                 <option value="AI_ML">AI & Agents</option>
@@ -719,7 +723,7 @@
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Status</label>
-              <select id="pe-status" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <select id="pe-status" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
                 <option value="PUBLISHED">PUBLISHED</option>
                 <option value="IN_PROGRESS">IN_PROGRESS</option>
                 <option value="MAINTENANCE">MAINTENANCE</option>
@@ -728,30 +732,30 @@
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Progress %</label>
-              <input type="number" id="pe-progress" min="0" max="100" value="95" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="number" id="pe-progress" min="0" max="100" value="95" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Short Summary (Featured Card View)</label>
-            <textarea id="pe-summary" rows="2" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">High-scale developer platform unifying portfolio, CMS, project tracking, live external telemetry, and an automated RAG assistant.</textarea>
+            <textarea id="pe-summary" rows="2" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">High-scale developer platform unifying portfolio, CMS, project tracking, live external telemetry, and an automated RAG assistant.</textarea>
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Technologies (comma separated)</label>
-            <input type="text" id="pe-tech" value="Java 21, Spring Boot 3, PostgreSQL, Redis, Docker, TailwindCSS" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+            <input type="text" id="pe-tech" value="Java 21, Spring Boot 3, PostgreSQL, Redis, Docker, TailwindCSS" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-fg-2 mb-1">GitHub Repo URL</label>
-              <input type="text" id="pe-github" value="https://github.com/raviranjankrmaurya/raviranjan-os" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="text" id="pe-github" value="https://github.com/raviranjankrmaurya/raviranjan-os" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Live Demo URL</label>
-              <input type="text" id="pe-demo" value="https://raviranjan.dev" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="text" id="pe-demo" value="https://raviranjan.dev" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Architecture Style</label>
-            <input type="text" id="pe-arch-style" value="Event-Driven Modular Monolith with Virtual Threads" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+            <input type="text" id="pe-arch-style" value="Event-Driven Modular Monolith with Virtual Threads" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
           </div>
         </div>
 
@@ -759,7 +763,7 @@
         <div id="etab-problem" class="editor-content hidden space-y-4 text-xs">
           <div>
             <label class="block text-fg-2 mb-1">Problem Statement & Bottlenecks Addressed</label>
-            <textarea id="pe-problem" rows="6" class="w-full bg-card border border-line rounded-lg p-3 text-fg focus:border-blue-500 focus:outline-none">Engineers struggle to showcase authentic system architecture, live code telemetry, and proof-of-work across disparate platforms without resorting to static, non-interactive portfolios.</textarea>
+            <textarea id="pe-problem" rows="6" class="w-full bg-card border border-line rounded-lg p-3 text-fg focus:border-indigo-500 focus:outline-none">Engineers struggle to showcase authentic system architecture, live code telemetry, and proof-of-work across disparate platforms without resorting to static, non-interactive portfolios.</textarea>
           </div>
         </div>
 
@@ -767,7 +771,7 @@
         <div id="etab-solution" class="editor-content hidden space-y-4 text-xs">
           <div>
             <label class="block text-fg-2 mb-1">Engineered Solution Overview</label>
-            <textarea id="pe-solution" rows="6" class="w-full bg-card border border-line rounded-lg p-3 text-fg focus:border-blue-500 focus:outline-none">Engineered a self-hosted developer platform that combines Neon Cloud PostgreSQL persistence, Redis caching, Docker orchestration, and an in-browser administrative control center with live telemetry synchronization.</textarea>
+            <textarea id="pe-solution" rows="6" class="w-full bg-card border border-line rounded-lg p-3 text-fg focus:border-indigo-500 focus:outline-none">Engineered a self-hosted developer platform that combines Neon Cloud PostgreSQL persistence, Redis caching, Docker orchestration, and an in-browser administrative control center with live telemetry synchronization.</textarea>
           </div>
         </div>
 
@@ -775,7 +779,7 @@
         <div id="etab-architecture" class="editor-content hidden space-y-4 text-xs">
           <div>
             <label class="block text-fg-2 mb-1">System Architecture Breakdown & Data Flow</label>
-            <textarea id="pe-architecture" rows="8" class="w-full bg-card border border-line rounded-lg p-3 text-fg focus:border-blue-500 focus:outline-none">The system decouples manual editorial content from third-party metrics using an IntegrationProvider ingestion pipeline backed by Neon Cloud PostgreSQL and Redis.</textarea>
+            <textarea id="pe-architecture" rows="8" class="w-full bg-card border border-line rounded-lg p-3 text-fg focus:border-indigo-500 focus:outline-none">The system decouples manual editorial content from third-party metrics using an IntegrationProvider ingestion pipeline backed by Neon Cloud PostgreSQL and Redis.</textarea>
           </div>
         </div>
 
@@ -783,14 +787,14 @@
         <div id="etab-technology" class="editor-content hidden space-y-4 text-xs bg-card border border-line p-5 rounded-xl">
           <div>
             <label class="block text-fg-2 mb-1">Core Technologies & Frameworks (comma-separated, saved to Neon DB)</label>
-            <input type="text" id="pe-tech-tab" placeholder="Java 21, Spring Boot 3.3, PostgreSQL, Redis, Docker, React" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none" oninput="document.getElementById('pe-tech').value = this.value">
+            <input type="text" id="pe-tech-tab" placeholder="Java 21, Spring Boot 3.3, PostgreSQL, Redis, Docker, React" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none" oninput="document.getElementById('pe-tech').value = this.value">
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Architecture Style / Pattern</label>
-            <input type="text" id="pe-arch-style-tab" placeholder="Event-Driven Modular Monolith / Microservices" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none" oninput="document.getElementById('pe-arch-style').value = this.value">
+            <input type="text" id="pe-arch-style-tab" placeholder="Event-Driven Modular Monolith / Microservices" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none" oninput="document.getElementById('pe-arch-style').value = this.value">
           </div>
           <div class="pt-2">
-            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">Save Technology Stack to Neon DB</button>
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Technology Stack to Neon DB</button>
           </div>
         </div>
 
@@ -799,19 +803,19 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label class="block text-fg-2 mb-1">Completion Percentage (0 - 100%)</label>
-              <input type="number" id="pe-progress-tab" min="0" max="100" value="95" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none" oninput="document.getElementById('pe-progress').value = this.value">
+              <input type="number" id="pe-progress-tab" min="0" max="100" value="95" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none" oninput="document.getElementById('pe-progress').value = this.value">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Project Start Date</label>
-              <input type="date" id="pe-started-at" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="date" id="pe-started-at" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Target / Completion Date</label>
-              <input type="date" id="pe-completed-at" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="date" id="pe-completed-at" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
           </div>
           <div class="pt-2">
-            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">Save Progress & Dates to Neon DB</button>
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Progress & Dates to Neon DB</button>
           </div>
         </div>
 
@@ -845,7 +849,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <input type="text" id="pe-cl-version" placeholder="Version Tag (e.g. v1.2.0)" class="bg-card border border-line rounded-lg p-2 text-fg">
               <input type="text" id="pe-cl-commit" placeholder="Commit Hash (e.g. 8f4a2c1)" class="bg-card border border-line rounded-lg p-2 text-fg">
-              <button type="button" onclick="handleAddProjectChangelog()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">+ Log Release</button>
+              <button type="button" onclick="handleAddProjectChangelog()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">+ Log Release</button>
             </div>
             <input type="text" id="pe-cl-summary" placeholder="Release summary and key changes shipped..." class="w-full bg-card border border-line rounded-lg p-2 text-fg">
           </div>
@@ -881,10 +885,10 @@
         <div id="etab-media" class="editor-content hidden space-y-4 text-xs bg-card border border-line p-5 rounded-xl">
           <div>
             <label class="block text-fg-2 mb-1">Featured Architecture Diagram / Cover Image URL</label>
-            <input type="text" id="pe-image-url" placeholder="https://.../architecture-diagram.png" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none">
+            <input type="text" id="pe-image-url" placeholder="https://.../architecture-diagram.png" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">
           </div>
           <div class="pt-2">
-            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">Save Media URL to Neon DB</button>
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Media URL to Neon DB</button>
           </div>
         </div>
 
@@ -893,19 +897,19 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-fg-2 mb-1">GitHub Repository URL</label>
-              <input type="text" id="pe-github-tab" placeholder="https://github.com/raviranjankrmaurya/..." class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none" oninput="document.getElementById('pe-github').value = this.value">
+              <input type="text" id="pe-github-tab" placeholder="https://github.com/raviranjankrmaurya/..." class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none" oninput="document.getElementById('pe-github').value = this.value">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Live Production Demo URL</label>
-              <input type="text" id="pe-demo-tab" placeholder="https://..." class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none" oninput="document.getElementById('pe-demo').value = this.value">
+              <input type="text" id="pe-demo-tab" placeholder="https://..." class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none" oninput="document.getElementById('pe-demo').value = this.value">
             </div>
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Documentation / Swagger / Architecture Spec URL</label>
-            <input type="text" id="pe-doc-url" placeholder="https://github.com/.../README.md" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none">
+            <input type="text" id="pe-doc-url" placeholder="https://github.com/.../README.md" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">
           </div>
           <div class="pt-2">
-            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">Save Repository & Demo Links to Neon DB</button>
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Repository & Demo Links to Neon DB</button>
           </div>
         </div>
 
@@ -913,14 +917,14 @@
         <div id="etab-seo" class="editor-content hidden space-y-4 text-xs bg-card border border-line p-5 rounded-xl">
           <div>
             <label class="block text-fg-2 mb-1">SEO Meta Title</label>
-            <input type="text" id="pe-seo-title" placeholder="Project Title — System Architecture Case Study" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none">
+            <input type="text" id="pe-seo-title" placeholder="Project Title — System Architecture Case Study" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-fg-2 mb-1">SEO Meta Description</label>
-            <textarea id="pe-seo-desc" rows="3" placeholder="Search engine description for this engineering case study..." class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none"></textarea>
+            <textarea id="pe-seo-desc" rows="3" placeholder="Search engine description for this engineering case study..." class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none"></textarea>
           </div>
           <div class="pt-2">
-            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">Save SEO Metadata to Neon DB</button>
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save SEO Metadata to Neon DB</button>
           </div>
         </div>
 
@@ -961,7 +965,7 @@
             <h2 class="text-xl font-bold tracking-tight text-fg">Skills Taxonomy & Matrix (Neon DB)</h2>
             <p class="text-xs text-fg-2 mt-0.5">Add, edit, or delete technical skills stored in Neon Cloud PostgreSQL.</p>
           </div>
-          <button onclick="openSkillModal()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs">+ Add Skill</button>
+          <button onclick="openSkillModal()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs">+ Add Skill</button>
         </div>
 
         <div id="skills-categories-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
@@ -1048,7 +1052,7 @@ Write your technical essay here...</textarea>
           </div>
           <div class="flex items-center space-x-2">
             <button type="button" onclick="resetHomepageLayout()" class="px-3 py-1.5 rounded-lg bg-raised border border-line text-fg hover:text-fg text-xs">Reset Default</button>
-            <button type="button" onclick="saveHomepageLayout()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md">Save Layout to Neon DB</button>
+            <button type="button" onclick="saveHomepageLayout()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md">Save Layout to Neon DB</button>
           </div>
         </div>
 
@@ -1103,7 +1107,7 @@ Write your technical essay here...</textarea>
             <button type="button" onclick="handleRetentionCleanup()" class="px-3 py-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-amber-400 transition-colors" title="Scrub IP & User-Agent metadata older than 90 days">
               🛡️ Apply 90d Privacy Retention
             </button>
-            <button type="button" onclick="loadAdminCrm()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors">
+            <button type="button" onclick="loadAdminCrm()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-colors">
               ↻ Refresh CRM
             </button>
           </div>
@@ -1112,7 +1116,7 @@ Write your technical essay here...</textarea>
         <!-- CRM Intelligence Filter Bar -->
         <div class="p-3.5 rounded-xl bg-card border border-line flex flex-wrap items-center justify-between gap-3 text-xs">
           <div class="flex flex-wrap items-center gap-1.5">
-            <button type="button" onclick="filterAdminCrm('ALL', this)" class="crm-filter-btn active px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/30">All</button>
+            <button type="button" onclick="filterAdminCrm('ALL', this)" class="crm-filter-btn active px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">All</button>
             <button type="button" onclick="filterAdminCrm('GENUINE', this)" class="crm-filter-btn px-2.5 py-1 rounded-lg bg-raised text-fg-2 border border-line hover:text-fg">Genuine / Recruiter</button>
             <button type="button" onclick="filterAdminCrm('REVIEW_REQUIRED', this)" class="crm-filter-btn px-2.5 py-1 rounded-lg bg-raised text-fg-2 border border-line hover:text-fg">Needs Review</button>
             <button type="button" onclick="filterAdminCrm('SPAM', this)" class="crm-filter-btn px-2.5 py-1 rounded-lg bg-raised text-fg-2 border border-line hover:text-fg">Spam</button>
@@ -1120,7 +1124,7 @@ Write your technical essay here...</textarea>
             <button type="button" onclick="filterAdminCrm('REPEAT', this)" class="crm-filter-btn px-2.5 py-1 rounded-lg bg-raised text-fg-2 border border-line hover:text-fg">Repeated</button>
           </div>
           <div class="relative w-full sm:w-64">
-            <input type="text" id="admin-crm-search" oninput="renderAdminCrmList()" placeholder="Search name, email, city, intent..." class="w-full px-3 py-1.5 rounded-lg bg-raised border border-line text-xs text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="admin-crm-search" oninput="renderAdminCrmList()" placeholder="Search name, email, city, intent..." class="w-full px-3 py-1.5 rounded-lg bg-raised border border-line text-xs text-fg focus:outline-none focus:border-indigo-400">
           </div>
         </div>
 
@@ -1136,80 +1140,76 @@ Write your technical essay here...</textarea>
             <h2 class="text-xl font-bold tracking-tight text-fg">Site Settings & Theme</h2>
             <p class="text-xs text-fg-2 mt-0.5">Manage branding, accent color, typography, Hero animations, and contact details in Neon DB.</p>
           </div>
-          <button id="btn-save-site-settings" type="button" onclick="handleSaveSiteSettings(event)" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer">Save Settings to Neon DB</button>
+          <button id="btn-save-site-settings" type="button" onclick="handleSaveSiteSettings(event)" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer">Save Settings to Neon DB</button>
         </div>
 
         <div class="space-y-6 text-xs bg-card border border-line p-6 rounded-xl">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-fg-2 mb-1">Global Site Title</label>
-              <input type="text" id="setting-site-title" value="Raviranjan.OS — Personal Developer Platform" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="text" id="setting-site-title" value="Raviranjan.OS — Personal Developer Platform" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Accent Theme Color (Live Preview & Public Theme)</label>
               <div class="flex items-center space-x-2">
-                <input type="color" id="setting-theme-color-picker" value="#3b82f6" class="h-8 w-12 bg-transparent cursor-pointer rounded-lg" oninput="document.getElementById('setting-theme-color-text').value = this.value; applyAdminAccentThemeColor(this.value);">
-                <input type="text" id="setting-theme-color-text" value="#3b82f6" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none" oninput="document.getElementById('setting-theme-color-picker').value = this.value; applyAdminAccentThemeColor(this.value);">
+                <input type="color" id="setting-theme-color-picker" value="#6366f1" class="h-8 w-12 bg-transparent cursor-pointer rounded-lg" oninput="document.getElementById('setting-theme-color-text').value = this.value; applyAdminAccentThemeColor(this.value);">
+                <input type="text" id="setting-theme-color-text" value="#6366f1" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none" oninput="document.getElementById('setting-theme-color-picker').value = this.value; applyAdminAccentThemeColor(this.value);">
               </div>
             </div>
           </div>
 
           <div>
             <label class="block text-fg-2 mb-1">Global Meta Description</label>
-            <textarea id="setting-meta-desc" rows="2" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">Production-grade developer operating system combining portfolio, CMS, project management, and real-time external telemetry.</textarea>
+            <textarea id="setting-meta-desc" rows="2" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">Production-grade developer operating system combining portfolio, CMS, project management, and real-time external telemetry.</textarea>
           </div>
 
           <!-- Typography Font Pairing & Animated Hero Headline Config (Stored in Neon DB) -->
-          <div class="p-4 rounded-xl bg-card border border-blue-500/30 space-y-4">
+          <div class="p-4 rounded-xl bg-card border border-indigo-500/30 space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">✨ Premium Typography & Animated Hero Texts (Neon DB)</span>
+              <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">✨ Premium Typography & Animated Hero Texts (Neon DB)</span>
               <span class="text-xs text-fg-2">Live updates Overview Hero typewriter & global font pairing</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-fg mb-1">Typography Font Pairing Preset</label>
-                <select id="setting-font-preset" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
-                  <option value="geist">Developer OS & AI SaaS — Geist + Geist Mono (Default)</option>
-                  <option value="editorial">AI Chatbot & Editorial — Inter + Instrument Serif</option>
-                  <option value="portfolio">Executive Portfolio — Manrope + Instrument Serif</option>
-                  <option value="jakarta">Modern Product UI — Plus Jakarta Sans + JetBrains Mono</option>
-                  <option value="agency">Premium Agency — Space Grotesk + Instrument Serif</option>
+                <select id="setting-font-preset" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
+                  <option value="geist">Design System — Inter + JetBrains Mono</option>
                 </select>
               </div>
               <div>
                 <label class="block text-fg mb-1">Hero Rotating Role Badges (Pipe | separated)</label>
-                <input type="text" id="setting-hero-role-texts" value="Full-Stack & AI Engineer | Java 21 & Spring Boot Architect | Distributed Systems Builder | Applied AI & RAG Specialist" class="w-full bg-card border border-line rounded-lg p-2 text-blue-300 focus:border-blue-500 focus:outline-none">
+                <input type="text" id="setting-hero-role-texts" value="Full-Stack & AI Engineer | Java 21 & Spring Boot Architect | Distributed Systems Builder | Applied AI & RAG Specialist" class="w-full bg-card border border-line rounded-lg p-2 text-indigo-300 focus:border-indigo-500 focus:outline-none">
               </div>
             </div>
             <div>
               <label class="block text-fg mb-1">Hero Animated Headlines (Pipe | separated)</label>
-              <textarea id="setting-hero-animated-texts" rows="2" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">Building AI-native software. | Scalable Java & Spring systems. | Production RAG & AI agents. | Full-stack cloud engineering.</textarea>
+              <textarea id="setting-hero-animated-texts" rows="2" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">Building AI-native software. | Scalable Java & Spring systems. | Production RAG & AI agents. | Full-stack cloud engineering.</textarea>
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-line">
             <div>
               <label class="block text-fg-2 mb-1">Top Bar Availability Status</label>
-              <input type="text" id="setting-availability" value="Open to Software Development Opportunities" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="text" id="setting-availability" value="Open to Software Development Opportunities" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Availability Card Heading</label>
-              <input type="text" id="setting-avail-card-title" value="Open to Opportunities" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="text" id="setting-avail-card-title" value="Open to Opportunities" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Availability Card Subtitle</label>
-              <input type="text" id="setting-avail-card-subtitle" value="Internships & full-time software developer roles" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="text" id="setting-avail-card-subtitle" value="Internships & full-time software developer roles" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-line">
             <div>
               <label class="block text-fg-2 mb-1">Hero Terminal curl Command</label>
-              <input type="text" id="setting-curl-command" value="curl -s https://raviranjan.dev/api/v1/profile | jq" class="w-full bg-card border border-line rounded-lg p-2 text-blue-300 focus:border-blue-500 focus:outline-none">
+              <input type="text" id="setting-curl-command" value="curl -s https://raviranjan.dev/api/v1/profile | jq" class="w-full bg-card border border-line rounded-lg p-2 text-indigo-300 focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Top Bar Updated Date Text</label>
-              <input type="text" id="setting-updated-date" value="Updated: Oct 2026" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+              <input type="text" id="setting-updated-date" value="Updated: Oct 2026" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
           </div>
 
@@ -1218,7 +1218,7 @@ Write your technical essay here...</textarea>
               <label class="block text-fg font-bold">"Ask the AI" Suggested Prompts (One per line — Admin Add/Edit)</label>
               <span class="text-xs text-emerald-400">Displayed on Hero & AI Drawer</span>
             </div>
-            <textarea id="setting-ai-prompts" rows="4" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none">What projects has Raviranjan built?
+            <textarea id="setting-ai-prompts" rows="4" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">What projects has Raviranjan built?
 Explain RakshaGrid.
 What technologies does he use?
 What AI projects has he worked on?</textarea>
@@ -1229,20 +1229,20 @@ What AI projects has he worked on?</textarea>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="block text-fg-2 mb-1">Contact Section Heading</label>
-                <input type="text" id="setting-contact-heading" value="Let's Connect" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+                <input type="text" id="setting-contact-heading" value="Let's Connect" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">Contact Email</label>
-                <input type="email" id="setting-contact-email" value="admin@raviranjan.dev" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+                <input type="email" id="setting-contact-email" value="admin@raviranjan.dev" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">Contact Phone / WhatsApp</label>
-                <input type="text" id="setting-contact-phone" value="+91-9999999999" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">
+                <input type="text" id="setting-contact-phone" value="+91-9999999999" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">
               </div>
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Contact Section Description Paragraph</label>
-              <textarea id="setting-contact-desc" rows="2" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-blue-500 focus:outline-none">I am actively open to software developer opportunities, internships, and collaborative engineering projects. Whether you want to discuss systems architecture, AI agent applications, or review my code, feel free to reach out.</textarea>
+              <textarea id="setting-contact-desc" rows="2" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">I am actively open to software developer opportunities, internships, and collaborative engineering projects. Whether you want to discuss systems architecture, AI agent applications, or review my code, feel free to reach out.</textarea>
             </div>
           </div>
         </div>
@@ -1270,7 +1270,7 @@ What AI projects has he worked on?</textarea>
               </div>
               <div class="flex items-center space-x-2 text-xs shrink-0">
                 <span class="text-xs text-fg-2">Model:</span>
-                <span class="text-xs px-2.5 py-1 rounded bg-card border border-line text-blue-400 font-bold">gemini-1.5-flash</span>
+                <span class="text-xs px-2.5 py-1 rounded bg-card border border-line text-indigo-400 font-bold">gemini-1.5-flash</span>
               </div>
             </div>
         <div class="flex items-center justify-between pb-4 border-b border-line">
@@ -1282,8 +1282,8 @@ What AI projects has he worked on?</textarea>
             <p class="text-xs text-fg-2 mt-0.5">Control RAG knowledge indexing, system prompt constraints, temperature, and query logs.</p>
           </div>
           <div class="flex items-center space-x-2 text-xs">
-            <button onclick="showToast('RAG knowledge base reindexed!', 'success')" class="px-3.5 py-1.5 rounded-lg bg-raised border border-blue-500/30 text-blue-400 hover:bg-blue-500/10">Reindex Knowledge</button>
-            <button onclick="saveAiSettings()" class="px-4 py-1.5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-md">Save AI Config</button>
+            <button onclick="showToast('RAG knowledge base reindexed!', 'success')" class="px-3.5 py-1.5 rounded-lg bg-raised border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10">Reindex Knowledge</button>
+            <button onclick="saveAiSettings()" class="px-4 py-1.5 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow-md">Save AI Config</button>
           </div>
         </div>
 
@@ -1304,7 +1304,7 @@ What AI projects has he worked on?</textarea>
 
               <div>
                 <label class="block text-fg-2 mb-1">System Prompt (Strict Grounding Contract)</label>
-                <textarea id="ai-system-prompt" rows="5" class="w-full bg-card border border-line rounded-lg p-3 text-fg focus:border-blue-500 focus:outline-none text-xs leading-relaxed">You are "Ask AI", the verified AI Portfolio Assistant for Raviranjan. Answer user questions with technical precision and factual honesty based strictly on the retrieved portfolio knowledge chunks. Never invent experience, projects, skills, statistics, companies, or achievements. If the user asks for information not present in the provided portfolio chunks, reply exactly with: "I don't have that information in Raviranjan's portfolio." When relevant, embed clickable markdown links to projects, GitHub repositories, research papers, or articles.</textarea>
+                <textarea id="ai-system-prompt" rows="5" class="w-full bg-card border border-line rounded-lg p-3 text-fg focus:border-indigo-500 focus:outline-none text-xs leading-relaxed">You are "Ask AI", the verified AI Portfolio Assistant for Raviranjan. Answer user questions with technical precision and factual honesty based strictly on the retrieved portfolio knowledge chunks. Never invent experience, projects, skills, statistics, companies, or achievements. If the user asks for information not present in the provided portfolio chunks, reply exactly with: "I don't have that information in Raviranjan's portfolio." When relevant, embed clickable markdown links to projects, GitHub repositories, research papers, or articles.</textarea>
               </div>
 
               <div class="grid grid-cols-3 gap-3">
@@ -1318,7 +1318,7 @@ What AI projects has he worked on?</textarea>
                 </div>
                 <div>
                   <label class="block text-fg-2 mb-1">Temperature (<span id="temp-val">0.00</span>)</label>
-                  <input id="ai-temp-slider" type="range" min="0" max="1" step="0.05" value="0.00" oninput="document.getElementById('temp-val').innerText = this.value" class="w-full h-8 accent-blue-500 cursor-pointer rounded-lg">
+                  <input id="ai-temp-slider" type="range" min="0" max="1" step="0.05" value="0.00" oninput="document.getElementById('temp-val').innerText = this.value" class="w-full h-8 accent-indigo-500 cursor-pointer rounded-lg">
                 </div>
                 <div>
                   <label class="block text-fg-2 mb-1">Max Output Tokens</label>
@@ -1333,39 +1333,39 @@ What AI projects has he worked on?</textarea>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 <label class="p-2.5 rounded bg-card border border-line flex items-center justify-between cursor-pointer">
                   <span>Projects & ADRs</span>
-                  <input type="checkbox" checked class="accent-blue-500 rounded-lg">
+                  <input type="checkbox" checked class="accent-indigo-500 rounded-lg">
                 </label>
                 <label class="p-2.5 rounded bg-card border border-line flex items-center justify-between cursor-pointer">
                   <span>Skills Matrix</span>
-                  <input type="checkbox" checked class="accent-blue-500 rounded-lg">
+                  <input type="checkbox" checked class="accent-indigo-500 rounded-lg">
                 </label>
                 <label class="p-2.5 rounded bg-card border border-line flex items-center justify-between cursor-pointer">
                   <span>Work Experience</span>
-                  <input type="checkbox" checked class="accent-blue-500 rounded-lg">
+                  <input type="checkbox" checked class="accent-indigo-500 rounded-lg">
                 </label>
                 <label class="p-2.5 rounded bg-card border border-line flex items-center justify-between cursor-pointer">
                   <span>Research Papers</span>
-                  <input type="checkbox" checked class="accent-blue-500 rounded-lg">
+                  <input type="checkbox" checked class="accent-indigo-500 rounded-lg">
                 </label>
                 <label class="p-2.5 rounded bg-card border border-line flex items-center justify-between cursor-pointer">
                   <span>Engineering Lab</span>
-                  <input type="checkbox" checked class="accent-blue-500 rounded-lg">
+                  <input type="checkbox" checked class="accent-indigo-500 rounded-lg">
                 </label>
                 <label class="p-2.5 rounded bg-card border border-line flex items-center justify-between cursor-pointer">
                   <span>Technical Writing</span>
-                  <input type="checkbox" checked class="accent-blue-500 rounded-lg">
+                  <input type="checkbox" checked class="accent-indigo-500 rounded-lg">
                 </label>
                 <label class="p-2.5 rounded bg-card border border-line flex items-center justify-between cursor-pointer">
                   <span>Contribution Stories</span>
-                  <input type="checkbox" checked class="accent-blue-500 rounded-lg">
+                  <input type="checkbox" checked class="accent-indigo-500 rounded-lg">
                 </label>
                 <label class="p-2.5 rounded bg-card border border-line flex items-center justify-between cursor-pointer">
                   <span>GitHub Repos & PRs</span>
-                  <input type="checkbox" checked class="accent-blue-500 rounded-lg">
+                  <input type="checkbox" checked class="accent-indigo-500 rounded-lg">
                 </label>
                 <label class="p-2.5 rounded bg-card border border-line flex items-center justify-between cursor-pointer">
                   <span>Coding Stats (LC/GFG)</span>
-                  <input type="checkbox" checked class="accent-blue-500 rounded-lg">
+                  <input type="checkbox" checked class="accent-indigo-500 rounded-lg">
                 </label>
               </div>
             </div>
@@ -1376,7 +1376,7 @@ What AI projects has he worked on?</textarea>
             <div class="p-5 rounded-xl bg-card border border-line space-y-3">
               <div class="flex items-center justify-between pb-2 border-b border-line">
                 <span class="font-bold text-fg">RAG Telemetry & Usage (Neon DB)</span>
-                <button type="button" onclick="loadAiConfig()" class="text-xs text-blue-400 hover:underline rounded-lg">Refresh</button>
+                <button type="button" onclick="loadAiConfig()" class="text-xs text-indigo-400 hover:underline rounded-lg">Refresh</button>
               </div>
               <div class="space-y-2 text-xs">
                 <div class="flex justify-between">
@@ -1385,7 +1385,7 @@ What AI projects has he worked on?</textarea>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-fg-2">Avg RAG Latency</span>
-                  <span id="ai-stat-avg-latency" class="text-blue-400 font-bold">-- ms</span>
+                  <span id="ai-stat-avg-latency" class="text-indigo-400 font-bold">-- ms</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-fg-2">Multi-Lingual Support</span>
@@ -1423,7 +1423,7 @@ What AI projects has he worked on?</textarea>
             <p class="text-xs text-fg-2 mt-0.5">Official REST and GraphQL API synchronization with real-time webhook ingestion.</p>
           </div>
           <div class="flex items-center space-x-2 text-xs">
-            <button onclick="triggerGitHubSync()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors flex items-center gap-1.5 shadow-md">
+            <button onclick="triggerGitHubSync()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-colors flex items-center gap-1.5 shadow-md">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
               <span>Sync Now</span>
             </button>
@@ -1440,7 +1440,7 @@ What AI projects has he worked on?</textarea>
           </div>
           <div class="p-4 rounded-xl bg-card border border-line">
             <span class="text-fg-2 block mb-1">Last Synchronization</span>
-            <span id="github-last-sync" class="text-sm font-bold text-blue-400">10 minutes ago</span>
+            <span id="github-last-sync" class="text-sm font-bold text-indigo-400">10 minutes ago</span>
             <span class="text-xs text-fg-3 block mt-1">Status: SUCCESS</span>
           </div>
           <div class="p-4 rounded-xl bg-card border border-line">
@@ -1479,7 +1479,7 @@ What AI projects has he worked on?</textarea>
                 <td class="py-2.5 px-4 text-emerald-400">SUCCESS</td>
                 <td class="py-2.5 px-4 text-fg">24 commits, 2 PRs</td>
                 <td class="py-2.5 px-4 text-fg-3">42ms</td>
-                <td class="py-2.5 px-4 text-right text-blue-400 cursor-pointer hover:underline" onclick="showToast('Synced commit sha-7fa9b21 to main', 'info')">View Payload</td>
+                <td class="py-2.5 px-4 text-right text-indigo-400 cursor-pointer hover:underline" onclick="showToast('Synced commit sha-7fa9b21 to main', 'info')">View Payload</td>
               </tr>
               <tr class="hover:bg-card/60">
                 <td class="py-2.5 px-4 text-fg-2">1 hour ago</td>
@@ -1487,7 +1487,7 @@ What AI projects has he worked on?</textarea>
                 <td class="py-2.5 px-4 text-emerald-400">SUCCESS</td>
                 <td class="py-2.5 px-4 text-fg">3 commits</td>
                 <td class="py-2.5 px-4 text-fg-3">18ms</td>
-                <td class="py-2.5 px-4 text-right text-blue-400 cursor-pointer hover:underline" onclick="showToast('Synced push event on raviranjan-os', 'info')">View Payload</td>
+                <td class="py-2.5 px-4 text-right text-indigo-400 cursor-pointer hover:underline" onclick="showToast('Synced push event on raviranjan-os', 'info')">View Payload</td>
               </tr>
             </tbody>
           </table>
@@ -1579,7 +1579,7 @@ What AI projects has he worked on?</textarea>
           </div>
           <div class="p-4 rounded-xl bg-card border border-line">
             <span class="text-fg-2 block mb-1">Institute Rank</span>
-            <span id="admin-gfg-rank" class="text-2xl font-bold text-blue-400">--</span>
+            <span id="admin-gfg-rank" class="text-2xl font-bold text-indigo-400">--</span>
             <span class="text-xs text-fg-3 block mt-1">Live from Neon DB</span>
           </div>
         </div>
@@ -1591,24 +1591,24 @@ What AI projects has he worked on?</textarea>
               <span class="font-bold text-fg text-sm">Add / Edit GeeksforGeeks Data in Neon DB</span>
               <span class="text-xs text-fg-2 block mt-0.5">Update your GFG Coding Score, Problems Solved, and Institute Rank in Neon PostgreSQL.</span>
             </div>
-            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Direct Neon DB Storage</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Direct Neon DB Storage</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label class="block text-fg-2 mb-1">GFG Username *</label>
-              <input id="gfg-imp-username" type="text" value="raviranjankrmaurya" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none">
+              <input id="gfg-imp-username" type="text" value="raviranjankrmaurya" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Coding Score *</label>
-              <input id="gfg-imp-score" type="number" min="0" value="0" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none">
+              <input id="gfg-imp-score" type="number" min="0" value="0" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Total Problems Solved *</label>
-              <input id="gfg-imp-solved" type="number" min="0" value="0" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none">
+              <input id="gfg-imp-solved" type="number" min="0" value="0" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Institute Rank *</label>
-              <input id="gfg-imp-rank" type="number" min="0" value="0" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-blue-500 focus:outline-none">
+              <input id="gfg-imp-rank" type="number" min="0" value="0" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">
             </div>
           </div>
           <div class="flex justify-end pt-2">
@@ -1626,7 +1626,7 @@ What AI projects has he worked on?</textarea>
             <h2 class="text-xl font-bold tracking-tight text-fg">DSA Knowledge & Problem Notes (Neon DB)</h2>
             <p class="text-xs text-fg-2 mt-0.5">Add, edit, or delete algorithmic problem solutions stored in Neon DB.</p>
           </div>
-          <button type="button" onclick="resetDsaForm()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white font-semibold text-xs">+ New Problem Note</button>
+          <button type="button" onclick="resetDsaForm()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold text-xs">+ New Problem Note</button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
@@ -1674,7 +1674,7 @@ What AI projects has he worked on?</textarea>
               <label class="block text-fg-2 mb-1">Solution Code (Java / C++ / Python)</label>
               <textarea id="dsa-code" rows="4" placeholder="class Solution { ... }" class="w-full bg-card border border-line rounded-lg p-2 text-fg font-mono"></textarea>
             </div>
-            <button type="button" onclick="handleSaveManualProblem()" class="w-full py-2 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors">Save Problem Note to Neon DB</button>
+            <button type="button" onclick="handleSaveManualProblem()" class="w-full py-2 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">Save Problem Note to Neon DB</button>
           </div>
 
           <!-- Existing Problem Table from Neon DB -->
@@ -1716,7 +1716,7 @@ What AI projects has he worked on?</textarea>
             <h2 class="text-xl font-bold tracking-tight text-fg">Profile & Biography Management</h2>
             <p class="text-xs text-fg-2 mt-0.5">Manage public identity, educational status, focus areas, and verified social links.</p>
           </div>
-          <button onclick="saveProfile()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors shadow-sm">Save Profile</button>
+          <button onclick="saveProfile()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-sm">Save Profile</button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1725,27 +1725,27 @@ What AI projects has he worked on?</textarea>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div>
                 <label class="block text-fg-2 mb-1">Full Legal Name</label>
-                <input type="text" id="prof-fullname" value="Raviranjan Kumar" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="text" id="prof-fullname" value="Raviranjan Kumar" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">Headline</label>
-                <input type="text" id="prof-headline" value="BCA Student · Software Developer" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="text" id="prof-headline" value="BCA Student · Software Developer" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">Current Education</label>
-                <input type="text" id="prof-education" value="Bachelor of Computer Applications (BCA)" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="text" id="prof-education" value="Bachelor of Computer Applications (BCA)" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">Location</label>
-                <input type="text" id="prof-location" value="New Delhi, Delhi, India" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="text" id="prof-location" value="New Delhi, Delhi, India" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">Contact Email</label>
-                <input type="email" id="prof-email" value="admin@raviranjan.dev" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="email" id="prof-email" value="admin@raviranjan.dev" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">Availability Status</label>
-                <select id="prof-availability" class="w-full p-2.5 rounded-lg bg-card border border-line text-emerald-400 focus:outline-none focus:border-blue-400">
+                <select id="prof-availability" class="w-full p-2.5 rounded-lg bg-card border border-line text-emerald-400 focus:outline-none focus:border-indigo-400">
                   <option value="true" selected>Open to Opportunities (Internships & Full-Time)</option>
                   <option value="false">Not Available</option>
                 </select>
@@ -1754,12 +1754,12 @@ What AI projects has he worked on?</textarea>
 
             <div class="text-xs pt-2">
               <label class="block text-fg-2 mb-1">Executive Bio</label>
-              <textarea id="prof-bio" rows="3" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400 font-sans">Building software for the AI-native era. Full-stack developer focused on Java, Spring Boot, Python, FastAPI, React, PostgreSQL, and AI/LLM applications.</textarea>
+              <textarea id="prof-bio" rows="3" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400 font-sans">Building software for the AI-native era. Full-stack developer focused on Java, Spring Boot, Python, FastAPI, React, PostgreSQL, and AI/LLM applications.</textarea>
             </div>
 
             <div class="text-xs pt-2">
               <label class="block text-fg-2 mb-1">Current Engineering Focus</label>
-              <input type="text" id="prof-focus" value="Software development, backend engineering, and AI/LLM applications." class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+              <input type="text" id="prof-focus" value="Software development, backend engineering, and AI/LLM applications." class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
             </div>
           </div>
 
@@ -1772,27 +1772,27 @@ What AI projects has he worked on?</textarea>
             <div class="space-y-3 text-xs">
               <div>
                 <label class="block text-fg-2 mb-1">GitHub Profile URL</label>
-                <input type="url" id="prof-github-url" value="https://github.com/raviranjan" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="url" id="prof-github-url" value="https://github.com/raviranjan" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">LinkedIn Profile URL</label>
-                <input type="url" id="prof-linkedin-url" value="https://linkedin.com/in/raviranjan" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="url" id="prof-linkedin-url" value="https://linkedin.com/in/raviranjan" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">LeetCode Profile URL</label>
-                <input type="url" id="prof-leetcode-url" value="https://leetcode.com/raviranjan" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="url" id="prof-leetcode-url" value="https://leetcode.com/raviranjan" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">GeeksforGeeks Profile URL</label>
-                <input type="url" id="prof-gfg-url" value="https://auth.geeksforgeeks.org/user/raviranjan" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="url" id="prof-gfg-url" value="https://auth.geeksforgeeks.org/user/raviranjan" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">Contact Phone / WhatsApp</label>
-                <input type="text" id="prof-phone" value="+91-9999999999" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="text" id="prof-phone" value="+91-9999999999" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">External Resume PDF URL (Optional)</label>
-                <input type="text" id="prof-resume-url" value="#" placeholder="https://... or leave # to use Built-in PDF Resume" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="text" id="prof-resume-url" value="#" placeholder="https://... or leave # to use Built-in PDF Resume" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
             </div>
           </div>
@@ -1836,8 +1836,8 @@ What AI projects has he worked on?</textarea>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <button type="button" onclick="openCareerModal('internship')" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs transition-colors shadow-md">+ Add Internship</button>
-            <button type="button" onclick="openCareerModal('experience')" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors">+ Add Experience</button>
-            <button type="button" onclick="openCareerModal('education')" class="px-3 py-1.5 rounded-lg bg-raised border border-line hover:border-blue-500/40 text-blue-400 font-semibold text-xs transition-colors">+ Add Degree</button>
+            <button type="button" onclick="openCareerModal('experience')" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors">+ Add Experience</button>
+            <button type="button" onclick="openCareerModal('education')" class="px-3 py-1.5 rounded-lg bg-raised border border-line hover:border-indigo-500/40 text-indigo-400 font-semibold text-xs transition-colors">+ Add Degree</button>
           </div>
         </div>
 
@@ -1887,7 +1887,7 @@ What AI projects has he worked on?</textarea>
           </div>
           <div class="flex items-center space-x-2">
             <button type="button" onclick="openCredentialModal('achievement')" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold text-xs transition-colors">+ Add Achievement</button>
-            <button type="button" onclick="openCredentialModal('certification')" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors">+ Add Certification</button>
+            <button type="button" onclick="openCredentialModal('certification')" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors">+ Add Certification</button>
           </div>
         </div>
 
@@ -1905,7 +1905,7 @@ What AI projects has he worked on?</textarea>
           <div class="saas-card p-5 space-y-3">
             <h3 class="text-sm font-bold text-fg border-b border-line pb-2 flex items-center justify-between">
               <span>Certifications & Accreditations</span>
-              <span class="text-xs text-blue-400">Neon DB</span>
+              <span class="text-xs text-indigo-400">Neon DB</span>
             </h3>
             <div id="admin-certifications-container" class="space-y-2.5 text-xs">
               <div class="p-4 text-center text-fg-3">Loading certifications from Neon DB...</div>
@@ -1921,7 +1921,7 @@ What AI projects has he worked on?</textarea>
             <h2 class="text-xl font-bold tracking-tight text-fg">Research Papers & Technical Investigations</h2>
             <p class="text-xs text-fg-2 mt-0.5">Manage research topics, abstracts, methodologies, evaluation metrics, and paper PDFs.</p>
           </div>
-          <button onclick="openResearchModal()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors">+ New Paper</button>
+          <button onclick="openResearchModal()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors">+ New Paper</button>
         </div>
 
         <div class="saas-card overflow-hidden">
@@ -1947,7 +1947,7 @@ What AI projects has he worked on?</textarea>
             <h2 class="text-xl font-bold tracking-tight text-fg">Engineering Lab Experiments (Neon DB)</h2>
             <p class="text-xs text-fg-2 mt-0.5">Create, edit, and delete experimental prototypes stored in Neon DB.</p>
           </div>
-          <button onclick="openLabModal()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors">+ New Experiment</button>
+          <button onclick="openLabModal()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors">+ New Experiment</button>
         </div>
 
         <div id="admin-lab-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -1962,7 +1962,7 @@ What AI projects has he worked on?</textarea>
             <h2 class="text-xl font-bold tracking-tight text-fg">Contribution Stories (Neon DB)</h2>
             <p class="text-xs text-fg-2 mt-0.5">Create, edit, and delete open-source contribution stories in Neon DB.</p>
           </div>
-          <button onclick="openStoryModal()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors">+ New Story</button>
+          <button onclick="openStoryModal()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors">+ New Story</button>
         </div>
 
         <div id="admin-stories-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1977,7 +1977,7 @@ What AI projects has he worked on?</textarea>
             <h2 class="text-xl font-bold tracking-tight text-fg">Integration Center (Neon DB & Live APIs)</h2>
             <p class="text-xs text-fg-2 mt-0.5">Manage external developer platform connections, trigger immediate syncs, and configure handles.</p>
           </div>
-          <button type="button" onclick="triggerGlobalSync()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors shadow-sm">Sync All Adapters</button>
+          <button type="button" onclick="triggerGlobalSync()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-sm">Sync All Adapters</button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -2000,8 +2000,8 @@ What AI projects has he worked on?</textarea>
               <div class="flex justify-between"><span>Webhooks Status:</span><span class="text-emerald-400">Active (SHA256 HMAC Verified)</span></div>
             </div>
             <div class="flex items-center justify-between text-xs pt-1">
-              <button type="button" onclick="triggerGitHubSync()" class="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-semibold">Sync Now</button>
-              <button type="button" onclick="switchView('github')" class="text-blue-400 hover:underline rounded-lg">Open GitHub Hub →</button>
+              <button type="button" onclick="triggerGitHubSync()" class="px-3 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 font-semibold">Sync Now</button>
+              <button type="button" onclick="switchView('github')" class="text-indigo-400 hover:underline rounded-lg">Open GitHub Hub →</button>
             </div>
           </div>
 
@@ -2025,7 +2025,7 @@ What AI projects has he worked on?</textarea>
             </div>
             <div class="flex items-center justify-between text-xs pt-1">
               <button type="button" onclick="triggerLeetCodeSync()" class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold">Sync Now</button>
-              <button type="button" onclick="switchView('leetcode')" class="text-blue-400 hover:underline rounded-lg">Open LeetCode Hub →</button>
+              <button type="button" onclick="switchView('leetcode')" class="text-indigo-400 hover:underline rounded-lg">Open LeetCode Hub →</button>
             </div>
           </div>
 
@@ -2044,12 +2044,12 @@ What AI projects has he worked on?</textarea>
             <div class="space-y-2 text-xs text-fg bg-card p-3 rounded-xl border border-line">
               <div class="flex justify-between"><span>Profile Handle:</span><span id="int-gfg-account" class="text-fg">raviranjankrmaurya</span></div>
               <div class="flex justify-between"><span>Current Metrics:</span><span id="int-gfg-stats" class="text-emerald-400">Stored in Neon DB</span></div>
-              <div class="flex justify-between"><span>Manual DB CRUD:</span><span class="text-blue-400">Enabled</span></div>
+              <div class="flex justify-between"><span>Manual DB CRUD:</span><span class="text-indigo-400">Enabled</span></div>
               <div class="flex justify-between"><span>Verification:</span><span class="text-emerald-400">Factual telemetry</span></div>
             </div>
             <div class="flex items-center justify-between text-xs pt-1">
               <button type="button" onclick="switchView('gfg')" class="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold">Edit GFG Data in DB</button>
-              <button type="button" onclick="switchView('gfg')" class="text-blue-400 hover:underline rounded-lg">Configure GFG →</button>
+              <button type="button" onclick="switchView('gfg')" class="text-indigo-400 hover:underline rounded-lg">Configure GFG →</button>
             </div>
           </div>
 
@@ -2068,12 +2068,12 @@ What AI projects has he worked on?</textarea>
             <div class="space-y-2 text-xs text-fg bg-card p-3 rounded-xl border border-line">
               <div class="flex justify-between"><span>Trigger Events:</span><span class="text-fg">Public Contact Form & AI Queries</span></div>
               <div class="flex justify-between"><span>Storage Target:</span><span class="text-emerald-400">Neon DB (notifications + contact_inquiries)</span></div>
-              <div class="flex justify-between"><span>Visitor IP Logging:</span><span class="text-blue-400">Enabled (X-Forwarded-For)</span></div>
+              <div class="flex justify-between"><span>Visitor IP Logging:</span><span class="text-indigo-400">Enabled (X-Forwarded-For)</span></div>
               <div class="flex justify-between"><span>Notification Drawer:</span><span class="text-emerald-400">Live Bell Sync</span></div>
             </div>
             <div class="flex items-center justify-between text-xs pt-1">
               <button type="button" onclick="toggleNotificationDrawer()" class="px-3 py-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-fg">Open Notification Panel</button>
-              <button type="button" onclick="switchView('crm')" class="text-blue-400 hover:underline rounded-lg">Open CRM Pipeline →</button>
+              <button type="button" onclick="switchView('crm')" class="text-indigo-400 hover:underline rounded-lg">Open CRM Pipeline →</button>
             </div>
           </div>
         </div>
@@ -2086,7 +2086,7 @@ What AI projects has he worked on?</textarea>
             <h2 class="text-xl font-bold tracking-tight text-fg">Platform Analytics & Insights (Neon DB)</h2>
             <p class="text-xs text-fg-2 mt-0.5">Real-time visitor metrics, resume downloads, AI query volume, and CSV report export.</p>
           </div>
-          <button type="button" onclick="exportAnalyticsCsv()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors shadow-md flex items-center gap-1.5">
+          <button type="button" onclick="exportAnalyticsCsv()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-colors shadow-md flex items-center gap-1.5">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Export CSV</span>
           </button>
@@ -2106,7 +2106,7 @@ What AI projects has he worked on?</textarea>
           <div class="saas-card p-4 space-y-1">
             <span class="text-xs text-fg-3">RESUME DOWNLOADS</span>
             <div id="analytics-resumes" class="text-2xl font-bold text-fg">--</div>
-            <span class="text-xs text-blue-400">Verified recruiter events</span>
+            <span class="text-xs text-indigo-400">Verified recruiter events</span>
           </div>
           <div class="saas-card p-4 space-y-1">
             <span class="text-xs text-fg-3">AI ASSISTANT QUERIES</span>
@@ -2122,7 +2122,7 @@ What AI projects has he worked on?</textarea>
             <h2 id="placeholder-title" class="text-xl font-bold tracking-tight text-fg">Module Title</h2>
             <p class="text-xs text-fg-2 mt-0.5">Real-time CRUD operations and configuration.</p>
           </div>
-          <button onclick="showToast('Operation recorded', 'success')" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white font-semibold text-xs">Action</button>
+          <button onclick="showToast('Operation recorded', 'success')" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold text-xs">Action</button>
         </div>
         <div class="p-8 rounded-xl bg-card border border-line flex flex-col items-center justify-center text-center space-y-3">
           <i data-lucide="check-circle-2" class="w-10 h-10 text-emerald-400"></i>
@@ -2140,12 +2140,12 @@ What AI projects has he worked on?</textarea>
     <!-- Drawer Header -->
     <div class="h-16 px-5 border-b border-line flex items-center justify-between shrink-0 bg-card">
       <div class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-md">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-md">
           <i data-lucide="bot" class="w-4 h-4"></i>
         </div>
         <div>
           <span class="font-bold text-fg text-sm">Ask Raviranjan</span>
-          <span class="text-xs text-blue-400 block">Grounded Portfolio RAG</span>
+          <span class="text-xs text-indigo-400 block">Grounded Portfolio RAG</span>
         </div>
       </div>
       <button onclick="toggleAiDrawer()" class="text-fg-2 hover:text-fg p-1 rounded-lg hover:bg-raised">
@@ -2155,17 +2155,17 @@ What AI projects has he worked on?</textarea>
 
     <!-- Suggested Query Chips -->
     <div class="p-3 border-b border-line bg-card overflow-x-auto flex gap-2 shrink-0">
-      <button onclick="askPresetQuery('What projects has Raviranjan built?')" class="px-2.5 py-1 rounded-full bg-card border border-line text-xs text-fg hover:border-blue-500/40 hover:text-fg shrink-0">Projects</button>
-      <button onclick="askPresetQuery('Explain RakshaGrid.')" class="px-2.5 py-1 rounded-full bg-card border border-line text-xs text-fg hover:border-blue-500/40 hover:text-fg shrink-0">Explain RakshaGrid</button>
-      <button onclick="askPresetQuery('What technologies does he know?')" class="px-2.5 py-1 rounded-full bg-card border border-line text-xs text-fg hover:border-blue-500/40 hover:text-fg shrink-0">Tech Stack</button>
-      <button onclick="askPresetQuery('Show projects involving PostgreSQL.')" class="px-2.5 py-1 rounded-full bg-card border border-line text-xs text-fg hover:border-blue-500/40 hover:text-fg shrink-0">PostgreSQL</button>
-      <button onclick="askPresetQuery('What did he learn from his GitHub contributions?')" class="px-2.5 py-1 rounded-full bg-card border border-line text-xs text-fg hover:border-blue-500/40 hover:text-fg shrink-0">GitHub PRs</button>
+      <button onclick="askPresetQuery('What projects has Raviranjan built?')" class="px-2.5 py-1 rounded-full bg-card border border-line text-xs text-fg hover:border-indigo-500/40 hover:text-fg shrink-0">Projects</button>
+      <button onclick="askPresetQuery('Explain RakshaGrid.')" class="px-2.5 py-1 rounded-full bg-card border border-line text-xs text-fg hover:border-indigo-500/40 hover:text-fg shrink-0">Explain RakshaGrid</button>
+      <button onclick="askPresetQuery('What technologies does he know?')" class="px-2.5 py-1 rounded-full bg-card border border-line text-xs text-fg hover:border-indigo-500/40 hover:text-fg shrink-0">Tech Stack</button>
+      <button onclick="askPresetQuery('Show projects involving PostgreSQL.')" class="px-2.5 py-1 rounded-full bg-card border border-line text-xs text-fg hover:border-indigo-500/40 hover:text-fg shrink-0">PostgreSQL</button>
+      <button onclick="askPresetQuery('What did he learn from his GitHub contributions?')" class="px-2.5 py-1 rounded-full bg-card border border-line text-xs text-fg hover:border-indigo-500/40 hover:text-fg shrink-0">GitHub PRs</button>
     </div>
 
     <!-- Chat Messages Viewport -->
     <div id="ai-messages-container" class="flex-1 overflow-y-auto p-4 space-y-4 font-sans text-xs">
       <div class="flex items-start space-x-2.5">
-        <div class="w-6 h-6 rounded-md bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
+        <div class="w-6 h-6 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
           <i data-lucide="bot" class="w-3.5 h-3.5"></i>
         </div>
         <div class="p-3 rounded-xl bg-card border border-line text-fg leading-relaxed max-w-[85%]">
@@ -2177,8 +2177,8 @@ What AI projects has he worked on?</textarea>
     <!-- Chat Input Form -->
     <div class="p-3 border-t border-line bg-card shrink-0">
       <form onsubmit="handleSendAiMessage(event)" class="flex items-center space-x-2">
-        <input id="ai-chat-input" type="text" placeholder="Ask about projects, stack, or experience..." class="flex-1 bg-raised border border-line rounded-lg px-3 py-2 text-xs text-fg focus:outline-none focus:border-blue-500 placeholder:text-fg-3">
-        <button type="submit" class="px-3.5 py-2 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors flex items-center justify-center shadow-md">
+        <input id="ai-chat-input" type="text" placeholder="Ask about projects, stack, or experience..." class="flex-1 bg-raised border border-line rounded-lg px-3 py-2 text-xs text-fg focus:outline-none focus:border-indigo-500 placeholder:text-fg-3">
+        <button type="submit" class="px-3.5 py-2 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors flex items-center justify-center shadow-md">
           <i data-lucide="send" class="w-3.5 h-3.5"></i>
         </button>
       </form>
@@ -2200,7 +2200,7 @@ What AI projects has he worked on?</textarea>
         </div>
       </div>
       <div class="flex items-center space-x-2">
-        <button onclick="markAllNotificationsRead()" class="text-xs text-blue-400 hover:underline px-2 py-1 rounded-lg">Mark all read</button>
+        <button onclick="markAllNotificationsRead()" class="text-xs text-indigo-400 hover:underline px-2 py-1 rounded-lg">Mark all read</button>
         <button onclick="toggleNotificationDrawer()" class="text-fg-2 hover:text-fg p-1 rounded-lg hover:bg-raised">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
@@ -2209,7 +2209,7 @@ What AI projects has he worked on?</textarea>
 
     <!-- Filter Pills -->
     <div class="p-3 border-b border-line bg-card flex gap-1.5 shrink-0 overflow-x-auto text-xs">
-      <button onclick="filterNotifications('ALL')" class="notif-filter active px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/30">All</button>
+      <button onclick="filterNotifications('ALL')" class="notif-filter active px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">All</button>
       <button onclick="filterNotifications('UNREAD')" class="notif-filter px-2.5 py-1 rounded-lg bg-raised text-fg-2 border border-line hover:text-fg">Unread</button>
       <button onclick="filterNotifications('URGENT')" class="notif-filter px-2.5 py-1 rounded-lg bg-raised text-fg-2 border border-line hover:text-fg">Urgent / High</button>
       <button onclick="filterNotifications('CRM')" class="notif-filter px-2.5 py-1 rounded-lg bg-raised text-fg-2 border border-line hover:text-fg">CRM Inquiries</button>
@@ -2222,7 +2222,7 @@ What AI projects has he worked on?</textarea>
       <div class="grid grid-cols-2 gap-1.5 text-xs">
         <button onclick="simulateEvent('INQUIRY')" class="p-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-rose-300 text-left truncate">+ New Inquiry (WhatsApp)</button>
         <button onclick="simulateEvent('MILESTONE')" class="p-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-amber-300 text-left truncate">+ Milestone (Email)</button>
-        <button onclick="simulateEvent('GITHUB')" class="p-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-blue-300 text-left truncate">+ GitHub Ingestion</button>
+        <button onclick="simulateEvent('GITHUB')" class="p-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-indigo-300 text-left truncate">+ GitHub Ingestion</button>
         <button onclick="simulateEvent('FAILURE')" class="p-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-rose-400 text-left truncate">! Integration Failure</button>
       </div>
     </div>
@@ -2241,7 +2241,7 @@ What AI projects has he worked on?</textarea>
   <div id="modal-add-project" onclick="if(event.target === this) closeAddProjectModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="w-full max-w-2xl bg-card border border-line rounded-xl shadow-xl p-6 space-y-4 text-xs admin-modal-box">
       <div class="flex items-center justify-between border-b border-line pb-3">
-        <div class="flex items-center space-x-2 text-blue-400">
+        <div class="flex items-center space-x-2 text-indigo-400">
           <i data-lucide="folder-plus" class="w-5 h-5"></i>
           <span id="modal-project-heading" class="text-sm font-bold tracking-wider uppercase">Create New Project</span>
         </div>
@@ -2255,18 +2255,18 @@ What AI projects has he worked on?</textarea>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-fg-2 mb-1">Project Title *</label>
-            <input type="text" id="new-proj-title" required placeholder="e.g. Distributed Task Orchestrator" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400" oninput="document.getElementById('new-proj-slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')">
+            <input type="text" id="new-proj-title" required placeholder="e.g. Distributed Task Orchestrator" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400" oninput="document.getElementById('new-proj-slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')">
           </div>
           <div>
             <label class="block text-fg-2 mb-1">URL Slug *</label>
-            <input type="text" id="new-proj-slug" required placeholder="e.g. distributed-task-orchestrator" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="new-proj-slug" required placeholder="e.g. distributed-task-orchestrator" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="block text-fg-2 mb-1">Category</label>
-            <select id="new-proj-category" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <select id="new-proj-category" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
               <option value="backend">Backend Engineering</option>
               <option value="ai">AI / ML System</option>
               <option value="web">Full-Stack Web</option>
@@ -2274,11 +2274,11 @@ What AI projects has he worked on?</textarea>
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Progress (0-100%)</label>
-            <input type="number" id="new-proj-progress" min="0" max="100" value="85" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="number" id="new-proj-progress" min="0" max="100" value="85" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Status</label>
-            <select id="new-proj-status" class="w-full p-2.5 rounded-lg bg-raised border border-line text-emerald-400 focus:outline-none focus:border-blue-400">
+            <select id="new-proj-status" class="w-full p-2.5 rounded-lg bg-raised border border-line text-emerald-400 focus:outline-none focus:border-indigo-400">
               <option value="PUBLISHED" selected>PUBLISHED</option>
               <option value="DRAFT">DRAFT</option>
             </select>
@@ -2287,28 +2287,28 @@ What AI projects has he worked on?</textarea>
 
         <div>
           <label class="block text-fg-2 mb-1">Tech Stack (comma-separated)</label>
-          <input type="text" id="new-proj-tech" placeholder="Java 21, Spring Boot, PostgreSQL, Docker" value="Java 21, Spring Boot, PostgreSQL, Docker" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <input type="text" id="new-proj-tech" placeholder="Java 21, Spring Boot, PostgreSQL, Docker" value="Java 21, Spring Boot, PostgreSQL, Docker" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
         </div>
 
         <div>
           <label class="block text-fg-2 mb-1">Short Summary</label>
-          <textarea id="new-proj-summary" rows="2" required placeholder="Architectural summary of what this application does..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400 font-sans"></textarea>
+          <textarea id="new-proj-summary" rows="2" required placeholder="Architectural summary of what this application does..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400 font-sans"></textarea>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-fg-2 mb-1">GitHub Repo URL</label>
-            <input type="url" id="new-proj-github" placeholder="https://github.com/raviranjan/my-repo" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="url" id="new-proj-github" placeholder="https://github.com/raviranjan/my-repo" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Live Demo URL</label>
-            <input type="text" id="new-proj-demo" placeholder="#" value="#" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="new-proj-demo" placeholder="#" value="#" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
         </div>
 
         <div class="flex items-center justify-end space-x-3 pt-3 border-t border-line">
           <button type="button" onclick="closeAddProjectModal()" class="px-4 py-2 rounded-lg bg-raised hover:bg-raised border border-line text-fg">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1.5 shadow-md">
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center gap-1.5 shadow-md">
             <i data-lucide="check" class="w-4 h-4"></i>
             <span id="modal-project-submit-label">Save & Publish Project</span>
           </button>
@@ -2322,7 +2322,7 @@ What AI projects has he worked on?</textarea>
   <div id="modal-career" onclick="if(event.target === this) closeCareerModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="w-full max-w-lg bg-card border border-line rounded-xl shadow-xl p-6 space-y-4 text-xs admin-modal-box">
       <div class="flex items-center justify-between border-b border-line pb-3">
-        <div class="flex items-center space-x-2 text-blue-400">
+        <div class="flex items-center space-x-2 text-indigo-400">
           <i data-lucide="briefcase" class="w-5 h-5"></i>
           <span id="modal-career-title" class="text-sm font-bold tracking-wider uppercase">Add Career Entry</span>
         </div>
@@ -2335,35 +2335,35 @@ What AI projects has he worked on?</textarea>
         <input type="hidden" id="career-type" value="experience">
         <div id="career-field-org">
           <label id="career-label-org" class="block text-fg-2 mb-1">Company / Organization *</label>
-          <input type="text" id="career-org" required placeholder="e.g. Infosys Springboard or Edunet Foundation – AICTE" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <input type="text" id="career-org" required placeholder="e.g. Infosys Springboard or Edunet Foundation – AICTE" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
         </div>
         <div id="career-field-role">
           <label id="career-label-role" class="block text-fg-2 mb-1">Role / Position *</label>
-          <input type="text" id="career-role" required placeholder="e.g. Artificial Intelligence Intern" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <input type="text" id="career-role" required placeholder="e.g. Artificial Intelligence Intern" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
         </div>
         <div id="career-extra-fields" class="space-y-3">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-fg-2 mb-1">Status (Pursuing / Completed)</label>
-              <select id="career-status" onchange="if(this.value==='PURSUING'){document.getElementById('career-end-date').value='';}" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+              <select id="career-status" onchange="if(this.value==='PURSUING'){document.getElementById('career-end-date').value='';}" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
                 <option value="PURSUING">Pursuing / Ongoing (Certificate Pending)</option>
                 <option value="COMPLETED">Completed (Certificate Issued)</option>
               </select>
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Location / Mode</label>
-              <input type="text" id="career-location" placeholder="e.g. Remote · India" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+              <input type="text" id="career-location" placeholder="e.g. Remote · India" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
             </div>
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Technologies / Skills Used (comma-separated)</label>
-            <input type="text" id="career-tech" placeholder="e.g. Python, FastAPI, React, Machine Learning, PostgreSQL" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="career-tech" placeholder="e.g. Python, FastAPI, React, Machine Learning, PostgreSQL" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
           <div id="career-internship-links" class="space-y-2.5 p-3 rounded-xl bg-raised border border-line">
             <div class="text-xs font-bold text-emerald-400">Internship Documents & Verification Links (Google Drive / PDF)</div>
             <div>
               <label class="block text-fg-2 mb-1 text-xs">Offer Letter URL</label>
-              <input type="text" id="career-offer-url" placeholder="https://drive.google.com/file/d/.../view" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+              <input type="text" id="career-offer-url" placeholder="https://drive.google.com/file/d/.../view" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
             </div>
             <div>
               <label class="block text-fg-2 mb-1 text-xs">Completion Certificate URL (Add when received)</label>
@@ -2371,27 +2371,27 @@ What AI projects has he worked on?</textarea>
             </div>
             <div>
               <label class="block text-fg-2 mb-1 text-xs">Project Report / Proof URL (Optional)</label>
-              <input type="text" id="career-report-url" placeholder="https://drive.google.com/file/d/.../view" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+              <input type="text" id="career-report-url" placeholder="https://drive.google.com/file/d/.../view" class="w-full p-2 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
             </div>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-fg-2 mb-1">Start Date *</label>
-            <input type="date" id="career-start-date" required class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="date" id="career-start-date" required class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
           <div>
             <label class="block text-fg-2 mb-1">End Date (blank if Pursuing)</label>
-            <input type="date" id="career-end-date" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="date" id="career-end-date" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
         </div>
         <div>
           <label class="block text-fg-2 mb-1">Summary / Description</label>
-          <textarea id="career-desc" rows="3" placeholder="Key project built, mentor, cohort batch, responsibilities, or achievements..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400 font-sans"></textarea>
+          <textarea id="career-desc" rows="3" placeholder="Key project built, mentor, cohort batch, responsibilities, or achievements..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400 font-sans"></textarea>
         </div>
         <div class="flex items-center justify-end space-x-3 pt-3 border-t border-line">
           <button type="button" onclick="closeCareerModal()" class="px-4 py-2 rounded-lg bg-raised hover:bg-raised border border-line text-fg">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">Save to Neon DB</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save to Neon DB</button>
         </div>
       </form>
     </div>
@@ -2401,7 +2401,7 @@ What AI projects has he worked on?</textarea>
   <div id="modal-research" onclick="if(event.target === this) closeResearchModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="w-full max-w-xl bg-card border border-line rounded-xl shadow-xl p-6 space-y-4 text-xs admin-modal-box">
       <div class="flex items-center justify-between border-b border-line pb-3">
-        <div class="flex items-center space-x-2 text-blue-400">
+        <div class="flex items-center space-x-2 text-indigo-400">
           <i data-lucide="file-text" class="w-5 h-5"></i>
           <span id="modal-research-title" class="text-sm font-bold tracking-wider uppercase">Publish Research Paper</span>
         </div>
@@ -2413,16 +2413,16 @@ What AI projects has he worked on?</textarea>
         <input type="hidden" id="research-id" value="">
         <div>
           <label class="block text-fg-2 mb-1">Paper Title *</label>
-          <input type="text" id="research-title" required placeholder="e.g. Comparative Analysis of Index Structures" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400" oninput="document.getElementById('research-slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')">
+          <input type="text" id="research-title" required placeholder="e.g. Comparative Analysis of Index Structures" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400" oninput="document.getElementById('research-slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-fg-2 mb-1">Slug *</label>
-            <input type="text" id="research-slug" required class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="research-slug" required class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Status</label>
-            <select id="research-status" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <select id="research-status" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
               <option value="PUBLISHED" selected>PUBLISHED</option>
               <option value="RESEARCHING">RESEARCHING</option>
               <option value="DRAFT">DRAFT</option>
@@ -2431,25 +2431,25 @@ What AI projects has he worked on?</textarea>
         </div>
         <div>
           <label class="block text-fg-2 mb-1">Authors *</label>
-          <input type="text" id="research-authors" value="Raviranjan Kumar" required class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <input type="text" id="research-authors" value="Raviranjan Kumar" required class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
         </div>
         <div>
           <label class="block text-fg-2 mb-1">Abstract *</label>
-          <textarea id="research-abstract" rows="3" required placeholder="Abstract / key findings of the investigation..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400 font-sans"></textarea>
+          <textarea id="research-abstract" rows="3" required placeholder="Abstract / key findings of the investigation..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400 font-sans"></textarea>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-fg-2 mb-1">DOI / Publication Link</label>
-            <input type="text" id="research-doi" placeholder="https://..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="research-doi" placeholder="https://..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
           <div>
             <label class="block text-fg-2 mb-1">GitHub / Dataset URL</label>
-            <input type="text" id="research-github" placeholder="https://github.com/..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="research-github" placeholder="https://github.com/..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
         </div>
         <div class="flex items-center justify-end space-x-3 pt-3 border-t border-line">
           <button type="button" onclick="closeResearchModal()" class="px-4 py-2 rounded-lg bg-raised hover:bg-raised border border-line text-fg">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">Save to Database</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save to Database</button>
         </div>
       </form>
     </div>
@@ -2459,7 +2459,7 @@ What AI projects has he worked on?</textarea>
   <div id="modal-skill" onclick="if(event.target === this) closeSkillModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="w-full max-w-md bg-card border border-line rounded-xl shadow-xl p-6 space-y-4 text-xs admin-modal-box">
       <div class="flex items-center justify-between border-b border-line pb-3">
-        <div class="flex items-center space-x-2 text-blue-400">
+        <div class="flex items-center space-x-2 text-indigo-400">
           <i data-lucide="cpu" class="w-5 h-5"></i>
           <span class="text-sm font-bold tracking-wider uppercase">Add Technical Skill</span>
         </div>
@@ -2471,11 +2471,11 @@ What AI projects has he worked on?</textarea>
         <input type="hidden" id="skill-id" value="">
         <div>
           <label class="block text-fg-2 mb-1">Skill Name *</label>
-          <input type="text" id="skill-name" required placeholder="e.g. Go, Kubernetes, Kafka" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <input type="text" id="skill-name" required placeholder="e.g. Go, Kubernetes, Kafka" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
         </div>
         <div>
           <label class="block text-fg-2 mb-1">Proficiency Level</label>
-          <select id="skill-level" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <select id="skill-level" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
             <option value="ADVANCED" selected>ADVANCED (Primary Core)</option>
             <option value="INTERMEDIATE">INTERMEDIATE (Active Use)</option>
             <option value="BEGINNER">BEGINNER (Familiar)</option>
@@ -2483,7 +2483,7 @@ What AI projects has he worked on?</textarea>
         </div>
         <div>
           <label class="block text-fg-2 mb-1">Category</label>
-          <select id="skill-category-select" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <select id="skill-category-select" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
             <option value="Languages">Languages</option>
             <option value="Frameworks">Frameworks & Libraries</option>
             <option value="Databases">Databases & Storage</option>
@@ -2493,7 +2493,7 @@ What AI projects has he worked on?</textarea>
         </div>
         <div class="flex items-center justify-end space-x-3 pt-3 border-t border-line">
           <button type="button" onclick="closeSkillModal()" class="px-4 py-2 rounded-lg bg-raised hover:bg-raised border border-line text-fg">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">Save Skill</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Skill</button>
         </div>
       </form>
     </div>
@@ -2503,7 +2503,7 @@ What AI projects has he worked on?</textarea>
   <div id="modal-lab" onclick="if(event.target === this) closeLabModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="w-full max-w-lg bg-card border border-line rounded-xl shadow-xl p-6 space-y-4 text-xs admin-modal-box">
       <div class="flex items-center justify-between border-b border-line pb-3">
-        <div class="flex items-center space-x-2 text-blue-400">
+        <div class="flex items-center space-x-2 text-indigo-400">
           <i data-lucide="flask-conical" class="w-5 h-5"></i>
           <span id="modal-lab-title" class="text-sm font-bold tracking-wider uppercase">Add Lab Experiment</span>
         </div>
@@ -2515,16 +2515,16 @@ What AI projects has he worked on?</textarea>
         <input type="hidden" id="lab-id" value="">
         <div>
           <label class="block text-fg-2 mb-1">Experiment Title *</label>
-          <input type="text" id="lab-title" required placeholder="e.g. Raft Consensus Implementation in Java" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400" oninput="document.getElementById('lab-slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')">
+          <input type="text" id="lab-title" required placeholder="e.g. Raft Consensus Implementation in Java" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400" oninput="document.getElementById('lab-slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-fg-2 mb-1">Slug *</label>
-            <input type="text" id="lab-slug" required class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="lab-slug" required class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Status</label>
-            <select id="lab-status" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <select id="lab-status" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
               <option value="ACTIVE" selected>ACTIVE</option>
               <option value="COMPLETED">COMPLETED</option>
               <option value="PROTOTYPE">PROTOTYPE</option>
@@ -2533,25 +2533,25 @@ What AI projects has he worked on?</textarea>
         </div>
         <div>
           <label class="block text-fg-2 mb-1">Objective *</label>
-          <input type="text" id="lab-objective" required placeholder="What hypothesis or architecture is being tested?" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <input type="text" id="lab-objective" required placeholder="What hypothesis or architecture is being tested?" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
         </div>
         <div>
           <label class="block text-fg-2 mb-1">Description *</label>
-          <textarea id="lab-desc" rows="2" required placeholder="Technical breakdown of the benchmark or prototype..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400 font-sans"></textarea>
+          <textarea id="lab-desc" rows="2" required placeholder="Technical breakdown of the benchmark or prototype..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400 font-sans"></textarea>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-fg-2 mb-1">Technologies</label>
-            <input type="text" id="lab-tech" placeholder="Java 21, Netty, Virtual Threads" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="lab-tech" placeholder="Java 21, Netty, Virtual Threads" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
           <div>
             <label class="block text-fg-2 mb-1">GitHub Repo URL</label>
-            <input type="text" id="lab-github" placeholder="https://github.com/..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="lab-github" placeholder="https://github.com/..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
         </div>
         <div class="flex items-center justify-end space-x-3 pt-3 border-t border-line">
           <button type="button" onclick="closeLabModal()" class="px-4 py-2 rounded-lg bg-raised hover:bg-raised border border-line text-fg">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">Save Experiment</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Experiment</button>
         </div>
       </form>
     </div>
@@ -2561,7 +2561,7 @@ What AI projects has he worked on?</textarea>
   <div id="modal-story" onclick="if(event.target === this) closeStoryModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="w-full max-w-lg bg-card border border-line rounded-xl shadow-xl p-6 space-y-4 text-xs admin-modal-box">
       <div class="flex items-center justify-between border-b border-line pb-3">
-        <div class="flex items-center space-x-2 text-blue-400">
+        <div class="flex items-center space-x-2 text-indigo-400">
           <i data-lucide="git-pull-request" class="w-5 h-5"></i>
           <span class="text-sm font-bold tracking-wider uppercase">Add Contribution Story</span>
         </div>
@@ -2573,33 +2573,33 @@ What AI projects has he worked on?</textarea>
         <input type="hidden" id="story-id" value="">
         <div>
           <label class="block text-fg-2 mb-1">Repository Name *</label>
-          <input type="text" id="story-repo" required placeholder="e.g. spring-projects/spring-boot" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <input type="text" id="story-repo" required placeholder="e.g. spring-projects/spring-boot" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
         </div>
         <div>
           <label class="block text-fg-2 mb-1">Story Title *</label>
-          <input type="text" id="story-title" required placeholder="e.g. Fixed Connection Leak in Redis Pool" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+          <input type="text" id="story-title" required placeholder="e.g. Fixed Connection Leak in Redis Pool" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
         </div>
         <div>
           <label class="block text-fg-2 mb-1">What Was Contributed *</label>
-          <textarea id="story-what" rows="2" required placeholder="Technical description of the patch, PR, or bugfix..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400 font-sans"></textarea>
+          <textarea id="story-what" rows="2" required placeholder="Technical description of the patch, PR, or bugfix..." class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400 font-sans"></textarea>
         </div>
         <div>
           <label class="block text-fg-2 mb-1">Problem & Impact *</label>
-          <textarea id="story-problem" rows="2" required placeholder="What issue did the upstream community face?" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400 font-sans"></textarea>
+          <textarea id="story-problem" rows="2" required placeholder="What issue did the upstream community face?" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400 font-sans"></textarea>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-fg-2 mb-1">PR / Issue URL</label>
-            <input type="text" id="story-pr-url" placeholder="https://github.com/.../pull/123" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="story-pr-url" placeholder="https://github.com/.../pull/123" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
           <div>
             <label class="block text-fg-2 mb-1">Technologies</label>
-            <input type="text" id="story-tech" placeholder="Java, Docker, Redis" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-blue-400">
+            <input type="text" id="story-tech" placeholder="Java, Docker, Redis" class="w-full p-2.5 rounded-lg bg-raised border border-line text-fg focus:outline-none focus:border-indigo-400">
           </div>
         </div>
         <div class="flex items-center justify-end space-x-3 pt-3 border-t border-line">
           <button type="button" onclick="closeStoryModal()" class="px-4 py-2 rounded-lg bg-raised hover:bg-raised border border-line text-fg">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">Save Story</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Story</button>
         </div>
       </form>
     </div>
@@ -2651,7 +2651,7 @@ What AI projects has he worked on?</textarea>
         </div>
         <div class="flex items-center justify-end space-x-3 pt-3 border-t border-line">
           <button type="button" onclick="closeCredentialModal()" class="px-4 py-2 rounded-lg bg-raised hover:bg-raised border border-line text-fg">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold">Save to Neon DB</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save to Neon DB</button>
         </div>
       </form>
     </div>
@@ -2729,13 +2729,14 @@ What AI projects has he worked on?</textarea>
     </div>
   </div>
 
-  <script src="/admin_app.js?v=19"></script>
+  <script src="/admin_app.js?v=20"></script>
+  <script src="/design-system.js?v=20" defer></script>
 
   <!-- Modal: Audit Log State Diff Viewer -->
   <div id="modal-audit-diff" onclick="if(event.target === this) closeAuditDiffModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="w-full max-w-2xl bg-card border border-line rounded-xl shadow-xl p-6 space-y-4 text-xs admin-modal-box" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between border-b border-line pb-3">
-        <div class="flex items-center space-x-2 text-blue-400">
+        <div class="flex items-center space-x-2 text-indigo-400">
           <i data-lucide="file-diff" class="w-5 h-5"></i>
           <span id="audit-diff-title" class="text-sm font-bold tracking-wider uppercase">Audit State Diff Inspector</span>
         </div>
@@ -2755,10 +2756,17 @@ What AI projects has he worked on?</textarea>
         </div>
       </div>
       <div class="flex justify-end pt-2 border-t border-line">
-        <button type="button" onclick="closeAuditDiffModal()" class="px-4 py-1.5 rounded-lg bg-blue-600 text-white font-bold">Close Inspector</button>
+        <button type="button" onclick="closeAuditDiffModal()" class="px-4 py-1.5 rounded-lg bg-indigo-600 text-white font-bold">Close Inspector</button>
       </div>
     </div>
   </div>
 
+<nav class="bottom-nav bottom-nav--admin" aria-label="Admin quick navigation">
+    <button type="button" class="bottom-nav__item" data-view="dashboard" onclick="switchView('dashboard')" aria-label="Dashboard"><i data-lucide="layout-dashboard" aria-hidden="true"></i><span>Home</span></button>
+    <button type="button" class="bottom-nav__item" data-view="projects" onclick="switchView('projects')" aria-label="Projects"><i data-lucide="folder-kanban" aria-hidden="true"></i><span>Projects</span></button>
+    <button type="button" class="bottom-nav__item" data-view="crm" onclick="switchView('crm')" aria-label="CRM"><i data-lucide="contact" aria-hidden="true"></i><span>CRM</span></button>
+    <button type="button" class="bottom-nav__item" data-view="ai-control" onclick="switchView('ai-control')" aria-label="AI assistant"><i data-lucide="bot" aria-hidden="true"></i><span>AI</span></button>
+    <button type="button" class="bottom-nav__item" onclick="toggleAdminMobileSidebar()" aria-label="Open menu"><i data-lucide="layout-list" aria-hidden="true"></i><span>Menu</span></button>
+  </nav>
 </body>
 </html>

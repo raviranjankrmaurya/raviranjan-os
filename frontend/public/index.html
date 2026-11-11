@@ -32,17 +32,17 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="/styles.css?v=19">
-  <link rel="stylesheet" href="/design-system.css?v=19">
+  <link rel="stylesheet" href="/styles.css?v=20">
+  <link rel="stylesheet" href="/design-system.css?v=20">
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Geist', 'Inter', 'system-ui', 'sans-serif'],
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
             mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
           },
           colors: {
@@ -56,6 +56,8 @@
             brand: { DEFAULT: 'rgb(var(--brand) / <alpha-value>)', hover: 'rgb(var(--brand-hover) / <alpha-value>)', fg: 'rgb(var(--brand-fg) / <alpha-value>)' },
             heat: { 1: 'rgb(var(--heat-1) / <alpha-value>)', 2: 'rgb(var(--heat-2) / <alpha-value>)', 3: 'rgb(var(--heat-3) / <alpha-value>)', 4: 'rgb(var(--heat-4) / <alpha-value>)' },
           },
+          borderRadius: { sm: '6px', DEFAULT: '8px', md: '10px', lg: '12px', xl: '16px', '2xl': '20px', '3xl': '28px' },
+          fontSize: { xs: ['0.8125rem', { lineHeight: '1.25rem' }] },
           borderColor: { DEFAULT: 'rgb(var(--line) / <alpha-value>)' },
           divideColor: { DEFAULT: 'rgb(var(--line) / <alpha-value>)' },
         }
@@ -63,7 +65,7 @@
     }
   </script>
 </head>
-<body class="bg-canvas text-fg font-sans antialiased selection:bg-blue-500/25">
+<body class="has-bottom-nav bg-canvas text-fg font-sans antialiased selection:bg-indigo-500/25">
 
   <!-- Toast Container -->
   <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
@@ -125,9 +127,9 @@
           <span>⚡ Recruiter Mode (1-Minute Quick Scan)</span>
           <span class="text-xs text-emerald-500">/recruiter</span>
         </div>
-        <div onclick="openAiWithQuery('Explain RakshaGrid.'); toggleCommandPalette()" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-blue-300 hover:text-blue-200">
+        <div onclick="openAiWithQuery('Explain RakshaGrid.'); toggleCommandPalette()" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-indigo-300 hover:text-indigo-200">
           <span>🤖 Ask AI: "Explain RakshaGrid."</span>
-          <span class="text-xs text-blue-500">RAG Query</span>
+          <span class="text-xs text-indigo-500">RAG Query</span>
         </div>
 
       </div>
@@ -137,9 +139,9 @@
   
   <!-- Secret Admin Authentication Modal (Ctrl+Shift+A or Secret Keyword) -->
   <div id="admin-auth-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Admin Access">
-    <div class="w-full max-w-sm bg-card border border-blue-500/40 rounded-xl shadow-xl p-5 space-y-3.5 animate-fade-in">
+    <div class="w-full max-w-sm bg-card border border-indigo-500/40 rounded-xl shadow-xl p-5 space-y-3.5 animate-fade-in">
       <div class="flex items-center justify-between border-b border-line pb-2.5">
-        <div class="flex items-center space-x-2 text-blue-400">
+        <div class="flex items-center space-x-2 text-indigo-400">
           <i data-lucide="shield" class="w-4 h-4"></i>
           <span class="text-xs font-bold tracking-wider uppercase">Admin Access</span>
         </div>
@@ -153,11 +155,11 @@
       <form id="admin-auth-form" onsubmit="handleAdminLogin(event)" autocomplete="off" class="space-y-3">
         <div>
           <label class="block text-xs text-fg-2 mb-1">USERNAME</label>
-          <input id="admin-auth-username" name="admin_user_id_manual" type="text" value="" placeholder="Username" class="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-blue-500" autocomplete="off" autocapitalize="none" spellcheck="false" required>
+          <input id="admin-auth-username" name="admin_user_id_manual" type="text" value="" placeholder="Username" class="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-indigo-500" autocomplete="off" autocapitalize="none" spellcheck="false" required>
         </div>
         <div>
           <label class="block text-xs text-fg-2 mb-1">PASSWORD</label>
-          <input id="admin-auth-password" name="admin_pass_manual" type="password" value="" placeholder="Password" class="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-blue-500" autocomplete="new-password" required>
+          <input id="admin-auth-password" name="admin_pass_manual" type="password" value="" placeholder="Password" class="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-indigo-500" autocomplete="new-password" required>
         </div>
 
         <div id="admin-auth-error" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-2.5 py-1.5 rounded flex items-center space-x-1.5 font-sans">
@@ -166,7 +168,7 @@
         </div>
 
         <div class="flex items-center justify-between pt-0.5">
-          <button type="button" onclick="toggleForgotAdminPanel(true)" class="text-xs text-blue-400 hover:underline rounded-lg">
+          <button type="button" onclick="toggleForgotAdminPanel(true)" class="text-xs text-indigo-400 hover:underline rounded-lg">
             Forgot credentials?
           </button>
         </div>
@@ -175,7 +177,7 @@
           <button type="button" onclick="closeAdminAuthModal()" class="px-3 py-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-xs text-fg">
             Cancel
           </button>
-          <button id="admin-auth-submit-btn" type="submit" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center space-x-1.5">
+          <button id="admin-auth-submit-btn" type="submit" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center space-x-1.5">
             <i data-lucide="key" class="w-3.5 h-3.5"></i>
             <span>Sign In</span>
           </button>
@@ -188,13 +190,13 @@
         <div id="forgot-step-1" class="space-y-2.5">
           <div>
             <label class="block text-xs text-fg-2 mb-1">REGISTERED EMAIL</label>
-            <input id="forgot-admin-email" type="email" value="" placeholder="Email address" class="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-blue-500" autocomplete="off" required>
+            <input id="forgot-admin-email" type="email" value="" placeholder="Email address" class="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-indigo-500" autocomplete="off" required>
           </div>
           <div>
             <label class="block text-xs text-fg-2 mb-1">MOBILE NUMBER</label>
-            <input id="forgot-admin-mobile" type="text" value="" placeholder="10-digit mobile" class="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-blue-500" autocomplete="off" required>
+            <input id="forgot-admin-mobile" type="text" value="" placeholder="10-digit mobile" class="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-indigo-500" autocomplete="off" required>
           </div>
-          <button type="button" id="btn-request-forgot-otp" onclick="handleRequestForgotOtp()" class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors">
+          <button type="button" id="btn-request-forgot-otp" onclick="handleRequestForgotOtp()" class="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors">
             Send OTP to Database
           </button>
         </div>
@@ -211,17 +213,17 @@
             </div>
             <div>
               <label class="block text-xs text-fg-2 mb-1">NEW USERNAME</label>
-              <input id="forgot-new-username" type="text" placeholder="Username" class="w-full px-2.5 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-blue-500" autocomplete="off">
+              <input id="forgot-new-username" type="text" placeholder="Username" class="w-full px-2.5 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-indigo-500" autocomplete="off">
             </div>
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs text-fg-2 mb-1">NEW PASSWORD</label>
-              <input id="forgot-new-password" type="password" minlength="6" placeholder="New password" class="w-full px-2.5 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-blue-500" autocomplete="new-password">
+              <input id="forgot-new-password" type="password" minlength="6" placeholder="New password" class="w-full px-2.5 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-indigo-500" autocomplete="new-password">
             </div>
             <div>
               <label class="block text-xs text-fg-2 mb-1">CONFIRM</label>
-              <input id="forgot-confirm-password" type="password" minlength="6" placeholder="Confirm" class="w-full px-2.5 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-blue-500" autocomplete="new-password">
+              <input id="forgot-confirm-password" type="password" minlength="6" placeholder="Confirm" class="w-full px-2.5 py-2 rounded-lg bg-canvas border border-line text-xs text-fg focus:outline-none focus:border-indigo-500" autocomplete="new-password">
             </div>
           </div>
           <button id="btn-submit-forgot-reset" type="submit" class="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs transition-colors">
@@ -247,9 +249,9 @@
     <div class="site-header__bar">
       <a href="#" onclick="handleLogoClick(event)" class="brand" title="Raviranjan.OS" aria-label="Raviranjan.OS home">
         <span class="brand__mark" aria-hidden="true">R</span>
-        <span class="brand__name max-[339px]:hidden">Raviranjan.OS</span>
+        <span class="brand__name max-[359px]:hidden">Raviranjan.OS</span>
       </a>
-
+      <span class="nav-divider" aria-hidden="true"></span>
       <nav class="nav-links" aria-label="Primary">
         <a href="#projects" class="nav-link">Projects</a>
         <a href="#experience" class="nav-link">Experience</a>
@@ -258,33 +260,36 @@
         <a href="#research" class="nav-link">Research</a>
         <a href="#about" class="nav-link">Contact</a>
       </nav>
-
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <button onclick="toggleCommandPalette()" class="btn hidden sm:inline-flex rounded-lg" aria-label="Open search" aria-keyshortcuts="Control+K Meta+K">
+        <button onclick="toggleCommandPalette()" class="btn btn--pill hidden 2xl:inline-flex" aria-label="Open search" aria-keyshortcuts="Control+K Meta+K">
           <i data-lucide="search" class="w-4 h-4" aria-hidden="true"></i>
           <span>Search</span>
           <kbd class="kbd">⌘K</kbd>
         </button>
-        <button onclick="toggleCommandPalette()" class="btn btn--icon sm:hidden max-[399px]:hidden rounded-lg" aria-label="Open search">
+        <button onclick="toggleCommandPalette()" class="btn btn--icon btn--pill 2xl:hidden max-[399px]:hidden" aria-label="Open search">
           <i data-lucide="search" class="w-4 h-4" aria-hidden="true"></i>
         </button>
-        <button id="theme-toggle-btn" onclick="toggleTheme()" class="btn btn--icon rounded-lg" aria-label="Toggle theme" title="Toggle theme">
-          <i id="theme-icon" data-lucide="sun" class="w-4 h-4" aria-hidden="true"></i>
+        <span class="hidden" aria-hidden="true"><button id="theme-toggle-btn" tabindex="-1" onclick="toggleTheme()"><i id="theme-icon" data-lucide="sun"></i></button></span>
+        <div class="theme-switch" role="group" aria-label="Theme">
+          <button type="button" data-theme-set="light" aria-pressed="false" aria-label="Light theme"><i data-lucide="sun" aria-hidden="true"></i></button>
+          <button type="button" data-theme-set="dark" aria-pressed="true" aria-label="Dark theme"><i data-lucide="moon" aria-hidden="true"></i></button>
+        </div>
+        <button onclick="toggleRecruiterMode()" class="btn btn--icon btn--pill hidden lg:inline-flex 2xl:hidden" aria-label="Recruiter mode" title="Recruiter mode">
+          <i data-lucide="briefcase" class="w-4 h-4" aria-hidden="true"></i>
         </button>
-        <button onclick="toggleRecruiterMode()" class="btn hidden lg:inline-flex rounded-lg">
+        <button onclick="toggleRecruiterMode()" class="btn btn--pill hidden 2xl:inline-flex">
           <i data-lucide="briefcase" class="w-4 h-4" aria-hidden="true"></i>
           <span>Recruiter</span>
         </button>
-        <button onclick="togglePublicAiDrawer()" class="btn btn--primary max-[479px]:!w-10 max-[479px]:!px-0 rounded-lg" aria-label="Ask AI assistant">
-          <i data-lucide="bot" class="w-4 h-4" aria-hidden="true"></i>
+        <button onclick="togglePublicAiDrawer()" class="btn btn--cta max-[479px]:!w-10 max-[479px]:!px-0" aria-label="Ask AI assistant">
+          <i data-lucide="sparkles" class="w-4 h-4" aria-hidden="true"></i>
           <span class="max-[479px]:hidden">Ask AI</span>
         </button>
-        <button id="mobile-nav-btn" onclick="toggleMobileNavMenu()" class="btn btn--icon lg:hidden rounded-lg" aria-label="Toggle navigation menu" aria-controls="mobile-nav-menu" aria-expanded="false">
+        <button id="mobile-nav-btn" onclick="toggleMobileNavMenu()" class="btn btn--icon btn--pill lg:hidden" aria-label="Toggle navigation menu" aria-controls="mobile-nav-menu" aria-expanded="false">
           <i data-lucide="menu" class="w-4 h-4" aria-hidden="true"></i>
         </button>
       </div>
     </div>
-
     <div id="mobile-nav-menu" class="hidden lg:hidden mobile-menu">
       <nav class="mobile-menu__grid" aria-label="Mobile">
         <a href="#overview" onclick="toggleMobileNavMenu(false)" class="mobile-link">Overview</a>
@@ -297,13 +302,13 @@
         <a href="#lab" onclick="toggleMobileNavMenu(false)" class="mobile-link">Lab</a>
         <a href="#writing" onclick="toggleMobileNavMenu(false)" class="mobile-link">Writing</a>
         <a href="#about" onclick="toggleMobileNavMenu(false)" class="mobile-link">Contact</a>
-        <button type="button" onclick="toggleRecruiterMode(); toggleMobileNavMenu(false)" class="mobile-link rounded-lg">Recruiter mode</button>
+        <button type="button" onclick="toggleRecruiterMode(); toggleMobileNavMenu(false)" class="mobile-link">Recruiter mode</button>
       </nav>
     </div>
   </header>
 
   <!-- Top Technical Status Bar (Factual & Honest) -->
-  <div class="w-full border-b border-line bg-subtle">
+  <div class="status-strip w-full border-b border-line bg-subtle">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-1.5 flex flex-wrap items-center justify-between text-xs text-fg-2 gap-2">
       <div class="flex items-center space-x-2">
         <span class="relative flex h-2 w-2">
@@ -338,7 +343,7 @@
             <span>Get in Touch</span>
           </a>
           <button onclick="openResumeModal()" class="px-3.5 py-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-xs text-fg transition-colors flex items-center gap-1.5">
-            <i data-lucide="file-text" class="w-3.5 h-3.5 text-blue-400"></i>
+            <i data-lucide="file-text" class="w-3.5 h-3.5 text-indigo-400"></i>
             <span>Download Resume</span>
           </button>
           <button onclick="toggleRecruiterMode(false)" class="p-1.5 text-fg-2 hover:text-fg rounded-lg" title="Close Recruiter View">
@@ -355,13 +360,13 @@
         <div class="space-y-1">
           <span class="text-fg-3">PRIMARY TECHNOLOGIES</span>
           <div id="recruiter-skills-cloud" class="flex flex-wrap gap-1">
-            <span class="px-1.5 py-0.5 rounded bg-raised text-blue-400 border border-line">Java 21</span>
-            <span class="px-1.5 py-0.5 rounded bg-raised text-blue-400 border border-line">Spring Boot</span>
-            <span class="px-1.5 py-0.5 rounded bg-raised text-blue-400 border border-line">Python</span>
-            <span class="px-1.5 py-0.5 rounded bg-raised text-blue-400 border border-line">FastAPI</span>
-            <span class="px-1.5 py-0.5 rounded bg-raised text-blue-400 border border-line">React</span>
-            <span class="px-1.5 py-0.5 rounded bg-raised text-blue-400 border border-line">PostgreSQL</span>
-            <span class="px-1.5 py-0.5 rounded bg-raised text-blue-400 border border-line">Docker</span>
+            <span class="px-1.5 py-0.5 rounded bg-raised text-indigo-400 border border-line">Java 21</span>
+            <span class="px-1.5 py-0.5 rounded bg-raised text-indigo-400 border border-line">Spring Boot</span>
+            <span class="px-1.5 py-0.5 rounded bg-raised text-indigo-400 border border-line">Python</span>
+            <span class="px-1.5 py-0.5 rounded bg-raised text-indigo-400 border border-line">FastAPI</span>
+            <span class="px-1.5 py-0.5 rounded bg-raised text-indigo-400 border border-line">React</span>
+            <span class="px-1.5 py-0.5 rounded bg-raised text-indigo-400 border border-line">PostgreSQL</span>
+            <span class="px-1.5 py-0.5 rounded bg-raised text-indigo-400 border border-line">Docker</span>
           </div>
         </div>
         <div class="space-y-1">
@@ -385,7 +390,7 @@
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span id="hero-profile-name">Raviranjan Kumar</span>
           </span>
-          <span class="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30 glass-pill">
+          <span class="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 glass-pill">
             <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
             <span id="hero-role-rotator" class="hero-role-fade font-semibold">Full-Stack & AI Engineer</span>
           </span>
@@ -394,7 +399,7 @@
         <!-- Dynamic Animated Headline (Editable by Admin in Neon DB) -->
         <div class="min-h-[56px] sm:min-h-[76px] flex items-center">
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-fg leading-[1.1] font-heading">
-            <span id="hero-animated-headline" class="hero-gradient-headline">Building AI-native software.</span><span id="hero-headline-cursor" class="hero-cursor-blink text-blue-400 ml-0.5">|</span>
+            <span id="hero-animated-headline" class="hero-gradient-headline">Building AI-native software.</span><span id="hero-headline-cursor" class="hero-cursor-blink text-indigo-400 ml-0.5">|</span>
           </h1>
         </div>
 
@@ -402,7 +407,7 @@
 
         <!-- Action Buttons (High-Contrast in both Dark & Light Mode) -->
         <div class="flex flex-wrap items-center gap-3 pt-2">
-          <a href="#projects" class="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-all flex items-center gap-2 shadow-md accent-bg-btn">
+          <a href="#projects" class="px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-all flex items-center gap-2 shadow-md accent-bg-btn">
             <i data-lucide="layers" class="w-4 h-4"></i>
             <span>View Projects</span>
           </a>
@@ -411,14 +416,14 @@
             <span>GitHub</span>
           </a>
           <button onclick="openResumeModal()" class="hero-secondary-btn px-4 py-2.5 rounded-lg bg-raised hover:bg-raised border border-line text-xs text-fg transition-all flex items-center gap-2">
-            <i data-lucide="file-text" class="w-4 h-4 text-blue-400"></i>
+            <i data-lucide="file-text" class="w-4 h-4 text-indigo-400"></i>
             <span>Resume</span>
           </button>
           <a href="#contact" class="hero-secondary-btn px-4 py-2.5 rounded-lg bg-raised hover:bg-raised border border-line text-xs text-fg transition-all flex items-center gap-2">
             <i data-lucide="mail" class="w-4 h-4 text-emerald-400"></i>
             <span>Contact</span>
           </a>
-          <button onclick="togglePublicAiDrawer()" class="px-4 py-2.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs transition-all flex items-center gap-2">
+          <button onclick="togglePublicAiDrawer()" class="px-4 py-2.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs transition-all flex items-center gap-2">
             <i data-lucide="bot" class="w-4 h-4"></i>
             <span>Ask AI</span>
           </button>
@@ -432,7 +437,7 @@
               <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
             </span>
-            <span class="text-blue-400 font-bold">$</span>
+            <span class="text-indigo-400 font-bold">$</span>
             <span id="hero-curl-command" class="whitespace-nowrap text-fg font-medium">curl -s https://raviranjan.dev/api/v1/profile | jq</span>
           </div>
           <button onclick="copyCurlCommand()" class="text-fg-2 hover:text-fg shrink-0 ml-3 px-2 py-1 rounded-lg hover:bg-raised transition-colors" title="Copy command">
@@ -442,12 +447,12 @@
 
         <!-- AI Prompts (Editable by Admin) -->
         <div class="flex flex-wrap items-center gap-2 text-xs pt-1">
-          <span class="text-fg-2 flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-400"></i>Ask the AI:</span>
+          <span class="text-fg-2 flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>Ask the AI:</span>
           <div id="hero-ai-prompts-list" class="flex flex-wrap items-center gap-2">
-            <button onclick="openAiWithQuery('What projects has Raviranjan built?')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-card border border-line text-fg hover:border-blue-500/40 hover:text-fg transition-colors">"What projects has he built?"</button>
-            <button onclick="openAiWithQuery('Explain RakshaGrid.')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-card border border-line text-fg hover:border-blue-500/40 hover:text-fg transition-colors">"Explain RakshaGrid"</button>
-            <button onclick="openAiWithQuery('What technologies does he use?')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-card border border-line text-fg hover:border-blue-500/40 hover:text-fg transition-colors">"Technologies he knows"</button>
-            <button onclick="openAiWithQuery('What AI projects has he worked on?')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-card border border-line text-fg hover:border-blue-500/40 hover:text-fg transition-colors">"AI applications"</button>
+            <button onclick="openAiWithQuery('What projects has Raviranjan built?')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-card border border-line text-fg hover:border-indigo-500/40 hover:text-fg transition-colors">"What projects has he built?"</button>
+            <button onclick="openAiWithQuery('Explain RakshaGrid.')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-card border border-line text-fg hover:border-indigo-500/40 hover:text-fg transition-colors">"Explain RakshaGrid"</button>
+            <button onclick="openAiWithQuery('What technologies does he use?')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-card border border-line text-fg hover:border-indigo-500/40 hover:text-fg transition-colors">"Technologies he knows"</button>
+            <button onclick="openAiWithQuery('What AI projects has he worked on?')" class="hero-prompt-chip px-3 py-1.5 rounded-lg bg-card border border-line text-fg hover:border-indigo-500/40 hover:text-fg transition-colors">"AI applications"</button>
           </div>
         </div>
       </div>
@@ -458,8 +463,8 @@
         <div class="md:col-span-4 saas-card bento-card p-5 flex flex-col justify-between space-y-3">
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">01 · IDENTITY</span>
-              <i data-lucide="user-check" class="w-4 h-4 text-blue-400"></i>
+              <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">01 · IDENTITY</span>
+              <i data-lucide="user-check" class="w-4 h-4 text-indigo-400"></i>
             </div>
             <div>
               <h3 id="overview-profile-name" class="text-lg font-bold text-fg">Raviranjan Kumar</h3>
@@ -479,8 +484,8 @@
         <div class="md:col-span-5 saas-card bento-card p-5 flex flex-col justify-between space-y-3">
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">02 · CORE TECH MATRIX</span>
-              <i data-lucide="cpu" class="w-4 h-4 text-blue-400"></i>
+              <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">02 · CORE TECH MATRIX</span>
+              <i data-lucide="cpu" class="w-4 h-4 text-indigo-400"></i>
             </div>
             <div id="skills-cloud" class="flex flex-wrap gap-1.5 pt-1">
               <span class="text-xs px-2.5 py-1 rounded-md bg-raised text-fg border border-line">Java 21</span>
@@ -489,7 +494,7 @@
               <span class="text-xs px-2.5 py-1 rounded-md bg-raised text-fg border border-line">FastAPI</span>
               <span class="text-xs px-2.5 py-1 rounded-md bg-raised text-fg border border-line">React 18</span>
               <span class="text-xs px-2.5 py-1 rounded-md bg-raised text-fg border border-line">PostgreSQL</span>
-              <span class="text-xs px-2.5 py-1 rounded-md bg-raised text-blue-300 border border-blue-500/30">AI/LLM & RAG</span>
+              <span class="text-xs px-2.5 py-1 rounded-md bg-raised text-indigo-300 border border-indigo-500/30">AI/LLM & RAG</span>
               <span class="text-xs px-2.5 py-1 rounded-md bg-raised text-fg border border-line">Redis</span>
               <span class="text-xs px-2.5 py-1 rounded-md bg-raised text-fg border border-line">Docker</span>
               <span class="text-xs px-2.5 py-1 rounded-md bg-raised text-fg border border-line">Git</span>
@@ -553,7 +558,7 @@
               <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
               <span class="text-sm font-semibold text-fg">GitHub</span>
             </div>
-            <span id="gh-sync-badge" class="text-xs px-1.5 py-0.5 rounded bg-raised text-blue-400 border border-line">Active Sync</span>
+            <span id="gh-sync-badge" class="text-xs px-1.5 py-0.5 rounded bg-raised text-indigo-400 border border-line">Active Sync</span>
           </div>
 
           <div class="grid grid-cols-2 gap-3 text-xs">
@@ -716,12 +721,12 @@
         <div>
           <div class="flex items-center gap-2">
             <h2 class="text-xl font-bold text-fg">Featured Projects</h2>
-            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">PRODUCTION BUILDS</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">PRODUCTION BUILDS</span>
           </div>
           <p class="text-xs text-fg-2 mt-1">Production systems with architecture & milestone telemetry.</p>
         </div>
         <div class="flex items-center space-x-2 text-xs">
-          <button onclick="filterProjects('all')" class="proj-filter px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/30 active">All</button>
+          <button onclick="filterProjects('all')" class="proj-filter px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 active">All</button>
           <button onclick="filterProjects('ai')" class="proj-filter px-2.5 py-1 rounded-lg bg-card text-fg-2 hover:text-fg">AI / ML</button>
           <button onclick="filterProjects('backend')" class="proj-filter px-2.5 py-1 rounded-lg bg-card text-fg-2 hover:text-fg">Backend</button>
           <button onclick="filterProjects('web')" class="proj-filter px-2.5 py-1 rounded-lg bg-card text-fg-2 hover:text-fg">Full-Stack</button>
@@ -739,7 +744,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h2 class="text-xl font-bold text-fg">Internships, Experience & Credentials</h2>
-            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">NEON DB VERIFIED</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">NEON DB VERIFIED</span>
           </div>
           <p class="text-xs text-fg-2 mt-1">Verified industrial internships, offer letters, completion certificates, academic background, and achievements.</p>
         </div>
@@ -747,9 +752,9 @@
       </div>
 
       <!-- Dedicated Internships Panel (Full Width) -->
-      <div class="saas-card p-5 space-y-4 border border-blue-500/20">
+      <div class="saas-card p-5 space-y-4 border border-indigo-500/20">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2.5">
-          <span class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+          <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
             <i data-lucide="badge-check" class="w-4 h-4"></i> Internships & Industrial Training
           </span>
           <span class="text-xs text-fg-2">Offer Letters & Completion Certificates Verified</span>
@@ -763,7 +768,7 @@
         <!-- Work Experience -->
         <div class="saas-card p-5 space-y-3">
           <div class="flex items-center justify-between border-b border-line pb-2">
-            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
               <i data-lucide="briefcase" class="w-3.5 h-3.5"></i> Work Experience & Roles
             </span>
             <span class="text-xs text-fg-3">Career Timeline</span>
@@ -866,7 +871,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h2 class="text-xl font-bold text-fg">Research Hub</h2>
-            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">INVESTIGATIONS & PAPERS</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">INVESTIGATIONS & PAPERS</span>
           </div>
           <p class="text-xs text-fg-2 mt-1">Systems architecture & AI pipeline notes.</p>
         </div>
@@ -900,7 +905,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h2 class="text-xl font-bold text-fg">Engineering Notes & Writing</h2>
-            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">TECHNICAL ESSAYS</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">TECHNICAL ESSAYS</span>
           </div>
           <p class="text-xs text-fg-2 mt-1">Concise essays on backend & system design.</p>
         </div>
@@ -922,7 +927,7 @@
 
           <div class="space-y-2 text-xs text-fg">
             <div class="flex items-center space-x-3 p-2.5 rounded bg-card border border-line">
-              <i data-lucide="mail" class="w-4 h-4 text-blue-400"></i>
+              <i data-lucide="mail" class="w-4 h-4 text-indigo-400"></i>
               <span id="about-profile-email">admin@raviranjan.dev</span>
             </div>
             <div class="flex items-center space-x-3 p-2.5 rounded bg-card border border-line">
@@ -947,20 +952,20 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-fg-2 mb-1">Your Name *</label>
-                <input type="text" id="contact-name" required minlength="2" maxlength="80" placeholder="Alice Smith" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="text" id="contact-name" required minlength="2" maxlength="80" placeholder="Alice Smith" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
               <div>
                 <label class="block text-fg-2 mb-1">Email Address *</label>
-                <input type="email" id="contact-email" required maxlength="254" placeholder="alice@company.com" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+                <input type="email" id="contact-email" required maxlength="254" placeholder="alice@company.com" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
               </div>
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Company / Organization (Optional)</label>
-              <input type="text" id="contact-company" maxlength="150" placeholder="e.g. Infosys, Google, Startup / University" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400">
+              <input type="text" id="contact-company" maxlength="150" placeholder="e.g. Infosys, Google, Startup / University" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400">
             </div>
             <div>
               <label class="block text-fg-2 mb-1">Message *</label>
-              <textarea id="contact-message" rows="3" required minlength="2" maxlength="5000" placeholder="Hi Raviranjan, I'd like to discuss a software engineering opportunity..." class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-blue-400"></textarea>
+              <textarea id="contact-message" rows="3" required minlength="2" maxlength="5000" placeholder="Hi Raviranjan, I'd like to discuss a software engineering opportunity..." class="w-full p-2.5 rounded-lg bg-card border border-line text-fg focus:outline-none focus:border-indigo-400"></textarea>
             </div>
             <div class="p-2.5 rounded bg-card border border-line text-xs text-fg-2 space-y-1.5 font-sans">
               <div class="flex items-start justify-between gap-2">
@@ -971,7 +976,7 @@
                 <span>Opt out of optional browser correlation signal (privacy mode)</span>
               </label>
             </div>
-            <button id="contact-submit-btn" type="submit" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors shadow-md">
+            <button id="contact-submit-btn" type="submit" class="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-colors shadow-md">
               Submit Inquiry to CRM
             </button>
           </form>
@@ -986,7 +991,7 @@
     <div class="w-full max-w-4xl max-h-[90vh] bg-card border border-line rounded-xl shadow-xl overflow-y-auto p-6 space-y-6 text-xs">
       <div class="flex items-center justify-between border-b border-line pb-4">
         <div>
-          <span id="modal-project-badge" class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">CASE STUDY</span>
+          <span id="modal-project-badge" class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">CASE STUDY</span>
           <h2 id="modal-project-title" class="text-xl font-bold text-fg mt-1">Project Title</h2>
         </div>
         <button onclick="closeProjectDetail()" class="p-1 rounded-lg hover:bg-raised text-fg-2 hover:text-fg">
@@ -1006,7 +1011,7 @@
       <!-- Top Modal Action Bar -->
       <div class="p-4 border-b border-line bg-subtle flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="flex items-center space-x-2.5">
-          <div class="w-7 h-7 rounded bg-blue-500/10 border border-blue-500/30 text-blue-400 flex items-center justify-center">
+          <div class="w-7 h-7 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center">
             <i data-lucide="file-text" class="w-4 h-4"></i>
           </div>
           <div>
@@ -1015,12 +1020,12 @@
           </div>
         </div>
         <div class="flex items-center space-x-2">
-          <button type="button" onclick="downloadResumePdf()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-md">
+          <button type="button" onclick="downloadResumePdf()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-md">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             <span>Download PDF</span>
           </button>
           <a id="resume-external-link-btn" href="#" target="_blank" rel="noopener noreferrer" class="hidden px-3 py-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-fg text-xs flex items-center gap-1">
-            <i data-lucide="external-link" class="w-3.5 h-3.5 text-blue-400"></i>
+            <i data-lucide="external-link" class="w-3.5 h-3.5 text-indigo-400"></i>
             <span>External PDF Link</span>
           </a>
           <button type="button" onclick="closeResumeModal()" class="p-1.5 rounded-lg hover:bg-raised text-fg-2 hover:text-fg">
@@ -1040,10 +1045,8 @@
   <div id="ai-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-[480px] bg-card border-l border-line shadow-xl transform translate-x-full transition-transform duration-300 flex flex-col" role="dialog" aria-modal="true" aria-label="Ask AI">
     <!-- Drawer Header -->
     <div class="p-4 border-b border-line flex items-center justify-between bg-canvas">
-      <div class="flex items-center space-x-2.5">
-        <div class="w-7 h-7 rounded bg-blue-500/10 text-blue-400 border border-blue-500/30 flex items-center justify-center">
-          <i data-lucide="bot" class="w-4 h-4"></i>
-        </div>
+      <div class="flex items-center gap-3">
+        <span class="orb" aria-hidden="true"></span>
         <div>
           <div class="font-bold text-sm text-fg">Ask AI</div>
           <div class="text-xs text-fg-3">RAG Assistant · Portfolio Grounded</div>
@@ -1059,17 +1062,17 @@
       <div class="flex items-center justify-between">
         <span class="text-xs text-fg-2">Reply Language:</span>
         <div class="flex items-center gap-1">
-          <button type="button" onclick="setPublicAiLanguage('AUTO')" id="ai-lang-AUTO" class="px-2 py-0.5 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/40 text-xs">Auto</button>
-          <button type="button" onclick="setPublicAiLanguage('HINGLISH')" id="ai-lang-HINGLISH" class="px-2 py-0.5 rounded-lg bg-raised text-fg-2 border border-line text-xs hover:text-fg">🇮🇳 Hinglish</button>
-          <button type="button" onclick="setPublicAiLanguage('HINDI')" id="ai-lang-HINDI" class="px-2 py-0.5 rounded-lg bg-raised text-fg-2 border border-line text-xs hover:text-fg">🇮🇳 हिंदी</button>
-          <button type="button" onclick="setPublicAiLanguage('ENGLISH')" id="ai-lang-ENGLISH" class="px-2 py-0.5 rounded-lg bg-raised text-fg-2 border border-line text-xs hover:text-fg">🇬🇧 English</button>
+          <button type="button" onclick="setPublicAiLanguage('AUTO')" id="ai-lang-AUTO" class="px-3 py-1.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs">Auto</button>
+          <button type="button" onclick="setPublicAiLanguage('HINGLISH')" id="ai-lang-HINGLISH" class="px-3 py-1.5 rounded-full bg-raised text-fg-2 border border-line text-xs hover:text-fg">🇮🇳 Hinglish</button>
+          <button type="button" onclick="setPublicAiLanguage('HINDI')" id="ai-lang-HINDI" class="px-3 py-1.5 rounded-full bg-raised text-fg-2 border border-line text-xs hover:text-fg">🇮🇳 हिंदी</button>
+          <button type="button" onclick="setPublicAiLanguage('ENGLISH')" id="ai-lang-ENGLISH" class="px-3 py-1.5 rounded-full bg-raised text-fg-2 border border-line text-xs hover:text-fg">🇬🇧 English</button>
         </div>
       </div>
       <div class="flex flex-wrap gap-1.5">
-        <button onclick="sendAiMessage('What projects has Raviranjan built?')" class="px-2 py-0.5 rounded-lg bg-raised hover:bg-raised text-fg border border-line">"Projects built?"</button>
-        <button onclick="sendAiMessage('RakshaGrid project Hinglish me samjhao')" class="px-2 py-0.5 rounded-lg bg-raised hover:bg-raised text-blue-300 border border-blue-500/30">"RakshaGrid (Hinglish)"</button>
-        <button onclick="sendAiMessage('रविरंजन के प्रोजेक्ट्स के बारे में हिंदी में बताओ')" class="px-2 py-0.5 rounded-lg bg-raised hover:bg-raised text-amber-300 border border-amber-500/30">"प्रोजेक्ट्स (हिंदी)"</button>
-        <button onclick="sendAiMessage('What technologies and DSA notes does he have?')" class="px-2 py-0.5 rounded-lg bg-raised hover:bg-raised text-fg border border-line">"Tech & DSA"</button>
+        <button onclick="sendAiMessage('What projects has Raviranjan built?')" class="px-3 py-1.5 rounded-full bg-raised hover:bg-raised text-fg border border-line">"Projects built?"</button>
+        <button onclick="sendAiMessage('RakshaGrid project Hinglish me samjhao')" class="px-3 py-1.5 rounded-full bg-raised hover:bg-raised text-indigo-300 border border-indigo-500/30">"RakshaGrid (Hinglish)"</button>
+        <button onclick="sendAiMessage('रविरंजन के प्रोजेक्ट्स के बारे में हिंदी में बताओ')" class="px-3 py-1.5 rounded-full bg-raised hover:bg-raised text-amber-300 border border-amber-500/30">"प्रोजेक्ट्स (हिंदी)"</button>
+        <button onclick="sendAiMessage('What technologies and DSA notes does he have?')" class="px-3 py-1.5 rounded-full bg-raised hover:bg-raised text-fg border border-line">"Tech & DSA"</button>
       </div>
     </div>
 
@@ -1082,10 +1085,10 @@
 
     <!-- Chat Input Form -->
     <div class="p-3 border-t border-line bg-canvas">
-      <form onsubmit="handleAiInput(event)" class="flex items-center space-x-2">
-        <input type="text" id="ai-user-query" placeholder="Ask anything about Raviranjan's engineering profile..." class="flex-1 p-2.5 rounded-lg bg-card border border-line text-xs text-fg focus:outline-none focus:border-blue-400 placeholder:text-fg-3">
-        <button type="submit" class="p-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors">
-          <i data-lucide="send" class="w-4 h-4"></i>
+      <form onsubmit="handleAiInput(event)" class="composer">
+        <input type="text" id="ai-user-query" placeholder="Send a message…" aria-label="Message the AI assistant" autocomplete="off">
+        <button type="submit" class="send" aria-label="Send message">
+          <i data-lucide="arrow-up" aria-hidden="true"></i>
         </button>
       </form>
     </div>
@@ -1133,8 +1136,16 @@
       </div>
     </div>
   </footer>
+  <nav class="bottom-nav bottom-nav--public" aria-label="Quick navigation">
+    <a href="#overview" class="bottom-nav__item" data-spy="overview" aria-label="Home"><i data-lucide="house" aria-hidden="true"></i><span>Home</span></a>
+    <a href="#projects" class="bottom-nav__item" data-spy="projects" aria-label="Projects"><i data-lucide="layout-grid" aria-hidden="true"></i><span>Projects</span></a>
+    <a href="#activity" class="bottom-nav__item" data-spy="activity" aria-label="Activity"><i data-lucide="activity" aria-hidden="true"></i><span>Activity</span></a>
+    <a href="#coding" class="bottom-nav__item" data-spy="coding" aria-label="Coding"><i data-lucide="code-xml" aria-hidden="true"></i><span>Coding</span></a>
+    <a href="#about" class="bottom-nav__item" data-spy="about" aria-label="Contact"><i data-lucide="mail" aria-hidden="true"></i><span>Contact</span></a>
+  </nav>
+  
 
-  <script src="/main_app.js?v=19"></script>
-  <script src="/design-system.js?v=19" defer></script>
+  <script src="/main_app.js?v=20"></script>
+  <script src="/design-system.js?v=20" defer></script>
 </body>
 </html>
