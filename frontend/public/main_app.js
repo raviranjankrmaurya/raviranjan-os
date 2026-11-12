@@ -108,15 +108,17 @@ function getOrCreateBrowserFingerprint() {
 
 // main_app.js - Raviranjan.OS Dynamic Client & Grounded RAG Telemetry Engine (100% Neon DB & Live APIs)
 
-// Global State (Populated 100% Dynamically from Neon DB & Connected APIs)
+// Global State (Populated 100% Dynamically & Connected APIs)
 let currentProfile = {
-  fullName: "Raviranjan Kumar",
-  headline: "BCA Student · Software Developer",
-  bio: "Building software for the AI-native era. Full-stack developer focused on Java, Spring Boot, Python, FastAPI, React, PostgreSQL, and AI/LLM applications.",
-  currentFocus: "Software development, backend engineering, and AI/LLM applications.",
-  location: "New Delhi, Delhi, India",
-  email: "admin@raviranjan.dev",
-  availableForHire: true
+  fullName: "",
+  headline: "",
+  bio: "",
+  currentFocus: "",
+  location: "",
+  email: "",
+  phone: "",
+  availableForHire: null,
+  socialLinks: []
 };
 
 let projectsList = [];
@@ -170,8 +172,6 @@ function startBackendWarmupAndHydrationLoop() {
     }
   }).catch(() => {});
 
-  fetch('https://raviranjan-os-backend.onrender.com/api', { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
-
   // 2. Continuous cold-start polling every 2.5s until 200 OK received
   let attempts = 0;
   if (backendWarmupInterval) clearInterval(backendWarmupInterval);
@@ -198,7 +198,7 @@ function startBackendWarmupAndHydrationLoop() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Wipe any legacy localStorage portfolio data so 100% comes from Neon DB
+  // Wipe any legacy localStorage portfolio data so 100% comes
   localStorage.removeItem("customProjects");
   localStorage.removeItem("cachedProfile");
 
@@ -289,7 +289,7 @@ function handleBackendStartupError() {
   }
 }
 
-// Dynamic Profile Ingestion (Strictly from Neon DB)
+// Dynamic Profile Ingestion (Strictly)
 function fetchDynamicProfile() {
   fetch("/api/profile")
     .then(res => {
@@ -314,85 +314,71 @@ function fetchDynamicProfile() {
 }
 
 function updateProfileDom() {
-  const nameEl = document.getElementById("hero-profile-name");
-  if (nameEl) nameEl.innerText = currentProfile.fullName || "Raviranjan Kumar";
+  const p = currentProfile || {};
+  const byId = id => document.getElementById(id);
+  // Fill an element from backend data; hide it (or its marked row) when the backend has no value.
+  const bind = (id, value) => {
+    const el = byId(id);
+    if (!el) return;
+    const v = value == null ? "" : String(value).trim();
+    el.textContent = v;
+    const row = el.closest("[data-hide-empty]") || (el.hasAttribute("data-hide-empty") ? el : null);
+    if (row) row.classList.toggle("hidden", !v);
+  };
 
-  const bioEl = document.getElementById("hero-profile-bio");
-  if (bioEl && currentProfile.bio) {
-    let cleanBio = String(currentProfile.bio)
-      .replace(/^Building software for the AI-native era\.?\s*/i, "")
-      .trim();
-    if (cleanBio.length > 120) cleanBio = cleanBio.substring(0, 117).trim() + "...";
-    if (!cleanBio) cleanBio = currentProfile.bio;
-    bioEl.innerText = cleanBio;
+  bind("hero-profile-name", p.fullName);
+  bind("recruiter-profile-name", p.fullName);
+  bind("overview-profile-name", p.fullName);
+  bind("recruiter-profile-headline", p.headline);
+  bind("overview-profile-headline", p.headline);
+  bind("recruiter-profile-bio", p.bio);
+  bind("overview-profile-bio", p.bio);
+  bind("hero-profile-location", p.location);
+  bind("about-profile-location", p.location);
+  bind("about-profile-email", p.email);
+  bind("about-profile-phone", p.phone);
+  bind("overview-focus-note", p.currentFocus);
+
+  const bioEl = byId("hero-profile-bio");
+  if (bioEl) {
+    let b = String(p.bio || "").trim();
+    if (b.length > 120) b = b.substring(0, 117).trim() + "…";
+    bioEl.textContent = b;
   }
 
-  const locEl = document.getElementById("hero-profile-location");
-  if (locEl && currentProfile.location) locEl.innerText = currentProfile.location;
+  // Availability: a state label driven by the backend flag (nothing shown if the flag is unknown)
+  const avail = typeof p.availableForHire === "boolean" ? (p.availableForHire ? "Open to opportunities" : "Currently focused on projects") : "";
+  bind("hero-availability-status", avail);
+  bind("availability-card-title", avail);
+  bind("recruiter-availability", avail);
 
-  const aboutLocEl = document.getElementById("about-profile-location");
-  if (aboutLocEl && currentProfile.location) aboutLocEl.innerText = currentProfile.location;
-
-  const emailEl = document.getElementById("about-profile-email");
-  if (emailEl && currentProfile.email) emailEl.innerText = currentProfile.email;
-
-  const availEl = document.getElementById("hero-availability-status");
-  if (availEl) {
-    availEl.innerText = currentProfile.availableForHire
-      ? "Open to Software Development Opportunities"
-      : "Currently Focused on Projects";
-  }
-
-  const recNameEl = document.getElementById("recruiter-profile-name");
-  if (recNameEl) recNameEl.innerText = currentProfile.fullName;
-
-  const recHeadlineEl = document.getElementById("recruiter-profile-headline");
-  if (recHeadlineEl) recHeadlineEl.innerText = `${currentProfile.headline} · Builder`;
-
-  const recBioEl = document.getElementById("recruiter-profile-bio");
-  if (recBioEl) recBioEl.innerText = currentProfile.bio;
-
-  const overNameEl = document.getElementById("overview-profile-name");
-  if (overNameEl) overNameEl.innerText = currentProfile.fullName;
-
-  const overHeadlineEl = document.getElementById("overview-profile-headline");
-  if (overHeadlineEl) overHeadlineEl.innerText = currentProfile.headline;
-
-  const overBioEl = document.getElementById("overview-profile-bio");
-  if (overBioEl) overBioEl.innerText = currentProfile.bio;
-
-  const phoneEl = document.getElementById("about-profile-phone");
-  if (phoneEl && currentProfile.phone) phoneEl.innerText = currentProfile.phone;
-
-  const focusNoteEl = document.getElementById("overview-focus-note");
-  if (focusNoteEl && currentProfile.currentFocus) focusNoteEl.innerText = currentProfile.currentFocus;
-
-  if (Array.isArray(currentProfile.socialLinks) && currentProfile.socialLinks.length > 0) {
-    currentProfile.socialLinks.forEach(l => {
-      const plat = (l.platform || "").toLowerCase();
-      if (plat.includes("github") && l.url) {
-        const gh1 = document.getElementById("avail-link-github");
-        const gh2 = document.getElementById("hero-github-btn");
-        if (gh1) gh1.href = l.url;
-        if (gh2) gh2.href = l.url;
-      }
-      if (plat.includes("linkedin") && l.url) {
-        const li = document.getElementById("avail-link-linkedin");
-        if (li) li.href = l.url;
-      }
-      if (plat.includes("leetcode") && l.url) {
-        const lc = document.getElementById("avail-link-leetcode");
-        if (lc) lc.href = l.url;
-      }
-      if (plat.includes("geeks") && l.url) {
-        const gfg = document.getElementById("avail-link-gfg");
-        if (gfg) gfg.href = l.url;
-      }
+  // Social links: show a link only when the backend provides it
+  const slots = { github: ["avail-link-github", "hero-github-btn"], linkedin: ["avail-link-linkedin"], leetcode: ["avail-link-leetcode"], geeks: ["avail-link-gfg"] };
+  const links = Array.isArray(p.socialLinks) ? p.socialLinks.filter(l => l && l.url) : [];
+  Object.keys(slots).forEach(key => {
+    const hit = links.find(l => (l.platform || "").toLowerCase().includes(key));
+    slots[key].forEach(id => {
+      const a = byId(id);
+      if (!a) return;
+      if (hit) { a.href = hit.url; a.classList.remove("hidden"); } else { a.removeAttribute("href"); a.classList.add("hidden"); }
     });
+  });
+
+  // Footer: name, year and social links come from the profile
+  bind("footer-name", p.fullName);
+  const yr = byId("footer-year"); if (yr) yr.textContent = String(new Date().getFullYear());
+  const fs = byId("footer-social");
+  if (fs) {
+    fs.innerHTML = links.map(l => `<li><a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.platform || l.url)}</a></li>`).join("");
+    fs.classList.toggle("hidden", links.length === 0);
   }
+  const curl = byId("hero-curl-command");
+  if (curl && !curl.textContent.trim()) curl.textContent = `curl -s ${location.origin}/api/profile | jq`;
+  if (p.fullName) document.title = p.fullName + " — Developer portfolio";
+  if ((!window.__heroHeadlines || !window.__heroHeadlines.length) && typeof initHeroTextAnimator === "function") initHeroTextAnimator();
 }
 
-// Dynamic Projects Ingestion (Strictly from Neon DB, Zero localStorage)
+// Dynamic Projects Ingestion (Strictly, Zero localStorage)
 function fetchDynamicProjects() {
   const container = document.getElementById("projects-grid");
   if (!container) return;
@@ -412,7 +398,7 @@ function fetchDynamicProjects() {
       projectsList = rawList.map(p => {
         const techs = Array.isArray(p.technologies) && p.technologies.length > 0
           ? p.technologies
-          : ["Java 21", "Spring Boot", "PostgreSQL"];
+          : [];
         const archLower = ((p.architectureStyle || "") + " " + techs.join(" ")).toLowerCase();
         let cat = "backend";
         if (archLower.includes("ai") || archLower.includes("ml") || archLower.includes("rag") || archLower.includes("llm")) cat = "ai";
@@ -422,18 +408,25 @@ function fetchDynamicProjects() {
           id: p.id,
           slug: p.slug || p.id,
           title: p.title,
-          version: p.version || "v1.0",
+          version: p.version || "",
           status: p.status || "PUBLISHED",
           statusClass: p.status === "PUBLISHED" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
-          progress: p.progress !== undefined ? p.progress : (p.progressPercentage || 85),
+          progress: Number.isFinite(Number(p.progress)) ? Number(p.progress) : 0,
           category: cat,
           description: p.shortSummary || p.fullDescription || p.description || "",
           fullDescription: p.fullDescription || p.shortSummary || "",
-          architectureStyle: p.architectureStyle || "Modular Architecture",
-          milestoneSummary: p.architectureStyle || "Synced from Neon DB",
+          architectureStyle: p.architectureStyle || "",
+          problemStatement: p.problemStatement || "",
+          solutionOverview: p.solutionOverview || "",
+          systemArchitecture: p.systemArchitecture || "",
+          milestones: Array.isArray(p.milestones) ? p.milestones : [],
+          decisions: Array.isArray(p.decisions) ? p.decisions : [],
+          changelogs: Array.isArray(p.changelogs) ? p.changelogs : [],
+          milestoneSummary: p.architectureStyle || "",
           technologies: techs,
-          github: p.githubRepoUrl || p.githubUrl || "https://github.com/raviranjankrmaurya",
-          demo: p.liveDemoUrl || "#"
+          github: p.githubRepoUrl || p.githubUrl || "",
+          demo: p.liveDemoUrl || "",
+          docs: p.documentationUrl || ""
         };
       });
       renderProjects(projectsList);
@@ -453,7 +446,7 @@ function renderProjects(items) {
       <div class="col-span-full p-8 rounded-xl bg-card border border-line text-center space-y-2">
         <i data-lucide="folder-search" class="w-8 h-8 text-fg-3 mx-auto"></i>
         <p class="text-sm font-bold text-fg">No Projects Published Yet</p>
-        <p class="text-xs text-fg-2">Add or publish projects in the Admin CMS to display them here from Neon DB.</p>
+        <p class="text-xs text-fg-2">Add or publish projects in the Admin CMS to display them here.</p>
       </div>
     `;
     if (window.lucide) window.lucide.createIcons();
@@ -520,7 +513,7 @@ function renderProjects(items) {
   if (window.lucide) window.lucide.createIcons();
 }
 
-// Dynamic Unified Activity Feed (Strictly from Neon DB)
+// Dynamic Unified Activity Feed (Strictly)
 function fetchDynamicActivity() {
   fetch("/api/activity?size=5")
     .then(res => res.json())
@@ -541,7 +534,7 @@ function renderActivity(items) {
   if (!container) return;
 
   if (!items || items.length === 0) {
-    container.innerHTML = `<div class="p-6 text-center text-xs text-fg-3">No developer activity recorded yet in Neon DB.</div>`;
+    container.innerHTML = `<div class="p-6 text-center text-xs text-fg-3">No developer activity recorded yet.</div>`;
     return;
   }
 
@@ -648,7 +641,10 @@ function renderGitHubHeatmap(year = 2026, liveDays = null) {
 
 async function fetchDirectGitHubContributions() {
   try {
-    const res = await fetch("https://github-contributions-api.jogruber.de/v4/raviranjankrmaurya?y=all");
+    const ghLink = (currentProfile.socialLinks || []).find(l => /github/i.test(l.platform || ""));
+    const ghUser = ghLink && ghLink.url ? (ghLink.url.match(/github\.com\/([^/?#]+)/i) || [])[1] : "";
+    if (!ghUser) return;
+    const res = await fetch(`https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(ghUser)}?y=all`);
     if (res.ok) {
       const data = await res.json();
       if (data && data.contributions && Array.isArray(data.contributions) && data.contributions.length > 0) {
@@ -739,8 +735,8 @@ async function fetchDynamicIntegrations() {
           setEl("gfg-score", Number(d.gfg.score || 0).toLocaleString());
           setEl("gfg-problems", d.gfg.problems ?? 0);
           setEl("gfg-articles", d.gfg.articles || "0 Notes");
-          setEl("gfg-rank", d.gfg.rank || "Synced from Neon DB");
-          setEl("gfg-last-sync", "Last sync: Neon DB");
+          setEl("gfg-rank", d.gfg.rank || "Synced");
+          setEl("gfg-last-sync", "");
           setHtml("gfg-health-status", "<span class=\"inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse\"></span> Connected");
         }
       }
@@ -809,8 +805,7 @@ function isSecretAdminTriggerKeyword(raw) {
     q === "sudo admin" ||
     q === "#unlock-os" ||
     q === "ravi@admin" ||
-    q === "8271190619" ||
-    q === "raviranjanmaurya@zohomail.in"
+    false
   );
 }
 
@@ -847,177 +842,63 @@ function filterProjects(cat) {
 }
 
 // Project Detail Case Study Modal
-const projectData = {
-  rakshagrid: {
-    title: 'RakshaGrid — AI-Powered Disaster Response Platform',
-    badge: 'ACTIVE BUILD (85%)',
-    problem: 'During natural disasters and civic emergencies, existing dispatch tools suffer from fragmented sensor data, duplicate reports, and delayed responder coordination, resulting in life-critical dispatch bottlenecks.',
-    solution: 'RakshaGrid provides a centralized incident triage and resource dispatch system. It processes incoming emergency reports, uses ML to rank urgency, maps hazard zones with PostGIS, and assigns personnel dynamically.',
-    architecture: 'Microservices architecture with FastAPI backend for async event streaming, PostgreSQL with PostGIS for spatial queries, and a modern React dashboard for emergency field coordinators.',
-    technologies: ['FastAPI', 'Python', 'React', 'PostgreSQL', 'PostGIS', 'Machine Learning', 'Docker'],
-    milestones: [
-      { name: 'Problem Discovery & Disaster Management Research', status: 'done' },
-      { name: 'System Architecture & Schema Design', status: 'done' },
-      { name: 'FastAPI Backend & Geospatial Indexing', status: 'done' },
-      { name: 'PostGIS Spatial Incident Radius Engine', status: 'done' },
-      { name: 'ML Urgency Triage & Priority Scoring', status: 'in-progress' },
-      { name: 'React Coordinator Real-Time Dashboard', status: 'in-progress' },
-      { name: 'Simulated Stress & Ingestion Testing', status: 'pending' },
-      { name: 'Containerized Production Deployment', status: 'pending' }
-    ],
-    adr: 'ADR #1: Selected PostgreSQL with PostGIS over MongoDB Geospatial to ensure ACID guarantees during simultaneous resource allocations and zero race conditions.',
-    learned: 'Learned spatial indexing with GiST, async worker pools in FastAPI, and designing mission-critical UIs with high accessibility under stress.',
-    future: 'Offline-first mobile synchronization for field rescue units in zero-connectivity areas.',
-    github: 'https://github.com/raviranjan/rakshagrid'
-  },
-  devpulse: {
-    title: 'DevPulse Engine — Real-time Developer Productivity Digest',
-    badge: 'STABLE V1.0 (92%)',
-    problem: 'Engineering teams waste dozens of hours every week manually compiling daily standup digests and tracking cross-repository pull requests across disjointed GitHub orgs.',
-    solution: 'DevPulse connects to GitHub via Webhooks and GraphQL, automatically categorizing commits, reviews, and issues into structured markdown standup summaries.',
-    architecture: 'Java 21 Spring Boot backend utilizing Virtual Threads for concurrent webhook ingestion, Redis Pub/Sub for live status broadcasts, and Server-Sent Events for instant browser updates.',
-    technologies: ['Java 21', 'Spring Boot 3.3', 'Redis', 'PostgreSQL', 'SSE', 'Docker'],
-    milestones: [
-      { name: 'GitHub Webhook Security Verification', status: 'done' },
-      { name: 'Virtual Threads Async Ingestion Pipeline', status: 'done' },
-      { name: 'Redis Pub/Sub Event Broadcast Bus', status: 'done' },
-      { name: 'Standup Generation Engine', status: 'done' }
-    ],
-    adr: 'ADR #2: Adopted Server-Sent Events (SSE) over WebSockets because client communication is strictly server-to-browser telemetry, eliminating bidirectional socket overhead.',
-    learned: 'Mastered Java 21 Project Loom virtual thread semantics and carrier thread unpinning under I/O blocking.',
-    future: 'Slack and Discord automated bot integrations.',
-    github: 'https://github.com/raviranjan/devpulse'
-  },
-  neurodoc: {
-    title: 'NeuroDoc — Enterprise Document QA & RAG Agent',
-    badge: 'PROTOTYPE (78%)',
-    problem: 'Searching through hundred-page technical manuals and compliance documents yields keyword mismatches and hallucinations with raw LLM completions.',
-    solution: 'NeuroDoc partitions documents into semantic vector chunks, indexes them with FAISS, and uses small open-source models with citation verification.',
-    architecture: 'Python FastAPI service with LangChain, FAISS vector indexing, Ollama local inference backend, and responsive Tailwind UI.',
-    technologies: ['Python', 'FastAPI', 'LangChain', 'FAISS', 'Ollama', 'React'],
-    milestones: [
-      { name: 'PDF & Markdown Semantic Token Chunking', status: 'done' },
-      { name: 'Vector Store & Cosine Similarity Ranking', status: 'done' },
-      { name: 'Citation & Hallucination Guardrails', status: 'in-progress' },
-      { name: 'Web-based Query Playground', status: 'in-progress' }
-    ],
-    adr: 'ADR #3: Implemented strict citation requirement where each answer must reference exact paragraph offsets.',
-    learned: 'Gained hands-on experience in embedding fine-tuning, context window management, and mitigating LLM hallucinations.',
-    future: 'Hybrid sparse (BM25) and dense vector retrieval for improved domain terminology recall.',
-    github: 'https://github.com/raviranjan/neurodoc'
-  },
-  algovault: {
-    title: 'AlgoVault — Interactive Algorithm Visualization Engine',
-    badge: 'PRODUCTION (96%)',
-    problem: 'Conceptualizing abstract pointer mechanics, graph traversals, and dynamic programming state transitions through static textbook diagrams is inefficient.',
-    solution: 'AlgoVault generates visual step-by-step animations for common data structures and algorithms with real-time complexity callouts and dual Java/Python syntax.',
-    architecture: 'Modern React SPA using the HTML5 Canvas API and customized animation loops with step-forward/step-back timeline scrubbing.',
-    technologies: ['React', 'TypeScript', 'Tailwind CSS', 'Canvas API'],
-    milestones: [
-      { name: 'Core Canvas Visualizer Renderer', status: 'done' },
-      { name: 'Sorting & Searching Visualizations', status: 'done' },
-      { name: 'Binary Trees & Graph BFS/DFS Engines', status: 'done' },
-      { name: 'Dynamic Programming Grid Visualizer', status: 'done' }
-    ],
-    adr: 'ADR #4: Used custom requestAnimationFrame loops instead of third-party chart libraries for granular per-frame stepping control.',
-    learned: 'Refined deep understanding of algorithmic invariants and client-side canvas performance optimizations.',
-    future: 'Adding competitive programming problem mapping directly to visualizers.',
-    github: 'https://github.com/raviranjan/algovault'
-  }
-};
+
 
 function openProjectDetail(slug) {
-  const dynProj = projectsList.find(item => item.slug === slug || String(item.id) === String(slug));
-  const preset = projectData[slug];
-
-  const p = preset || (dynProj ? {
-    title: dynProj.title,
-    badge: `${dynProj.status || "PUBLISHED"} (${dynProj.progress || 85}%)`,
-    problem: dynProj.description || "Engineered to solve complex distributed architecture and developer workflow challenges.",
-    solution: dynProj.fullDescription || dynProj.description || "Full-stack implementation backed by Neon Cloud PostgreSQL and Spring Boot.",
-    architecture: dynProj.architectureStyle || "Modular Service Architecture",
-    technologies: dynProj.technologies || ["Java 21", "Spring Boot", "PostgreSQL"],
-    milestones: [
-      { name: "Architecture & Database Schema Design", status: "done" },
-      { name: "Core Backend Services & API Layer", status: "done" },
-      { name: "Frontend Integration & Telemetry", status: dynProj.progress >= 90 ? "done" : "in-progress" }
-    ],
-    adr: `ADR #1: Persisted domain state in Neon Cloud PostgreSQL with ${dynProj.architectureStyle || "Modular"} pattern for high availability.`,
-    learned: "Production-grade API engineering, relational modeling, and clean separation of concerns.",
-    github: dynProj.github || "https://github.com/raviranjankrmaurya"
-  } : null);
-
+  const p = projectsList.find(item => item.slug === slug || String(item.id) === String(slug));
   if (!p) return;
 
   const modal = document.getElementById("project-detail-modal");
   const title = document.getElementById("modal-project-title");
   const badge = document.getElementById("modal-project-badge");
   const body = document.getElementById("modal-project-body");
+  if (!modal || !title || !body) return;
 
-  title.innerText = p.title;
-  badge.innerText = p.badge;
+  title.textContent = p.title || "";
+  if (badge) badge.textContent = p.status ? String(p.status).replace(/_/g, " ") + (Number.isFinite(Number(p.progress)) ? ` · ${Number(p.progress)}%` : "") : "";
 
-  const milestonesHtml = (p.milestones || []).map(m => {
-    const icon = m.status === "done" ? "✓" : (m.status === "in-progress" ? "◐" : "○");
-    const color = m.status === "done" ? "text-emerald-400" : (m.status === "in-progress" ? "text-indigo-400" : "text-fg-3");
-    return `<div class="flex items-center space-x-2 text-xs">
-      <span class="${color} font-bold w-4">${icon}</span>
-      <span class="${m.status ==="done" ? "text-fg" : "text-fg-2"}">${escapeHtml(m.name)}</span>
-    </div>`;
+  const pretty = v => String(v || "").replace(/_/g, " ").toLowerCase().replace(/^\w/, c => c.toUpperCase());
+  const h4 = t => `<h4 class="text-indigo-400 font-semibold text-xs mb-1">${t}</h4>`;
+  const para = (t, body) => body ? `<div>${h4(t)}<p class="text-fg leading-relaxed whitespace-pre-wrap">${escapeHtml(body)}</p></div>` : "";
+
+  const milestones = (p.milestones || []).map(m => {
+    const st = String(m.status || "").toUpperCase();
+    const done = st === "COMPLETED" || st === "DONE";
+    const icon = done ? "✓" : (st === "IN_PROGRESS" ? "◐" : "○");
+    const color = done ? "text-emerald-400" : (st === "IN_PROGRESS" ? "text-indigo-400" : "text-fg-3");
+    return `<div class="flex items-center gap-2 text-xs"><span class="${color} font-bold w-4" aria-hidden="true">${icon}</span><span class="${done ? "text-fg" : "text-fg-2"}">${escapeHtml(m.title || m.name || "")}</span>${m.versionTag ? `<span class="text-fg-3">${escapeHtml(m.versionTag)}</span>` : ""}</div>`;
   }).join("");
 
-  const techBadges = (p.technologies || []).map(t =>
-    `<span class="px-2 py-0.5 rounded bg-raised border border-line text-xs text-indigo-300">${escapeHtml(t)}</span>`
-  ).join("");
+  const decisions = (p.decisions || []).map(d => `
+    <div class="p-3 rounded-xl bg-raised border border-line space-y-1">
+      <div class="font-medium text-fg">${escapeHtml(d.decisionTitle || "")}</div>
+      ${d.problemContext ? `<p class="text-fg-2">${escapeHtml(d.problemContext)}</p>` : ""}
+      ${d.decisionTaken ? `<p class="text-fg"><span class="text-fg-3">Decision: </span>${escapeHtml(d.decisionTaken)}</p>` : ""}
+      ${d.tradeOffsConsidered ? `<p class="text-fg-2"><span class="text-fg-3">Trade-offs: </span>${escapeHtml(d.tradeOffsConsidered)}</p>` : ""}
+    </div>`).join("");
+
+  const techs = (p.technologies || []).map(t => `<span class="px-2 py-0.5 rounded-full bg-raised border border-line text-xs text-indigo-300">${escapeHtml(typeof t === "string" ? t : (t.name || ""))}</span>`).join("");
+
+  const link = (href, label, icon) => href ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="btn btn--pill"><i data-lucide="${icon}" class="w-4 h-4" aria-hidden="true"></i><span>${label}</span></a>` : "";
+  const actions = link(p.github, "Source code", "github") + link(p.demo, "Live demo", "external-link") + link(p.docs, "Documentation", "book-open");
+
+  const sections = [
+    para("Overview", p.problemStatement || p.fullDescription || p.description),
+    para("Solution", p.solutionOverview),
+    para("Architecture", p.systemArchitecture || p.architectureStyle),
+    milestones ? `<div>${h4("Milestones")}<div class="space-y-1.5 bg-raised p-3 rounded-xl border border-line">${milestones}</div></div>` : "",
+    decisions ? `<div>${h4("Decisions")}<div class="space-y-2">${decisions}</div></div>` : "",
+    techs ? `<div>${h4("Technology")}<div class="flex flex-wrap gap-1.5 pt-1">${techs}</div></div>` : ""
+  ].filter(Boolean).join("");
 
   body.innerHTML = `
-    <div class="space-y-4 text-xs font-sans">
-      <div>
-        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">1. Problem Statement & Overview</h4>
-        <p class="text-fg leading-relaxed">${escapeHtml(p.problem)}</p>
+    <div class="space-y-4 text-sm">
+      ${sections || `<p class="text-fg-3">No further details have been published for this project yet.</p>`}
+      <div class="pt-4 border-t border-line flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap gap-2">${actions}</div>
+        <button type="button" onclick="closeProjectDetail()" class="btn btn--pill">Close</button>
       </div>
-
-      <div>
-        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">2. Engineered Solution</h4>
-        <p class="text-fg leading-relaxed">${escapeHtml(p.solution)}</p>
-      </div>
-
-      <div>
-        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">3. System Architecture</h4>
-        <p class="text-fg leading-relaxed bg-raised p-3 rounded border border-line">${escapeHtml(p.architecture)}</p>
-      </div>
-
-      <div>
-        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-2">4. Milestone Progress Matrix</h4>
-        <div class="space-y-1.5 bg-raised p-3 rounded-xl border border-line">
-          ${milestonesHtml}
-        </div>
-      </div>
-
-      <div>
-        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">5. Architectural Decision Record (ADR)</h4>
-        <p class="text-fg bg-raised p-3 rounded border border-line leading-relaxed">${escapeHtml(p.adr)}</p>
-      </div>
-
-      <div>
-        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">6. Key Engineering Lessons</h4>
-        <p class="text-fg leading-relaxed">${escapeHtml(p.learned)}</p>
-      </div>
-
-      <div>
-        <h4 class="text-indigo-400 font-bold uppercase text-xs mb-1">7. Technology Stack</h4>
-        <div class="flex flex-wrap gap-1.5 pt-1">${techBadges}</div>
-      </div>
-
-      <div class="pt-4 border-t border-line flex items-center justify-between text-xs">
-        <a href="${escapeHtml(p.github)}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded bg-raised hover:bg-raised border border-line text-fg flex items-center gap-1.5">
-          <i data-lucide="github" class="w-3.5 h-3.5"></i>
-          <span>View Source on GitHub</span>
-        </a>
-        <button onclick="closeProjectDetail()" class="text-fg-2 hover:text-fg rounded-lg">Close Case Study</button>
-      </div>
-    </div>
-  `;
+    </div>`;
 
   modal.classList.remove("hidden");
   if (window.lucide) window.lucide.createIcons();
@@ -1029,70 +910,7 @@ function closeProjectDetail() {
 }
 
 // DSA Notes Explorer
-const dsaNotes = {
-  twosum: {
-    problem: 'Two Sum (LeetCode #1)',
-    approach: 'One-Pass Hash Map with Space-Time Tradeoff',
-    timeComp: 'O(n) linear scan',
-    spaceComp: 'O(n) auxiliary hash map storage',
-    learned: 'Instead of an O(n²) nested loop searching for complement (target - nums[i]), maintaining a hash map of previously seen numbers reduces complement verification to an average O(1) amortized lookup.',
-    code: `class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        Map<Integer, Integer> map = new HashMap<>();
-        for (int i = 0; i < nums.length; i++) {
-            int complement = target - nums[i];
-            if (map.containsKey(complement)) {
-                return new int[] { map.get(complement), i };
-            }
-            map.put(nums[i], i);
-        }
-        return new int[0];
-    }
-}`
-  },
-  lru: {
-    problem: 'LRU Cache (LeetCode #146)',
-    approach: 'Doubly Linked List + Hash Map for Constant-Time Eviction',
-    timeComp: 'O(1) for both get() and put() operations',
-    spaceComp: 'O(capacity) storage for key-node mappings',
-    learned: 'A hash map provides O(1) key-to-node lookup, while a doubly linked list with pseudo-head and pseudo-tail nodes allows splicing nodes out and moving them to the front in strict O(1) without boundary condition null checks.',
-    code: `class LRUCache {
-    class Node { int key, val; Node prev, next; }
-    private final int capacity;
-    private final Map<Integer, Node> map = new HashMap<>();
-    private final Node head = new Node(), tail = new Node();
 
-    public LRUCache(int capacity) {
-        this.capacity = capacity;
-        head.next = tail;
-        tail.prev = head;
-    }
-    // O(1) get & put with node splicing
-}`
-  },
-  rotated: {
-    problem: 'Search in Rotated Sorted Array (LeetCode #33)',
-    approach: 'Modified Binary Search with Sorted Half Invariant',
-    timeComp: 'O(log n) logarithmic time',
-    spaceComp: 'O(1) constant auxiliary space',
-    learned: 'Even when an array is rotated around a pivot, at least one half (left or right) is ALWAYS strictly sorted. By checking if nums[low] <= nums[mid], we identify the sorted half and determine if target falls within its bounds.',
-    code: `public int search(int[] nums, int target) {
-    int low = 0, high = nums.length - 1;
-    while (low <= high) {
-        int mid = low + (high - low) / 2;
-        if (nums[mid] == target) return mid;
-        if (nums[low] <= nums[mid]) {
-            if (target >= nums[low] && target < nums[mid]) high = mid - 1;
-            else low = mid + 1;
-        } else {
-            if (target > nums[mid] && target <= nums[high]) low = mid + 1;
-            else high = mid - 1;
-        }
-    }
-    return -1;
-}`
-  }
-};
 
 async function fetchDynamicDsaNotes() {
   const tabsBar = document.getElementById("dsa-tabs-bar");
@@ -1114,8 +932,8 @@ async function fetchDynamicDsaNotes() {
             approach: item.topic || item.topicTags || item.approach || item.approachNotes || "Optimal Algorithmic Approach",
             timeComp: item.timeComplexity || "O(n)",
             spaceComp: item.spaceComplexity || "O(1)",
-            learned: item.approach || item.approachNotes || item.whatILearned || "Synced directly from Neon DB DSA Repository.",
-            code: (item.solutionCode || item.codeSnippet || "// Solution synced from Neon DB").replace(/\\n/g, "\n")
+            learned: item.approach || item.approachNotes || item.whatILearned || "Synced directly DSA Repository.",
+            code: (item.solutionCode || item.codeSnippet || "// Solution synced").replace(/\\n/g, "\n")
           };
         });
 
@@ -1135,18 +953,18 @@ async function fetchDynamicDsaNotes() {
   }
 
   if (container) {
-    container.innerHTML = `<div class="p-6 text-center text-xs text-fg-3">No DSA problem notes saved in Neon DB yet. Add notes in Admin CMS → DSA Notes Repo.</div>`;
+    container.innerHTML = `<div class="p-6 text-center text-xs text-fg-3">No DSA problem notes saved yet. Add notes in Admin CMS → DSA Notes Repo.</div>`;
   }
 }
 
 function showDsaNote(key) {
   const dynNote = dynamicDsaNotesList.find(n => String(n.key) === String(key));
-  const note = dynNote || dsaNotes[key];
+  const note = dynNote;
   if (!note) return;
 
   const allKeys = dynamicDsaNotesList.length > 0
     ? dynamicDsaNotesList.map(n => n.key)
-    : ['twosum', 'lru', 'rotated'];
+    : [];
 
   allKeys.forEach(k => {
     const tab = document.getElementById(`dsa-tab-${k}`);
@@ -1192,7 +1010,7 @@ function showDsaNote(key) {
       <div>
         <div class="flex items-center justify-between text-xs text-fg-3 mb-1">
           <span>Solution Implementation</span>
-          <span>Synced from Neon DB</span>
+          <span>Synced</span>
         </div>
         <pre class="p-3 rounded-lg bg-canvas border border-line text-xs font-mono text-fg overflow-x-auto leading-relaxed"><code>${escapeHtml(note.code)}</code></pre>
       </div>
@@ -1258,7 +1076,7 @@ async function sendAiMessage(query) {
 
   const loadingBubble = document.createElement('div');
   loadingBubble.className = 'p-3 rounded-lg bg-raised border border-line text-fg-2 text-xs  mr-6 flex items-center space-x-2';
-  loadingBubble.innerHTML = '<span class="inline-block animate-spin mr-1">⟳</span> Querying Neon DB & RAG Engine...';
+  loadingBubble.innerHTML = '<span class="inline-block animate-spin mr-1">⟳</span> Thinking…';
   chatContainer.appendChild(loadingBubble);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
@@ -1312,7 +1130,7 @@ async function sendAiMessage(query) {
         .replace(/\n/g, '<br>');
       aiBubble.innerHTML = `
         <div class="flex items-center justify-between text-xs text-indigo-400 border-b border-line pb-1 mb-1">
-          <span>🤖 Ask AI · Grounded on Neon DB</span>
+          <span>🤖 Ask AI · Grounded</span>
           <span class="text-fg-3">${d?.latencyMs || 45}ms</span>
         </div>
         <div>${formattedAns}</div>
@@ -1337,93 +1155,8 @@ async function sendAiMessage(query) {
 
 // Grounded Portfolio RAG Evaluation Engine (Strict Truthfulness - No Hallucinations)
 function evaluatePortfolioRag(query) {
-  const q = query.toLowerCase();
-  if (q.includes('admin') || q.includes('cms') || q.includes('login') || q.includes('control panel') || q.includes('dashboard') || q.includes('auth') || q.includes('passphrase')) {
-    return `<strong>🔐 Administrative Operating System Gateway</strong>
-    <p class="mt-1 text-fg">
-      Raviranjan.OS includes a private headless CMS for managing live projects, skills, research, and integration sync adapters.
-    </p>
-    <div class="mt-3 p-3 rounded-xl bg-card border border-indigo-500/30 space-y-2">
-      <div class="text-xs text-indigo-400 font-semibold uppercase tracking-wider">ADMIN ACCESS UNLOCK</div>
-      <p class="text-xs text-fg-2">Click the button below to open the private passphrase modal and authenticate, or go directly to <code>/admin</code>.</p>
-      <div class="flex flex-wrap items-center gap-2 pt-1">
-        <button onclick="openAdminAuthModal(); togglePublicAiDrawer();" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-sm">
-          <i data-lucide="key" class="w-3.5 h-3.5"></i>
-          <span>Unlock Admin Terminal</span>
-        </button>
-        <a href="/admin" class="px-3 py-1.5 rounded bg-raised hover:bg-raised border border-line text-xs text-fg transition-colors">
-          Open /admin
-        </a>
-      </div>
-    </div>`;
-  }
-
-
-  if (q.includes('rakshagrid') || q.includes('disaster')) {
-    return `<strong>RakshaGrid</strong> is Raviranjan's AI-powered disaster response and resource dispatch platform.
-    <ul class="list-disc pl-4 mt-1 space-y-1">
-      <li><strong>Stack:</strong> FastAPI (Python), React, PostgreSQL with PostGIS, and Machine Learning.</li>
-      <li><strong>Key Feature:</strong> Calculates incident priority scores and performs sub-10ms geospatial point-in-polygon queries for nearest emergency personnel dispatch.</li>
-      <li><strong>Progress:</strong> Currently at 85% completion.</li>
-    </ul>
-    <div class="mt-2 text-xs text-indigo-400">Source: <a href="#projects" class="underline">Portfolio Projects / RakshaGrid</a></div>`;
-  }
-
-  if (q.includes('project') || q.includes('built') || q.includes('work')) {
-    return `Raviranjan has built several notable software projects:
-    <ul class="list-disc pl-4 mt-1 space-y-1">
-      <li><strong>RakshaGrid:</strong> AI disaster response coordinator with PostGIS (FastAPI, React).</li>
-      <li><strong>DevPulse Engine:</strong> Real-time developer productivity and commit digest engine (Java 21, Spring Boot, Redis).</li>
-      <li><strong>NeuroDoc QA:</strong> Document QA agent with retrieval-augmented generation (Python, LangChain, FAISS).</li>
-      <li><strong>AlgoVault:</strong> Interactive algorithm visualization playground (React, TypeScript, Canvas API).</li>
-      <li><strong>Raviranjan.OS:</strong> His full personal developer operating system with Spring Boot and 24 CMS modules.</li>
-    </ul>
-    <div class="mt-2 text-xs text-indigo-400">Source: <a href="#projects" class="underline">Projects Section</a></div>`;
-  }
-
-  if (q.includes('technolog') || q.includes('stack') || q.includes('know') || q.includes('skill')) {
-    return `Raviranjan's core verified technologies include:
-    <ul class="list-disc pl-4 mt-1 space-y-1">
-      <li><strong>Languages:</strong> Java 21, Python, JavaScript, TypeScript, SQL.</li>
-      <li><strong>Frameworks:</strong> Spring Boot (Security, Data JPA), FastAPI, React, Node.js.</li>
-      <li><strong>Databases & Storage:</strong> PostgreSQL (with PostGIS), Redis.</li>
-      <li><strong>Infrastructure & Tools:</strong> Docker, Git, RESTful APIs, SSE, Maven.</li>
-      <li><strong>AI/ML Focus:</strong> Retrieval-Augmented Generation (RAG), local LLMs, vector search.</li>
-    </ul>`;
-  }
-
-  if (q.includes('contribution') || q.includes('open source') || q.includes('learn')) {
-    return `Raviranjan focuses on open-source contributions with clear learning stories:
-    <ul class="list-disc pl-4 mt-1 space-y-1">
-      <li><strong>Spring Boot:</strong> Investigated Java 21 carrier thread unpinning under Virtual Thread executors to resolve test harness timeouts.</li>
-      <li><strong>FastAPI:</strong> Submitted reproduction tests and guidance for proxy buffering headers with StreamingResponse in Server-Sent Events.</li>
-    </ul>
-    <div class="mt-2 text-xs text-indigo-400">Source: <a href="#contributions" class="underline">Contribution Stories</a></div>`;
-  }
-
-  if (q.includes('postgres') || q.includes('database') || q.includes('sql')) {
-    return `Raviranjan utilizes <strong>PostgreSQL</strong> extensively across his architecture:
-    <ul class="list-disc pl-4 mt-1 space-y-1">
-      <li><strong>RakshaGrid:</strong> Spatial indexing with PostGIS for fast incident radius checks.</li>
-      <li><strong>Raviranjan.OS:</strong> 50 normalized relational tables managed via Flyway migrations (V1-V5).</li>
-      <li><strong>DevPulse:</strong> Persistent commit telemetry storage.</li>
-    </ul>`;
-  }
-
-  if (q.includes('ai') || q.includes('rag') || q.includes('llm') || q.includes('agent')) {
-    return `Raviranjan's AI projects emphasize local, private, and deterministic workflows:
-    <ul class="list-disc pl-4 mt-1 space-y-1">
-      <li><strong>NeuroDoc:</strong> Local RAG with FAISS and citation verification.</li>
-      <li><strong>MCP Server (Lab):</strong> Model Context Protocol tool executor enabling LLMs to query database schemas safely.</li>
-      <li><strong>Ask AI:</strong> In-browser portfolio RAG system grounded strictly on verified facts.</li>
-    </ul>`;
-  }
-
-  if (q.includes('education') || q.includes('college') || q.includes('student') || q.includes('degree')) {
-    return `Raviranjan Kumar is currently a <strong>Bachelor of Computer Applications (BCA)</strong> student based in <strong>New Delhi, India</strong>, actively preparing for software developer and engineering opportunities.`;
-  }
-
-  return `I don't have that specific information in Raviranjan's verified portfolio. As a grounded assistant, I do not speculate or invent details. You can ask about his projects (RakshaGrid, DevPulse, NeuroDoc), his technical stack (Java, Spring Boot, Python, React, PostgreSQL), or his open-source contributions.`;
+  // No invented answers: when the live AI backend is unreachable we say so instead of replying from canned text.
+  return "The assistant is temporarily unavailable, so I can't answer that right now. Please try again in a moment.";
 }
 
 // Contact Form Handler with Rate-Limit (HTTP 429 Retry-After), Validation, and Privacy Signal Support
@@ -1554,7 +1287,7 @@ function toggleMobileNavMenu(forceState) {
 
 function copyCurlCommand() {
   const cmdEl = document.getElementById('hero-curl-command');
-  const cmdText = cmdEl ? cmdEl.innerText.trim() : 'curl -s https://raviranjan.dev/api/v1/profile | jq';
+  const cmdText = cmdEl ? cmdEl.innerText.trim() : `curl -s ${location.origin}/api/profile | jq`;
   navigator.clipboard.writeText(cmdText).then(() => {
     showToast('Command copied to clipboard!', 'success');
   });
@@ -1617,16 +1350,16 @@ async function renderInteractiveResumeSheet() {
       }
     }
 
-    const fullName = settings.resumeFullName || prof.fullName || 'Raviranjan Kumar';
-    const headline = settings.resumeHeadline || prof.headline || 'BCA Student · Full-Stack & Backend Software Developer';
-    const email = settings.contactEmail || prof.email || 'admin@raviranjan.dev';
-    const phone = settings.contactPhone || prof.phone || '+91-9999999999';
-    const location = prof.location || 'New Delhi, India';
-    const summary = settings.resumeSummary || prof.bio || 'Software developer focused on Java 21, Spring Boot, Python, FastAPI, React, PostgreSQL, and AI/LLM applications.';
+    const fullName = settings.resumeFullName || prof.fullName || '';
+    const headline = settings.resumeHeadline || prof.headline || '';
+    const email = settings.contactEmail || prof.email || '';
+    const phone = settings.contactPhone || prof.phone || '';
+    const location = prof.location || '';
+    const summary = settings.resumeSummary || prof.bio || '';
 
-    let githubLink = 'https://github.com/raviranjankrmaurya';
-    let linkedinLink = 'https://linkedin.com/in/raviranjan';
-    let leetcodeLink = 'https://leetcode.com/raviranjanmaurya';
+    let githubLink = '';
+    let linkedinLink = '';
+    let leetcodeLink = '';
     if (Array.isArray(prof.socialLinks)) {
       prof.socialLinks.forEach(s => {
         const pl = (s.platform || '').toLowerCase();
@@ -1648,10 +1381,10 @@ async function renderInteractiveResumeSheet() {
             <div class="text-xs text-indigo-400">${escapeHtml(ed.institution)}</div>
             ${ed.description ? `<p class="text-xs text-fg-2 mt-0.5">${escapeHtml(ed.description)}</p>` : ''}
           </div>
-          <div class="text-xs text-fg-2">${escapeHtml(ed.startDate || '2023')} — ${escapeHtml(ed.endDate || 'Present')} · ${escapeHtml(ed.grade || 'Enrolled')}</div>
+          <div class="text-xs text-fg-2">${escapeHtml([ed.startDate, ed.endDate].filter(Boolean).join(' — '))}${ed.grade ? ' · ' + escapeHtml(ed.grade) : ''}</div>
         </div>
       `).join('')
-      : `<div class="text-xs text-fg"><strong>Bachelor of Computer Applications (BCA)</strong> · Enrolled</div>`;
+      : '';
 
     const expHtml = exps.length > 0
       ? exps.map(ex => {
@@ -1732,7 +1465,7 @@ async function renderInteractiveResumeSheet() {
         <!-- Key Projects -->
         <div class="space-y-2">
           <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 border-b border-line pb-1">Featured Production Projects</h3>
-          <div class="space-y-2">${projHtml || '<div class="text-xs text-fg-2">Projects synced from Neon DB.</div>'}</div>
+          <div class="space-y-2">${projHtml || '<div class="text-xs text-fg-2">Projects synced.</div>'}</div>
         </div>
 
         <!-- Education -->
@@ -1818,7 +1551,7 @@ function openAdminAuthModal() {
   const errorBox = document.getElementById('admin-auth-error');
   if (errorBox) errorBox.classList.add('hidden');
 
-  // Load last credential updated timestamp from Neon DB
+  // Load last credential updated timestamp
   fetch('/api/v1/auth/credential-metadata')
     .then(r => r.ok ? r.json() : null)
     .then(json => {
@@ -1907,14 +1640,14 @@ async function handleRequestForgotOtp() {
       return;
     }
 
-    // Never auto-fill or display the OTP on screen! Admin reads it from Neon DB (admin_credential_otps)
+    // Never auto-fill or display the OTP on screen! Admin reads it (admin_credential_otps)
     if (otpInput) {
       otpInput.value = '';
     }
     if (step1) step1.classList.add('hidden');
     if (step2) step2.classList.remove('hidden');
     if (otpInput) setTimeout(() => otpInput.focus(), 60);
-    showToast('OTP saved in Neon DB (admin_credential_otps).', 'success');
+    showToast('OTP saved (admin_credential_otps).', 'success');
   } catch (e) {
     if (errBox) {
       errBox.classList.remove('hidden');
@@ -1997,7 +1730,7 @@ async function handleResetAdminWithOtp(event) {
     const badge = document.getElementById('admin-cred-updated-badge');
     if (badge) badge.innerText = `Updated: ${updatedTimeStr}`;
 
-    showToast('Credentials updated in Neon DB!', 'success');
+    showToast('Credentials updated!', 'success');
     toggleForgotAdminPanel(false);
     const userInput = document.getElementById('admin-auth-username');
     const pwdInput = document.getElementById('admin-auth-password');
@@ -2351,7 +2084,7 @@ async function fetchDynamicCareerAndCredentials() {
 
       if (internEl) {
         internEl.innerHTML = internships.length === 0
-          ? `<div class="col-span-2 p-4 text-fg-3 text-center">No internships recorded in Neon DB yet.</div>`
+          ? `<div class="col-span-2 p-4 text-fg-3 text-center">No internships recorded yet.</div>`
           : internships.map(e => {
               const isPursuing = Boolean(e.current) || !e.endDate;
               const techBadges = (e.technologies || '')
@@ -2395,7 +2128,7 @@ async function fetchDynamicCareerAndCredentials() {
       if (expEl) {
         const listToRender = workExps.length > 0 ? workExps : allExps;
         expEl.innerHTML = listToRender.length === 0
-          ? `<div class="p-3 text-fg-3 text-center">No work experience entries in Neon DB yet.</div>`
+          ? `<div class="p-3 text-fg-3 text-center">No work experience entries yet.</div>`
           : listToRender.map(e => `
             <div class="p-3.5 rounded-xl bg-card border border-line space-y-1.5">
               <div class="flex items-center justify-between">
@@ -2413,7 +2146,7 @@ async function fetchDynamicCareerAndCredentials() {
     if (eduEl && eduRes.ok) {
       const edus = (await eduRes.json())?.data || [];
       eduEl.innerHTML = edus.length === 0
-        ? `<div class="p-3 text-fg-3 text-center">No education entries in Neon DB yet.</div>`
+        ? `<div class="p-3 text-fg-3 text-center">No education entries yet.</div>`
         : edus.map(ed => `
           <div class="p-3.5 rounded-xl bg-card border border-line space-y-1.5">
             <div class="flex items-center justify-between">
@@ -2430,7 +2163,7 @@ async function fetchDynamicCareerAndCredentials() {
     if (achEl && achRes.ok) {
       const achs = (await achRes.json())?.data || [];
       achEl.innerHTML = achs.length === 0
-        ? `<div class="p-3 text-fg-3 text-center">No achievements in Neon DB yet.</div>`
+        ? `<div class="p-3 text-fg-3 text-center">No achievements yet.</div>`
         : achs.map(a => `
           <div class="p-3 rounded-xl bg-card border border-line flex items-start justify-between gap-2">
             <div>
@@ -2445,7 +2178,7 @@ async function fetchDynamicCareerAndCredentials() {
     if (certEl && certRes.ok) {
       const certs = (await certRes.json())?.data || [];
       certEl.innerHTML = certs.length === 0
-        ? `<div class="p-3 text-fg-3 text-center">No certifications in Neon DB yet.</div>`
+        ? `<div class="p-3 text-fg-3 text-center">No certifications yet.</div>`
         : certs.map(c => `
           <div class="p-3 rounded-xl bg-card border border-line flex items-center justify-between gap-2">
             <div>
@@ -2463,7 +2196,7 @@ async function fetchDynamicCareerAndCredentials() {
 
 
 // -------------------------------------------------------------
-// Dynamic Content Ingestion (Contributions, Research, Lab, Articles — 100% from Neon DB)
+// Dynamic Content Ingestion (Contributions, Research, Lab, Articles — 100%)
 // -------------------------------------------------------------
 
 async function fetchDynamicContributions() {
@@ -2482,7 +2215,7 @@ async function fetchDynamicContributions() {
   }
 
   if (!stories || stories.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No open-source contribution stories in Neon DB yet. Add stories in Admin CMS → Contribution Stories.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No open-source contribution stories yet. Add stories in Admin CMS → Contribution Stories.</div>`;
     return;
   }
 
@@ -2526,7 +2259,7 @@ async function fetchDynamicResearch() {
   }
 
   if (!papers || papers.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No research publications in Neon DB yet. Add papers in Admin CMS → Research Papers.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No research publications yet. Add papers in Admin CMS → Research Papers.</div>`;
     return;
   }
 
@@ -2542,11 +2275,11 @@ async function fetchDynamicResearch() {
         <h3 class="text-sm font-semibold text-fg">${escapeHtml(p.title)}</h3>
         <p class="text-xs text-fg font-sans leading-relaxed">${escapeHtml(p.abstractText || '')}</p>
         <div class="text-xs text-fg-2">
-          <span class="text-fg-3">Methodology:</span> ${escapeHtml(p.methodology || 'Empirical systems benchmarking')}
+          <span class="text-fg-3">Methodology:</span> ${escapeHtml(p.methodology || '—')}
         </div>
       </div>
       <div class="flex items-center justify-between pt-3 border-t border-line text-xs">
-        <span class="text-fg-3 text-xs">Author: ${escapeHtml(p.authors || 'Raviranjan Kumar')}</span>
+        <span class="text-fg-3 text-xs">${p.authors ? 'Author: ' + escapeHtml(p.authors) : ''}</span>
         <div class="flex items-center gap-3">
           <a href="${escapeHtml(p.githubUrl || '#')}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">Code ↗</a>
         </div>
@@ -2571,7 +2304,7 @@ async function fetchDynamicLab() {
   }
 
   if (!labs || labs.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No engineering lab experiments in Neon DB yet. Add experiments in Admin CMS → Engineering Lab.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No engineering lab experiments yet. Add experiments in Admin CMS → Engineering Lab.</div>`;
     return;
   }
 
@@ -2611,7 +2344,7 @@ async function fetchDynamicArticles() {
   }
 
   if (!articles || articles.length === 0) {
-    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No engineering articles in Neon DB yet. Publish articles in Admin CMS → Technical Writing.</div>`;
+    container.innerHTML = `<div class="col-span-full p-6 rounded-xl bg-card border border-line text-center text-xs text-fg-3">No engineering articles yet. Publish articles in Admin CMS → Technical Writing.</div>`;
     return;
   }
 
@@ -2633,7 +2366,7 @@ async function fetchDynamicArticles() {
             <span class="px-1.5 py-0.5 rounded bg-raised text-fg-2 text-xs border border-line">${escapeHtml(t)}</span>
           `).join('')}
         </div>
-        <span class="text-indigo-400 hover:underline cursor-pointer">Synced from Neon DB →</span>
+        <span class="text-indigo-400 hover:underline cursor-pointer">Synced →</span>
       </div>
     </div>
   `).join('');
@@ -2642,19 +2375,9 @@ async function fetchDynamicArticles() {
 // ==========================================
 // 3D INTERACTIVE HERO NEURAL CORE, SMOOTH TEXT ANIMATOR & GEOIP RESOLVER
 // ==========================================
-window.__heroHeadlines = [
-  "Building AI-native software.",
-  "Scalable Java & Spring systems.",
-  "Production RAG & AI agents.",
-  "Full-stack cloud engineering."
-];
+window.__heroHeadlines = [];
 
-window.__heroRoles = [
-  "Full-Stack & AI Engineer",
-  "Java 21 & Spring Boot Architect",
-  "Distributed Systems Builder",
-  "Applied AI & RAG Specialist"
-];
+window.__heroRoles = [];
 
 let __heroTypeTimer = null;
 let __heroRoleTimer = null;
@@ -2686,207 +2409,64 @@ function updateHeroAnimatorTexts(rawHeadlines, rawRoles) {
 }
 
 function initHeroTextAnimator() {
-  const savedFont = localStorage.getItem('rr_font_preset');
-  if (savedFont) applyFontPreset(savedFont);
-
   const headlineEl = document.getElementById('hero-animated-headline');
   const roleEl = document.getElementById('hero-role-rotator');
 
   if (__heroTypeTimer) clearTimeout(__heroTypeTimer);
   if (__heroRoleTimer) clearInterval(__heroRoleTimer);
+  const reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-  // 1. Smooth Typewriter / Morphing Headline Cycle
+  // Headline: configured phrases (Site Settings) or, if none, the profile headline. Nothing is invented.
   if (headlineEl) {
-    let phraseIdx = 0;
-    let charIdx = (window.__heroHeadlines[0] || '').length;
-    let isDeleting = false;
-    headlineEl.textContent = window.__heroHeadlines[0] || "Building software for the AI-native era.";
-
-    const tick = () => {
-      const phrases = window.__heroHeadlines && window.__heroHeadlines.length > 0
-        ? window.__heroHeadlines
-        : ["Building software for the AI-native era."];
-      const currentPhrase = phrases[phraseIdx % phrases.length];
-
-      if (!isDeleting) {
-        charIdx = Math.min(currentPhrase.length, charIdx + 1);
-        headlineEl.textContent = currentPhrase.substring(0, charIdx);
-        if (charIdx >= currentPhrase.length) {
-          isDeleting = true;
-          __heroTypeTimer = setTimeout(tick, 2800);
-          return;
+    const configured = (window.__heroHeadlines || []).filter(Boolean);
+    const phrases = configured.length ? configured : (currentProfile && currentProfile.headline ? [currentProfile.headline] : []);
+    if (phrases.length <= 1 || reduce) {
+      headlineEl.textContent = phrases[0] || '';
+    } else {
+      let phraseIdx = 0;
+      let charIdx = phrases[0].length;
+      let isDeleting = false;
+      headlineEl.textContent = phrases[0];
+      const tick = () => {
+        const currentPhrase = phrases[phraseIdx % phrases.length];
+        if (!isDeleting) {
+          charIdx = Math.min(currentPhrase.length, charIdx + 1);
+          headlineEl.textContent = currentPhrase.substring(0, charIdx);
+          if (charIdx >= currentPhrase.length) { isDeleting = true; __heroTypeTimer = setTimeout(tick, 2800); return; }
+          __heroTypeTimer = setTimeout(tick, 34);
+        } else {
+          charIdx = Math.max(0, charIdx - 1);
+          headlineEl.textContent = currentPhrase.substring(0, charIdx);
+          if (charIdx === 0) { isDeleting = false; phraseIdx = (phraseIdx + 1) % phrases.length; __heroTypeTimer = setTimeout(tick, 260); return; }
+          __heroTypeTimer = setTimeout(tick, 18);
         }
-        __heroTypeTimer = setTimeout(tick, 34);
-      } else {
-        charIdx = Math.max(0, charIdx - 1);
-        headlineEl.textContent = currentPhrase.substring(0, charIdx);
-        if (charIdx === 0) {
-          isDeleting = false;
-          phraseIdx = (phraseIdx + 1) % phrases.length;
-          __heroTypeTimer = setTimeout(tick, 260);
-          return;
-        }
-        __heroTypeTimer = setTimeout(tick, 18);
-      }
-    };
-
-    __heroTypeTimer = setTimeout(() => {
-      isDeleting = true;
-      tick();
-    }, 3000);
+      };
+      __heroTypeTimer = setTimeout(() => { isDeleting = true; tick(); }, 3000);
+    }
   }
 
-  // 2. Smooth Role Badge Crossfade
+  // Role badge: only shown when roles are configured
   if (roleEl) {
-    let rIdx = 0;
-    roleEl.textContent = window.__heroRoles[0] || "Full-Stack & AI Engineer";
-    __heroRoleTimer = setInterval(() => {
-      const roles = window.__heroRoles && window.__heroRoles.length > 0
-        ? window.__heroRoles
-        : ["Full-Stack & AI Engineer"];
-      roleEl.classList.add('fade-out');
-      setTimeout(() => {
-        rIdx = (rIdx + 1) % roles.length;
-        roleEl.textContent = roles[rIdx];
-        roleEl.classList.remove('fade-out');
-      }, 260);
-    }, 3600);
+    const roles = (window.__heroRoles || []).filter(Boolean);
+    const wrap = roleEl.closest('[data-hide-empty]');
+    roleEl.textContent = roles[0] || '';
+    if (wrap) wrap.classList.toggle('hidden', roles.length === 0);
+    if (roles.length > 1 && !reduce) {
+      let rIdx = 0;
+      __heroRoleTimer = setInterval(() => {
+        roleEl.classList.add('fade-out');
+        setTimeout(() => {
+          rIdx = (rIdx + 1) % roles.length;
+          roleEl.textContent = roles[rIdx];
+          roleEl.classList.remove('fade-out');
+        }, 260);
+      }, 3600);
+    }
   }
 }
 
 // 3. Full-Viewport 3D Ambient Background Wave & Perspective Mesh (#bg-3d-canvas)
-function initHero3dVisual() {
-  return; // decorative animated background removed by the design system (readability + performance)
-  const canvas = document.getElementById('bg-3d-canvas');
-  if (!canvas || canvas.__initializedBg3d) return;
-  canvas.__initializedBg3d = true;
-
-  const ctx = canvas.getContext('2d');
-  let width = 0;
-  let height = 0;
-  let dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-  const resize = () => {
-    width = window.innerWidth || 1280;
-    height = window.innerHeight || 800;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  };
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Subtle floating 3D depth particles
-  const particles = Array.from({ length: 42 }, (_, i) => ({
-    x: (Math.sin(i * 12.9898) * 43758.5453) % 1,
-    y: (Math.cos(i * 78.233) * 23421.631) % 1,
-    z: 0.2 + ((i * 0.17) % 0.8),
-    size: 1.2 + (i % 3) * 0.7,
-    speedX: (i % 2 === 0 ? 1 : -1) * (0.00008 + (i % 5) * 0.00002),
-    speedY: -0.00012 - (i % 4) * 0.00003
-  })).map(p => ({ ...p, x: Math.abs(p.x), y: Math.abs(p.y) }));
-
-  let mouseX = 0;
-  let mouseY = 0;
-  let targetMouseX = 0;
-  let targetMouseY = 0;
-
-  window.addEventListener('mousemove', (e) => {
-    targetMouseX = (e.clientX / Math.max(1, width) - 0.5) * 2;
-    targetMouseY = (e.clientY / Math.max(1, height) - 0.5) * 2;
-  }, { passive: true });
-
-  const renderFrame = (time) => {
-    const t = time * 0.00055;
-    const isLight = document.documentElement.classList.contains('light');
-    mouseX += (targetMouseX - mouseX) * 0.04;
-    mouseY += (targetMouseY - mouseY) * 0.04;
-
-    ctx.clearRect(0, 0, width, height);
-
-    // Draw 3D perspective flowing topological wave ribbons across the background
-    const cols = 38;
-    const rows = 14;
-    const fov = 520;
-    const camZ = 420;
-    const centerX = width * 0.5 + mouseX * 36;
-    const centerY = height * 0.34 + mouseY * 22;
-
-    const grid = [];
-    for (let r = 0; r < rows; r++) {
-      const rowPts = [];
-      const depthRatio = r / (rows - 1);
-      const z = -120 + depthRatio * 560;
-      for (let c = 0; c < cols; c++) {
-        const colRatio = (c / (cols - 1)) - 0.5;
-        const worldX = colRatio * (width * 1.45);
-        const wave1 = Math.sin(colRatio * 5.2 + t * 1.8 + r * 0.38) * 38;
-        const wave2 = Math.cos(colRatio * 3.1 - t * 1.2 + r * 0.52) * 24;
-        const worldY = 130 + wave1 + wave2 + (depthRatio * 65) - mouseY * 18;
-
-        const scale = fov / Math.max(80, fov + z + camZ * 0.35);
-        const px = centerX + worldX * scale;
-        const py = centerY + worldY * scale;
-        rowPts.push({ px, py, scale, depthRatio, colRatio });
-      }
-      grid.push(rowPts);
-    }
-
-    // Horizontal flowing 3D wave lines
-    for (let r = 0; r < rows; r++) {
-      const fade = Math.sin((r / (rows - 1)) * Math.PI);
-      const alpha = isLight ? fade * 0.14 : fade * 0.17;
-      ctx.beginPath();
-      for (let c = 0; c < cols; c++) {
-        const pt = grid[r][c];
-        if (c === 0) ctx.moveTo(pt.px, pt.py);
-        else ctx.lineTo(pt.px, pt.py);
-      }
-      ctx.strokeStyle = isLight
-        ? (r % 3 === 0 ? `rgba(124, 58, 237, ${alpha})` : `rgba(37, 99, 235, ${alpha})`)
-        : (r % 3 === 0 ? `rgba(99, 102, 241, ${alpha})` : `rgba(99, 102, 241, ${alpha})`);
-      ctx.lineWidth = r % 4 === 0 ? 1.25 : 0.8;
-      ctx.stroke();
-    }
-
-    // Subtle cross-rib perspective filaments
-    for (let c = 0; c < cols; c += 2) {
-      const colFade = 1 - Math.abs((c / (cols - 1)) - 0.5) * 1.65;
-      if (colFade <= 0) continue;
-      const alpha = (isLight ? 0.065 : 0.08) * colFade;
-      ctx.beginPath();
-      for (let r = 0; r < rows; r++) {
-        const pt = grid[r][c];
-        if (r === 0) ctx.moveTo(pt.px, pt.py);
-        else ctx.lineTo(pt.px, pt.py);
-      }
-      ctx.strokeStyle = isLight
-        ? `rgba(37, 99, 235, ${alpha})`
-        : `rgba(99, 102, 241, ${alpha})`;
-      ctx.lineWidth = 0.65;
-      ctx.stroke();
-    }
-
-    // Subtle glowing intersection nodes & floating depth particles
-    for (const p of particles) {
-      p.x = (p.x + p.speedX + 1) % 1;
-      p.y = (p.y + p.speedY + 1) % 1;
-      const px = p.x * width + mouseX * 18 * p.z;
-      const py = p.y * height + mouseY * 14 * p.z;
-      const alpha = (isLight ? 0.18 : 0.28) * p.z;
-      ctx.beginPath();
-      ctx.arc(px, py, p.size * p.z, 0, Math.PI * 2);
-      ctx.fillStyle = isLight
-        ? `rgba(37, 99, 235, ${alpha})`
-        : `rgba(99, 102, 241, ${alpha})`;
-      ctx.fill();
-    }
-
-    requestAnimationFrame(renderFrame);
-  };
-
-  requestAnimationFrame(renderFrame);
-}
+function initHero3dVisual() { /* decorative animated background removed by the design system */ }
 
 // 4. Client-Side Public IP & GeoIP Prefetch (So Cloud Shell / Docker Bridge Still Captures Recruiter's Real Location)
 window.__visitorGeo = null;

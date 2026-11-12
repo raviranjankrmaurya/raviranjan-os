@@ -305,11 +305,11 @@ async function triggerGitHubSync() {
     if (res.ok) {
       const lastSyncEl = document.getElementById("github-last-sync");
       if (lastSyncEl) lastSyncEl.innerText = "Just now";
-      showToast("GitHub live sync completed and stored in Neon DB!", "success");
+      showToast("GitHub live sync completed and stored!", "success");
       loadAdminDashboardMetrics();
     } else {
       await fetch("/api/activity/sync", { method: "POST" });
-      showToast("GitHub telemetry synchronized to Neon DB!", "success");
+      showToast("GitHub telemetry synchronized!", "success");
       loadAdminDashboardMetrics();
     }
   } catch (e) {
@@ -323,11 +323,11 @@ async function triggerLeetCodeSync() {
     const headers = await getAuthHeaders();
     const res = await fetch("/api/admin/integrations/LEETCODE/sync?mode=MANUAL", { method: "POST", headers });
     if (res.ok) {
-      showToast("LeetCode live profile & recent submissions saved to Neon DB!", "success");
+      showToast("LeetCode live profile & recent submissions saved!", "success");
       loadAdminDashboardMetrics();
     } else {
       await fetch("/api/activity/sync", { method: "POST" });
-      showToast("LeetCode telemetry synchronized to Neon DB!", "success");
+      showToast("LeetCode telemetry synchronized!", "success");
       loadAdminDashboardMetrics();
     }
   } catch (e) {
@@ -365,7 +365,7 @@ async function handleGfgManualImport() {
   const rank = parseInt(document.getElementById("gfg-imp-rank")?.value || "0", 10);
 
 
-  showToast(`Saving GFG metrics to Neon DB...`, "info");
+  showToast(`Saving GFG metrics...`, "info");
   try {
     const headers = await getAuthHeaders();
     const res = await fetch("/api/admin/integrations/gfg/import", {
@@ -379,7 +379,7 @@ async function handleGfgManualImport() {
       })
     });
     if (res.ok) {
-      showToast("GeeksforGeeks metrics saved to Neon DB!", "success");
+      showToast("GeeksforGeeks metrics saved!", "success");
       await loadAdminGfg();
       await loadAdminDashboardMetrics();
     } else {
@@ -395,7 +395,7 @@ async function handleDeleteGfgData() {
     const headers = await getAuthHeaders();
     const res = await fetch("/api/admin/integrations/gfg", { method: "DELETE", headers });
     if (res.ok) {
-      showToast("GeeksforGeeks data reset in Neon DB!", "success");
+      showToast("GeeksforGeeks data reset!", "success");
       await loadAdminGfg();
       await loadAdminDashboardMetrics();
     }
@@ -447,7 +447,7 @@ async function loadAdminActivity() {
       const items = (json?.data?.content || json?.data || []).slice(0, 5);
       cachedAdminActivities = items;
       if (items.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center text-fg-3">No activity records in Neon DB yet.</div>`;
+        container.innerHTML = `<div class="p-4 text-center text-fg-3">No activity records yet.</div>`;
         return;
       }
       container.innerHTML = items.map(act => {
@@ -494,7 +494,7 @@ async function handleEditActivityItem(id) {
       body: JSON.stringify({ title: newTitle.trim(), description: newDesc.trim() })
     });
     if (res.ok) {
-      showToast("Activity updated in Neon DB!", "success");
+      showToast("Activity updated!", "success");
       await loadAdminActivity();
       await loadAdminDashboardMetrics();
     } else {
@@ -512,7 +512,7 @@ async function handleDeleteActivityItem(id) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/activity/${id}`, { method: "DELETE", headers });
     if (res.ok) {
-      showToast("Activity deleted from Neon DB!", "success");
+      showToast("Activity deleted!", "success");
       await loadAdminActivity();
       await loadAdminDashboardMetrics();
     } else {
@@ -529,7 +529,7 @@ function resetDsaForm() {
   const idEl = document.getElementById("dsa-id");
   if (idEl) idEl.value = "";
   const heading = document.getElementById("dsa-form-heading");
-  if (heading) heading.innerText = "Add New Solution Note in Neon DB";
+  if (heading) heading.innerText = "Add New Solution Note";
   const titleEl = document.getElementById("dsa-title");
   if (titleEl) {
     titleEl.value = "";
@@ -539,7 +539,7 @@ function resetDsaForm() {
   if (document.getElementById("dsa-space")) document.getElementById("dsa-space").value = "O(1)";
   if (document.getElementById("dsa-approach")) document.getElementById("dsa-approach").value = "";
   if (document.getElementById("dsa-code")) document.getElementById("dsa-code").value = "";
-  showToast("Form cleared — enter Problem Title & Solution below to save to Neon DB", "info");
+  showToast("Form cleared — enter Problem Title & Solution below to save", "info");
 }
 
 async function loadAdminDsa() {
@@ -551,7 +551,7 @@ async function loadAdminDsa() {
       const json = await res.json();
       cachedAdminDsaProblems = json?.data || [];
       if (cachedAdminDsaProblems.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center text-fg-3">No DSA problem notes in Neon DB. Use the form on the left to add one.</div>`;
+        container.innerHTML = `<div class="p-4 text-center text-fg-3">No DSA problem notes. Use the form on the left to add one.</div>`;
         return;
       }
       container.innerHTML = cachedAdminDsaProblems.map(p => {
@@ -630,7 +630,7 @@ async function handleSaveManualProblem() {
     const method = editId ? "PUT" : "POST";
     const res = await fetch(url, { method, headers, body: JSON.stringify(payload) });
     if (res.ok) {
-      showToast(editId ? `DSA problem "${title}" updated in Neon DB!` : `DSA problem "${title}" saved to Neon DB!`, "success");
+      showToast(editId ? `DSA problem "${title}" updated!` : `DSA problem "${title}" saved!`, "success");
       resetDsaForm();
       await loadAdminDsa();
       await loadAdminDashboardMetrics();
@@ -650,7 +650,7 @@ async function handleDeleteDsaProblem(id) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/dsa/${id}`, { method: "DELETE", headers });
     if (res.ok) {
-      showToast(`Deleted "${label}" from Neon DB!`, "success");
+      showToast(`Deleted "${label}"!`, "success");
       await loadAdminDsa();
     }
   } catch (e) {
@@ -752,7 +752,7 @@ async function handleSendAiMessage(e) {
     });
     const json = await res.json().catch(() => ({}));
     const d = json?.data || {};
-    const answer = d.answer || "Connected to Neon DB RAG Engine.";
+    const answer = d.answer || "Connected RAG Engine.";
     const formatted = escapeHtml(answer)
       .replace(/\*\*(.*?)\*\*/g, '<strong class="text-fg">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-xs">&nearr;</span></a>')
       .replace(/\n/g, '<br>');
@@ -791,7 +791,7 @@ async function saveAiSettings() {
       body: JSON.stringify({ enabled, systemPrompt, modelName, temperature, maxTokens: 1024 })
     });
     if (res.ok) {
-      showToast(`AI settings saved to Neon DB (${modelName})!`, 'success');
+      showToast(`AI settings saved (${modelName})!`, 'success');
       loadAiConfig();
     } else {
       showToast('Failed to save AI config', 'warning');
@@ -808,36 +808,32 @@ function toggleNotificationDrawer() {
   drawer.classList.toggle('translate-x-full');
 }
 
-function filterNotifications(filterType) {
-  document.querySelectorAll('.notif-filter').forEach(btn => {
-    btn.classList.remove('active', 'bg-indigo-500/10', 'text-indigo-400', 'border-indigo-500/30');
-    btn.classList.add('bg-raised', 'text-fg-2');
-  });
-  if (event && event.target) {
-    event.target.classList.add('active', 'bg-indigo-500/10', 'text-indigo-400', 'border-indigo-500/30');
-    event.target.classList.remove('bg-raised', 'text-fg-2');
-  }
+let currentNotifFilter = 'ALL';
+function filterNotifications(filterType, btnEl) {
+  currentNotifFilter = filterType || currentNotifFilter;
+  const clicked = btnEl || (typeof event !== 'undefined' && event && event.currentTarget instanceof Element ? event.currentTarget : null);
+  document.querySelectorAll('.notif-filter').forEach(btn => btn.classList.remove('active'));
+  const active = clicked || [...document.querySelectorAll('.notif-filter')].find(b => (b.getAttribute('onclick') || '').includes("'" + currentNotifFilter + "'"));
+  if (active) active.classList.add('active');
 
-  const items = document.querySelectorAll('.notif-item');
-  items.forEach(item => {
-    const type = item.getAttribute('data-type');
+  let shown = 0;
+  document.querySelectorAll('.notif-item').forEach(item => {
+    const type = item.getAttribute('data-type') || '';
     const priority = item.getAttribute('data-priority');
     const isRead = item.getAttribute('data-read') === 'true';
-
-    if (filterType === 'ALL') {
-      item.classList.remove('hidden');
-    } else if (filterType === 'UNREAD') {
-      item.classList.toggle('hidden', isRead);
-    } else if (filterType === 'URGENT') {
-      item.classList.toggle('hidden', priority !== 'URGENT' && priority !== 'HIGH');
-    } else if (filterType === 'CRM') {
-      const isCrm = type === 'CRM' || type === 'NEW_CONTACT_INQUIRY' || type === 'CONTACT_INQUIRY';
-      item.classList.toggle('hidden', !isCrm);
-    } else if (filterType === 'INTEGRATION') {
-      const isInt = type.includes('INTEGRATION') || type.includes('GITHUB') || type.includes('SYNC');
-      item.classList.toggle('hidden', !isInt);
-    }
+    let show = true;
+    if (currentNotifFilter === 'UNREAD') show = !isRead;
+    else if (currentNotifFilter === 'URGENT') show = priority === 'URGENT' || priority === 'HIGH';
+    else if (currentNotifFilter === 'CRM') show = type === 'CRM' || type === 'NEW_CONTACT_INQUIRY' || type === 'CONTACT_INQUIRY';
+    else if (currentNotifFilter === 'INTEGRATION') show = type.includes('INTEGRATION') || type.includes('GITHUB') || type.includes('SYNC');
+    item.classList.toggle('hidden', !show);
+    if (show) shown++;
   });
+  const container = document.getElementById('notif-items-container');
+  container?.querySelector('[data-notif-empty]')?.remove();
+  if (container && shown === 0 && document.querySelectorAll('.notif-item').length > 0) {
+    container.insertAdjacentHTML('beforeend', '<div data-notif-empty class="p-6 text-center text-fg-3 text-sm">Nothing matches this filter.</div>');
+  }
 }
 
 function markSingleRead(btn) {
@@ -878,78 +874,6 @@ function incrementBadge() {
   count++;
   badge.innerText = count;
 }
-
-// Live Event Simulator
-function simulateEvent(eventType) {
-  const container = document.getElementById('notif-items-container');
-  if (!container) return;
-
-  const card = document.createElement('div');
-  let title = '';
-  let msg = '';
-  let priority = 'MEDIUM';
-  let type = 'SYSTEM';
-  let dispatchNote = '';
-
-  if (eventType === 'INQUIRY') {
-    title = 'New Recruiter Inquiry: Alex Rivera';
-    msg = 'Staff Infrastructure Architect inquiry via portfolio contact form.';
-    priority = 'URGENT';
-    type = 'CRM';
-    dispatchNote = 'CRM · WhatsApp Alert Dispatched to Admin';
-    showToast('Inbound contact inquiry received -> WhatsApp alert dispatched to admin device!', 'success');
-  } else if (eventType === 'MILESTONE') {
-    title = 'Milestone Completed: SIMD Kernel Acceleration';
-    msg = 'Engineering Lab POC achieved 4.2x speedup on vector distance matrix.';
-    priority = 'HIGH';
-    type = 'MILESTONE';
-    dispatchNote = 'MILESTONE · Email Alert Dispatched';
-    showToast('Project milestone marked completed -> Email confirmation sent!', 'info');
-  } else if (eventType === 'GITHUB') {
-    title = 'GitHub Webhook Push Event Ingested';
-    msg = 'Merged PR #18 into main with 3 new verified commits.';
-    priority = 'LOW';
-    type = 'INTEGRATION';
-    dispatchNote = 'GITHUB · Telemetry Synced';
-    showToast('GitHub Webhook push event verified and synced to PostgreSQL', 'info');
-    prependUnifiedActivity('GITHUB_COMMIT', 'Merged PR #18 into main', 'Ingested via GitHub Webhook');
-  } else if (eventType === 'FAILURE') {
-    title = 'Integration Alert: LeetCode Rate Limit Warning';
-    msg = 'LeetCode GraphQL endpoint throttled. Active circuit breaker cached snapshot.';
-    priority = 'URGENT';
-    type = 'INTEGRATION';
-    dispatchNote = 'ALERT · Circuit Breaker Tripped';
-    showToast('Integration failure alert: Circuit breaker tripped, serving cached data', 'warning');
-  }
-
-  card.className = 'notif-item p-3.5 rounded-lg bg-card border border-indigo-500/40 space-y-2 transition-all animate-in fade-in duration-300';
-  card.setAttribute('data-type', type);
-  card.setAttribute('data-priority', priority);
-  card.setAttribute('data-read', 'false');
-
-  const pColor = priority === 'URGENT' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-
-  card.innerHTML = `
-    <div class="flex items-center justify-between text-xs">
-      <div class="flex items-center space-x-1.5">
-        <span class="px-1.5 py-0.5 rounded font-bold border ${pColor}">${priority}</span>
-        <span class="text-fg-2">${dispatchNote}</span>
-      </div>
-      <span class="text-emerald-400 font-bold">Just now (Live SSE)</span>
-    </div>
-    <p class="font-bold text-fg text-xs">${title}</p>
-    <p class="text-fg-2 text-xs leading-relaxed">${msg}</p>
-    <div class="pt-2 border-t border-line flex items-center justify-between text-xs">
-      <span class="text-indigo-400">SSE Real-time Broadcast</span>
-      <button onclick="markSingleRead(this)" class="text-fg-3 hover:text-fg rounded-lg">Mark read</button>
-    </div>
-  `;
-
-  container.insertBefore(card, container.firstChild);
-  incrementBadge();
-  if (window.lucide) window.lucide.createIcons();
-}
-
 
 // -------------------------------------------------------------
 // Modular Integration & Profile Management Handlers (100% Neon DB)
@@ -1020,11 +944,11 @@ async function saveProfile() {
       })
     ]);
     if (profRes.ok) {
-      showToast("Profile, Social Links & Resume saved to Neon DB!", "success");
+      showToast("Profile, Social Links & Resume saved!", "success");
       await loadAdminProfileData();
     } else {
       const err = await profRes.json().catch(() => ({}));
-      showToast(err.message || "Failed to update profile in Neon DB", "warning");
+      showToast(err.message || "Failed to update profile", "warning");
     }
   } catch (err) {
     showToast("Network error saving profile: " + err.message, "warning");
@@ -1109,7 +1033,7 @@ function openEditProjectModalById(idOrSlug) {
   const heading = document.getElementById("modal-project-heading");
   if (heading) heading.innerText = "Edit Project: " + (project.title || project.slug);
   const submitLabel = document.getElementById("modal-project-submit-label");
-  if (submitLabel) submitLabel.innerText = "Update Project in Neon DB";
+  if (submitLabel) submitLabel.innerText = "Update Project";
 
   document.getElementById("edit-proj-id").value = project.id || project.slug;
   document.getElementById("new-proj-title").value = project.title || "";
@@ -1173,7 +1097,7 @@ async function handleCreateProject(event) {
     });
 
     if (res.ok) {
-      showToast(editId ? `Project "${title}" updated in Neon DB!` : `Project "${title}" created in Neon DB!`, "success");
+      showToast(editId ? `Project "${title}" updated!` : `Project "${title}" created!`, "success");
       closeAddProjectModal();
       document.getElementById("form-add-project")?.reset();
       await loadAdminProjects();
@@ -1181,11 +1105,11 @@ async function handleCreateProject(event) {
       await populateProjectEditorSelector();
     } else {
       const err = await res.json().catch(() => ({}));
-      showToast(err.message || "Failed to save project in Neon DB", "warning");
+      showToast(err.message || "Failed to save project", "warning");
     }
   } catch (err) {
     console.error("Save project error:", err);
-    showToast("Network error saving project to Neon DB", "warning");
+    showToast("Network error saving project", "warning");
   }
 }
 
@@ -1198,11 +1122,11 @@ async function syncIntegration(provider) {
       headers
     });
     if (res.ok) {
-      showToast(`${provider} synchronized with Neon DB!`, "success");
+      showToast(`${provider} synchronized!`, "success");
       loadAdminDashboardMetrics();
     } else {
       await fetch("/api/activity/sync", { method: "POST" });
-      showToast(`${provider} synchronized with Neon DB!`, "success");
+      showToast(`${provider} synchronized!`, "success");
       loadAdminDashboardMetrics();
     }
   } catch (e) {
@@ -1325,11 +1249,11 @@ function renderAdminProjectsTable(projects) {
 
   const counter = document.getElementById("admin-projects-counter");
   if (counter) {
-    counter.innerText = `Showing ${projects.length} project${projects.length === 1 ? "" : "s"} from Neon DB`;
+    counter.innerText = `Showing ${projects.length} project${projects.length === 1 ? "" : "s"}`;
   }
 
   if (!projects || projects.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-fg-3 text-xs">No projects in Neon DB. Click "+ Create New Project" to add your project directly into Neon DB.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-fg-3 text-xs">No projects. Click "+ Create New Project" to add your project directly.</td></tr>`;
     return;
   }
 
@@ -1360,8 +1284,8 @@ function renderAdminProjectsTable(projects) {
         <td class="py-3 px-4 text-fg-2 text-xs">${escapeHtml(p.architectureStyle || "Modular Architecture")}</td>
         <td class="py-3 px-4 text-right space-x-2.5 whitespace-nowrap">
           <button type="button" onclick="open13TabEditorForProject('${pid}')" class="text-emerald-400 hover:text-emerald-300 text-xs rounded-lg" title="Deep 13-Tab Architecture Editor">13-Tab Editor</button>
-          <button type="button" onclick="openEditProjectModalById('${pid}')" class="text-indigo-400 hover:text-indigo-300 text-xs rounded-lg" title="Edit Project in Neon DB">Edit</button>
-          <button type="button" onclick="handleDeleteProject('${pid}')" class="text-rose-400 hover:text-rose-300 text-xs rounded-lg" title="Delete Project from Neon DB">Delete</button>
+          <button type="button" onclick="openEditProjectModalById('${pid}')" class="text-indigo-400 hover:text-indigo-300 text-xs rounded-lg" title="Edit Project">Edit</button>
+          <button type="button" onclick="handleDeleteProject('${pid}')" class="text-rose-400 hover:text-rose-300 text-xs rounded-lg" title="Delete Project">Delete</button>
         </td>
       </tr>
     `;
@@ -1399,13 +1323,13 @@ async function handleDeleteProject(idOrSlug) {
     });
 
     if (res.ok) {
-      showToast(`Project "${label}" deleted from Neon DB!`, "success");
+      showToast(`Project "${label}" deleted!`, "success");
       await loadAdminProjects();
       await loadAdminDashboardMetrics();
       await populateProjectEditorSelector();
     } else {
       const err = await res.json().catch(() => ({}));
-      showToast(err.message || "Failed to delete project from Neon DB", "warning");
+      showToast(err.message || "Failed to delete project", "warning");
     }
   } catch (err) {
     console.error("Delete project error:", err);
@@ -1424,7 +1348,7 @@ async function handleDeleteAllProjects() {
     });
 
     if (res.ok) {
-      showToast("All projects deleted from Neon DB!", "success");
+      showToast("All projects deleted!", "success");
       await loadAdminProjects();
       await loadAdminDashboardMetrics();
       await populateProjectEditorSelector();
@@ -1599,7 +1523,7 @@ async function handleSaveCareer(event) {
       body: JSON.stringify(payload)
     });
     if (res.ok) {
-      showToast(`${isEdu ? 'Education' : isIntern ? 'Internship' : 'Experience'} saved to Neon DB!`, 'success');
+      showToast(`${isEdu ? 'Education' : isIntern ? 'Internship' : 'Experience'} saved!`, 'success');
       closeCareerModal();
       await loadAdminCareer();
     } else {
@@ -1622,7 +1546,7 @@ async function loadAdminCareer() {
       const dataEdu = await resEdu.json();
       cachedAdminEducations = dataEdu?.data || [];
       if (cachedAdminEducations.length === 0) {
-        eduContainer.innerHTML = '<div class="p-4 rounded-xl bg-card border border-line text-center text-fg-3 text-xs">No education records in Neon DB yet. Click "+ Add Degree" to record one.</div>';
+        eduContainer.innerHTML = '<div class="p-4 rounded-xl bg-card border border-line text-center text-fg-3 text-xs">No education records yet. Click "+ Add Degree" to record one.</div>';
       } else {
         eduContainer.innerHTML = cachedAdminEducations.map(edu => `
           <div class="p-4 rounded-xl bg-card border border-line space-y-2 text-xs">
@@ -1659,7 +1583,7 @@ async function loadAdminCareer() {
 
     if (internContainer) {
       if (internships.length === 0) {
-        internContainer.innerHTML = '<div class="col-span-2 p-4 rounded-xl bg-card border border-line text-center text-fg-3 text-xs">No internships in Neon DB yet. Click "+ Add Internship" to add one.</div>';
+        internContainer.innerHTML = '<div class="col-span-2 p-4 rounded-xl bg-card border border-line text-center text-fg-3 text-xs">No internships yet. Click "+ Add Internship" to add one.</div>';
       } else {
         internContainer.innerHTML = internships.map(exp => {
           const isPursuing = Boolean(exp.current) || !exp.endDate;
@@ -1700,7 +1624,7 @@ async function loadAdminCareer() {
 
     if (expContainer) {
       if (workExps.length === 0) {
-        expContainer.innerHTML = '<div class="p-4 rounded-xl bg-card border border-line text-center text-fg-3 text-xs">No general experience records in Neon DB yet. Click "+ Add Experience" to record one.</div>';
+        expContainer.innerHTML = '<div class="p-4 rounded-xl bg-card border border-line text-center text-fg-3 text-xs">No general experience records yet. Click "+ Add Experience" to record one.</div>';
       } else {
         expContainer.innerHTML = workExps.map(exp => `
           <div class="p-4 rounded-xl bg-card border border-line space-y-2 text-xs">
@@ -1731,7 +1655,7 @@ async function handleDeleteEducation(id) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/education/${id}`, { method: 'DELETE', headers });
     if (res.ok) {
-      showToast('Education record deleted from Neon DB!', 'success');
+      showToast('Education record deleted!', 'success');
       loadAdminCareer();
     }
   } catch (e) {
@@ -1744,7 +1668,7 @@ async function handleDeleteExperience(id) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/experiences/${id}`, { method: 'DELETE', headers });
     if (res.ok) {
-      showToast('Experience record deleted from Neon DB!', 'success');
+      showToast('Experience record deleted!', 'success');
       loadAdminCareer();
     }
   } catch (e) {
@@ -1752,7 +1676,7 @@ async function handleDeleteExperience(id) {
   }
 }
 
-// Achievements & Certifications CRUD (Neon DB)
+// Achievements & Certifications CRUD
 function toggleCredentialModalFields(type) {
   const isCert = type === 'certification';
   const orgLabel = document.getElementById('cred-org-label');
@@ -1794,7 +1718,7 @@ function openCredentialModal(type = 'achievement', editId = null) {
       document.getElementById('cred-desc').value = a.description || '';
     }
   } else {
-    if (heading) heading.innerText = type === 'certification' ? 'Add Certification to Neon DB' : 'Add Achievement to Neon DB';
+    if (heading) heading.innerText = type === 'certification' ? 'Add Certification' : 'Add Achievement';
   }
   modal.classList.remove('hidden');
 }
@@ -1841,7 +1765,7 @@ async function handleSaveCredential(event) {
     const headers = await getAuthHeaders();
     const res = await fetch(url, { method, headers, body: JSON.stringify(payload) });
     if (res.ok) {
-      showToast(`${isCert ? 'Certification' : 'Achievement'} "${title}" saved to Neon DB!`, 'success');
+      showToast(`${isCert ? 'Certification' : 'Achievement'} "${title}" saved!`, 'success');
       closeCredentialModal();
       await loadAdminCredentials();
     } else {
@@ -1862,7 +1786,7 @@ async function loadAdminCredentials() {
       const resA = await fetch('/api/achievements');
       cachedAdminAchievements = (await resA.json())?.data || [];
       if (cachedAdminAchievements.length === 0) {
-        achContainer.innerHTML = `<div class="p-4 text-center text-fg-3">No achievements in Neon DB. Click "+ Add Achievement" above.</div>`;
+        achContainer.innerHTML = `<div class="p-4 text-center text-fg-3">No achievements. Click "+ Add Achievement" above.</div>`;
       } else {
         achContainer.innerHTML = cachedAdminAchievements.map(a => `
           <div class="p-3 rounded-xl bg-card border border-line flex items-center justify-between gap-2">
@@ -1883,7 +1807,7 @@ async function loadAdminCredentials() {
       const resC = await fetch('/api/certifications');
       cachedAdminCertifications = (await resC.json())?.data || [];
       if (cachedAdminCertifications.length === 0) {
-        certContainer.innerHTML = `<div class="p-4 text-center text-fg-3">No certifications in Neon DB. Click "+ Add Certification" above.</div>`;
+        certContainer.innerHTML = `<div class="p-4 text-center text-fg-3">No certifications. Click "+ Add Certification" above.</div>`;
       } else {
         certContainer.innerHTML = cachedAdminCertifications.map(c => `
           <div class="p-3 rounded-xl bg-card border border-line flex items-center justify-between gap-2">
@@ -1909,7 +1833,7 @@ async function handleDeleteAchievement(id) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/achievements/${id}`, { method: 'DELETE', headers });
     if (res.ok) {
-      showToast("Achievement deleted from Neon DB!", "success");
+      showToast("Achievement deleted!", "success");
       loadAdminCredentials();
     }
   } catch (e) {}
@@ -1920,13 +1844,13 @@ async function handleDeleteCertification(id) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/certifications/${id}`, { method: 'DELETE', headers });
     if (res.ok) {
-      showToast("Certification deleted from Neon DB!", "success");
+      showToast("Certification deleted!", "success");
       loadAdminCredentials();
     }
   } catch (e) {}
 }
 
-// 3. Research Papers Management (Neon DB)
+// 3. Research Papers Management
 let cachedAdminResearch = [];
 
 function openResearchModal(paperId = null) {
@@ -1990,7 +1914,7 @@ async function handleSaveResearch(event) {
       body: JSON.stringify(payload)
     });
     if (res.ok) {
-      showToast(`Research paper "${title}" saved to Neon DB!`, "success");
+      showToast(`Research paper "${title}" saved!`, "success");
       closeResearchModal();
       await loadAdminResearch();
     } else {
@@ -2012,7 +1936,7 @@ async function loadAdminResearch() {
     cachedAdminResearch = data?.data?.content || data?.data || [];
 
     if (!cachedAdminResearch || cachedAdminResearch.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-fg-3 text-xs">No research papers in Neon DB. Click "+ New Paper" to publish one.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-fg-3 text-xs">No research papers. Click "+ New Paper" to publish one.</td></tr>`;
       return;
     }
 
@@ -2040,7 +1964,7 @@ async function handleDeleteResearch(id) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/research/${id}`, { method: "DELETE", headers });
     if (res.ok) {
-      showToast(`Research paper "${title}" deleted from Neon DB!`, "success");
+      showToast(`Research paper "${title}" deleted!`, "success");
       await loadAdminResearch();
     }
   } catch (e) {
@@ -2048,7 +1972,7 @@ async function handleDeleteResearch(id) {
   }
 }
 
-// 4. Skills Matrix Management (Neon DB)
+// 4. Skills Matrix Management
 let cachedAdminSkills = [];
 
 function openSkillModal(skillId = null, defaultCategory = null) {
@@ -2116,7 +2040,7 @@ async function handleSaveSkill(event) {
       body: JSON.stringify({ name, proficiencyLevel: level, categoryName: category })
     });
     if (res.ok) {
-      showToast(`Skill "${name}" saved to Neon DB!`, "success");
+      showToast(`Skill "${name}" saved!`, "success");
       closeSkillModal();
       await loadAdminSkills();
     } else {
@@ -2198,14 +2122,14 @@ async function loadAdminSkills() {
 async function handleDeleteSkill(id) {
   const s = cachedAdminSkills.find(item => String(item.id) === String(id));
   const name = s ? s.name : id;
-  if (!confirm(`Are you sure you want to delete the skill "${name}" from Neon DB?\n\nPress OK to delete or Cancel to keep.`)) {
+  if (!(await window.confirmDialog({ title: `Delete skill "${name}"?`, message: "It will be removed from the database and the public skills matrix.", confirmText: "Delete" }))) {
     return;
   }
   try {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/skills/${id}`, { method: "DELETE", headers });
     if (res.ok) {
-      showToast(`Skill "${name}" deleted from Neon DB!`, "success");
+      showToast(`Skill "${name}" deleted!`, "success");
       await loadAdminSkills();
     }
   } catch (e) {
@@ -2213,7 +2137,7 @@ async function handleDeleteSkill(id) {
   }
 }
 
-// 5. Engineering Lab Experiments Management (Neon DB)
+// 5. Engineering Lab Experiments Management
 let cachedAdminLabs = [];
 
 function openLabModal(labId = null) {
@@ -2270,7 +2194,7 @@ async function handleSaveLab(event) {
       })
     });
     if (res.ok) {
-      showToast(`Experiment "${title}" saved to Neon DB!`, "success");
+      showToast(`Experiment "${title}" saved!`, "success");
       closeLabModal();
       await loadAdminLab();
     } else {
@@ -2291,7 +2215,7 @@ async function loadAdminLab() {
     const data = await res.json();
     cachedAdminLabs = data?.data?.content || data?.data || [];
     if (cachedAdminLabs.length === 0) {
-      container.innerHTML = `<div class="col-span-3 p-6 text-center text-fg-3 text-xs">No lab experiments in Neon DB. Click "+ New Experiment" to add one.</div>`;
+      container.innerHTML = `<div class="col-span-3 p-6 text-center text-fg-3 text-xs">No lab experiments. Click "+ New Experiment" to add one.</div>`;
       return;
     }
     container.innerHTML = cachedAdminLabs.map((lab, idx) => `
@@ -2328,7 +2252,7 @@ async function handleDeleteLab(id) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/lab/${id}`, { method: "DELETE", headers });
     if (res.ok) {
-      showToast(`Experiment "${title}" deleted from Neon DB!`, "success");
+      showToast(`Experiment "${title}" deleted!`, "success");
       await loadAdminLab();
     }
   } catch (e) {
@@ -2336,7 +2260,7 @@ async function handleDeleteLab(id) {
   }
 }
 
-// 6. Contribution Stories Management (Neon DB)
+// 6. Contribution Stories Management
 let cachedAdminStories = [];
 
 function openStoryModal(storyId = null) {
@@ -2394,7 +2318,7 @@ async function handleSaveStory(event) {
       })
     });
     if (res.ok) {
-      showToast(`Contribution story "${title}" saved to Neon DB!`, "success");
+      showToast(`Contribution story "${title}" saved!`, "success");
       closeStoryModal();
       await loadAdminStories();
     } else {
@@ -2415,7 +2339,7 @@ async function loadAdminStories() {
     const data = await res.json();
     cachedAdminStories = data?.data?.content || data?.data || [];
     if (cachedAdminStories.length === 0) {
-      container.innerHTML = `<div class="col-span-2 p-6 text-center text-fg-3 text-xs">No contribution stories in Neon DB. Click "+ New Story" to add one.</div>`;
+      container.innerHTML = `<div class="col-span-2 p-6 text-center text-fg-3 text-xs">No contribution stories. Click "+ New Story" to add one.</div>`;
       return;
     }
     container.innerHTML = cachedAdminStories.map(s => `
@@ -2449,7 +2373,7 @@ async function handleDeleteStory(id) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/stories/${id}`, { method: "DELETE", headers });
     if (res.ok) {
-      showToast(`Contribution story "${title}" deleted from Neon DB!`, "success");
+      showToast(`Contribution story "${title}" deleted!`, "success");
       await loadAdminStories();
     }
   } catch (e) {
@@ -2457,7 +2381,7 @@ async function handleDeleteStory(id) {
   }
 }
 
-// 7. Technical Writing / Articles Management (Neon DB)
+// 7. Technical Writing / Articles Management
 let cachedAdminArticles = [];
 
 function resetArticleEditor() {
@@ -2479,7 +2403,7 @@ async function loadAdminArticles() {
       const json = await res.json();
       cachedAdminArticles = json?.data?.content || json?.data || [];
       if (cachedAdminArticles.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-fg-3">No articles in Neon DB yet. Use the editor above to publish one.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-fg-3">No articles yet. Use the editor above to publish one.</td></tr>`;
         return;
       }
       tbody.innerHTML = cachedAdminArticles.map(a => `
@@ -2541,7 +2465,7 @@ async function handleSaveArticle(status = "PUBLISHED") {
       })
     });
     if (res.ok) {
-      showToast(`Article "${title}" saved to Neon DB!`, "success");
+      showToast(`Article "${title}" saved!`, "success");
       resetArticleEditor();
       await loadAdminArticles();
     } else {
@@ -2560,7 +2484,7 @@ async function handleDeleteArticle(id) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/articles/${id}`, { method: "DELETE", headers });
     if (res.ok) {
-      showToast(`Article "${title}" deleted from Neon DB!`, "success");
+      showToast(`Article "${title}" deleted!`, "success");
       await loadAdminArticles();
     }
   } catch (e) {
@@ -2568,7 +2492,7 @@ async function handleDeleteArticle(id) {
   }
 }
 
-// 8. Contact Intelligence, AI Moderation & CRM Inquiries Management (Neon DB)
+// 8. Contact Intelligence, AI Moderation & CRM Inquiries Management
 let cachedAdminInquiries = [];
 let currentAdminCrmFilter = 'ALL';
 
@@ -2592,14 +2516,32 @@ async function loadAdminCrm() {
   try {
     const headers = await getAuthHeaders();
     const res = await fetch("/api/admin/inquiries?size=50", { headers });
-    if (res.ok) {
-      const json = await res.json();
-      cachedAdminInquiries = json?.data?.content || json?.data || [];
-      renderAdminCrmList();
-    }
+    if (!res.ok) throw new Error("Server responded " + res.status);
+    const json = await res.json();
+    cachedAdminInquiries = json?.data?.content || json?.data || [];
+    renderAdminCrmList();
   } catch (e) {
     console.warn("Load CRM error:", e);
+    container.innerHTML = `
+      <div class="p-6 rounded-xl bg-card border border-line text-center space-y-3">
+        <p class="text-fg-2">Could not load inquiries. ${escapeHtml(e.message || "")}</p>
+        <button type="button" onclick="loadAdminCrm()" class="btn btn--pill btn--primary">Try again</button>
+      </div>`;
   }
+}
+
+function toggleCrmCard(btn) {
+  const card = btn.closest('[data-crm-card]');
+  if (!card) return;
+  const open = card.getAttribute('data-open') !== 'true';
+  card.setAttribute('data-open', String(open));
+  card.querySelector('[data-crm-details]')?.classList.toggle('hidden', !open);
+  card.querySelector('[data-crm-msg]')?.classList.toggle('line-clamp-2', !open);
+  card.querySelectorAll('[data-crm-toggle]').forEach(b => {
+    b.setAttribute('aria-expanded', String(open));
+    const label = b.querySelector('[data-crm-toggle-label]');
+    if (label) label.textContent = open ? 'Show less' : 'Show more';
+  });
 }
 
 function renderAdminCrmList() {
@@ -2632,104 +2574,79 @@ function renderAdminCrmList() {
   });
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="p-6 rounded-xl bg-card border border-line text-center text-fg-3">No contact inquiries match the selected filter in Neon DB.</div>`;
+    container.innerHTML = `<div class="p-6 rounded-xl bg-card border border-line text-center text-fg-3">No inquiries match this filter.</div>`;
     return;
   }
 
   container.innerHTML = filtered.map(inq => {
-    const intent = inq.intent || "GENUINE_INQUIRY";
-    const rawModStatus = inq.moderationStatus || "APPROVED";
-    const modStatus = (rawModStatus === "MODERATION_FAILED" && !inq.spam && !inq.abusive && !inq.threatening)
-      ? "APPROVED"
-      : rawModStatus;
-    const confPct = inq.moderationConfidence !== undefined && inq.moderationConfidence !== null
-      ? Math.round(Number(inq.moderationConfidence) * 100) + "%"
-      : "88%";
-    const isSpam = Boolean(inq.spam);
-    const isAbusive = Boolean(inq.abusive) || Boolean(inq.threatening);
+    const id = escapeHtml(String(inq.id));
+    const isSpam = Boolean(inq.spam) || inq.moderationStatus === "QUARANTINED_SPAM" || inq.moderationStatus === "CONFIRMED_SPAM";
+    const isAbusive = Boolean(inq.abusive) || Boolean(inq.threatening) || inq.moderationStatus === "FLAGGED_ABUSE";
+    const needsReview = inq.moderationStatus === "REVIEW_REQUIRED" || inq.moderationStatus === "MODERATION_FAILED";
     const isRepeat = Boolean(inq.repeatSubmission) || Number(inq.repeatCount) > 1;
     const isDisposable = Boolean(inq.disposableEmail);
+    const pretty = v => String(v || "").replace(/_/g, " ").toLowerCase().replace(/^\w/, c => c.toUpperCase());
 
-    const locParts = [inq.city, inq.region, inq.country]
-      .filter(p => p && p !== "Private / Loopback Network" && p !== "Location Unavailable");
-    let resolvedLocLabel = locParts.join(", ");
-    let resolvedProvider = inq.geoProvider || "GeoIP";
-    if (!resolvedLocLabel || resolvedProvider === "PRIVATE_OR_LOOPBACK" || resolvedProvider === "UNAVAILABLE") {
-      const sig = String(inq.browserIdentifier || "");
-      if (sig.includes("Asia/Kolkata") || sig.includes("Asia/Calcutta")) {
-        resolvedLocLabel = "New Delhi / Bihar, India";
-      } else if (sig.includes("America/")) {
-        resolvedLocLabel = "United States";
-      } else if (sig.includes("Europe/")) {
-        resolvedLocLabel = "Europe";
-      } else {
-        resolvedLocLabel = "New Delhi, Delhi NCR, India";
-      }
-      resolvedProvider = "Edge/Timezone GeoIP";
-    }
-    const locationStr = `📍 ${escapeHtml(resolvedLocLabel)} (${escapeHtml(resolvedProvider)})`;
+    // moderation chip only when the backend actually analysed the message (nothing is invented)
+    const hasMod = Boolean(inq.moderationStatus || inq.intent);
+    const conf = (inq.moderationConfidence !== undefined && inq.moderationConfidence !== null && inq.moderationConfidence !== "")
+      ? ` ${Math.round(Number(inq.moderationConfidence) * 100)}%` : "";
+    let modClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+    if (isSpam || isAbusive) modClass = "bg-rose-500/10 text-rose-400 border-rose-500/30";
+    else if (needsReview) modClass = "bg-amber-500/10 text-amber-400 border-amber-500/30";
+    const modLabel = pretty(inq.moderationStatus || inq.intent) + conf;
 
-    const timeStr = inq.createdAt ? new Date(inq.createdAt).toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+    const place = [inq.city, inq.region, inq.country].filter(p => p && p !== "Private / Loopback Network" && p !== "Location Unavailable").join(", ");
+    const timeStr = inq.createdAt ? new Date(inq.createdAt).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+    const msg = String(inq.message || "");
+    const longMsg = msg.length > 140 || msg.split("\n").length > 2;
+    const initial = escapeHtml((inq.name || "?").trim().charAt(0).toUpperCase() || "?");
 
-    let modBadgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
-    if (isSpam || modStatus === "QUARANTINED_SPAM" || modStatus === "CONFIRMED_SPAM") {
-      modBadgeClass = "bg-rose-500/10 text-rose-400 border-rose-500/30";
-    } else if (isAbusive || modStatus === "FLAGGED_ABUSE") {
-      modBadgeClass = "bg-rose-500/20 text-rose-300 border-rose-500/40";
-    } else if (modStatus === "REVIEW_REQUIRED" || modStatus === "MODERATION_FAILED") {
-      modBadgeClass = "bg-amber-500/10 text-amber-400 border-amber-500/30";
-    }
+    const rows = [
+      ["Location", place ? place + (inq.geoProvider && inq.geoProvider !== "UNAVAILABLE" && inq.geoProvider !== "PRIVATE_OR_LOOPBACK" ? " (" + inq.geoProvider + ")" : "") : "Not available"],
+      ["Referrer", inq.referrer],
+      ["IP address", inq.ipAddress || "Redacted"],
+      ["Browser hash", inq.browserHash],
+      ["User agent", inq.userAgent],
+      ["Moderation reason", inq.moderationReason],
+      ["Suggested action", inq.recommendedAction ? pretty(inq.recommendedAction) : ""]
+    ].filter(r => r[1]).map(r => `<div class="min-w-0"><dt class="text-fg-3">${r[0]}</dt><dd class="text-fg-2 break-words">${escapeHtml(String(r[1]))}</dd></div>`).join("");
+
+    const iconBtn = (fn, icon, label, tone) => `<button type="button" onclick="${fn}" class="btn btn--icon btn--pill ${tone}" aria-label="${label}" title="${label}"><i data-lucide="${icon}" class="w-4 h-4" aria-hidden="true"></i></button>`;
 
     return `
-      <div class="p-4 rounded-xl bg-card border ${isSpam || isAbusive ? 'border-rose-500/30' : 'border-line'} space-y-3">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 border-b border-line pb-2.5">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="font-bold text-fg text-sm">${escapeHtml(inq.name || "Visitor")}</span>
-            <span class="text-indigo-400 text-xs">&lt;${escapeHtml(inq.email || "")}&gt;</span>
-            ${inq.company ? `<span class="text-fg-2 text-xs">· ${escapeHtml(inq.company)}</span>` : ""}
-            <span class="px-2 py-0.5 rounded text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">${escapeHtml(inq.status || "NEW")}</span>
-            <span class="px-2 py-0.5 rounded text-xs border ${modBadgeClass}">${escapeHtml(intent)} · ${escapeHtml(modStatus)} (${confPct})</span>
-            ${isRepeat ? `<span class="px-2 py-0.5 rounded text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30">Repeat #${inq.repeatCount || 2}</span>` : ""}
-            ${isDisposable ? `<span class="px-2 py-0.5 rounded text-xs bg-amber-500/10 text-amber-300 border border-amber-500/30">Disposable Email</span>` : ""}
+      <article data-crm-card data-open="false" class="p-3.5 rounded-xl bg-card border ${isSpam || isAbusive ? "border-rose-500/30" : "border-line"} space-y-2.5">
+        <div class="flex items-start gap-3">
+          <span class="w-9 h-9 shrink-0 rounded-full grid place-items-center text-sm font-semibold bg-indigo-500/15 text-indigo-400" aria-hidden="true">${initial}</span>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span class="font-semibold text-fg text-sm truncate max-w-[16rem]">${escapeHtml(inq.name || "Visitor")}</span>
+              ${inq.status ? `<span class="px-2 py-0.5 rounded-full text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">${escapeHtml(pretty(inq.status))}</span>` : ""}
+              ${hasMod ? `<span class="px-2 py-0.5 rounded-full text-xs border ${modClass}">${escapeHtml(modLabel)}</span>` : ""}
+              ${isRepeat ? `<span class="px-2 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30">Repeat ×${inq.repeatCount || 2}</span>` : ""}
+              ${isDisposable ? `<span class="px-2 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30">Disposable email</span>` : ""}
+            </div>
+            <div class="text-xs text-fg-3 truncate">${escapeHtml(inq.email || "")}${inq.company ? " · " + escapeHtml(inq.company) : ""}${timeStr ? " · " + timeStr : ""}</div>
           </div>
-          <span class="text-xs text-fg-3">${timeStr}</span>
+          <button type="button" data-crm-toggle onclick="toggleCrmCard(this)" aria-expanded="false" aria-label="Show details" title="Details" class="btn btn--icon btn--pill shrink-0"><i data-lucide="chevrons-up-down" class="w-4 h-4" aria-hidden="true"></i></button>
         </div>
 
-        <p class="text-fg font-sans text-xs leading-relaxed whitespace-pre-wrap">${escapeHtml(inq.message || "")}</p>
+        <p data-crm-msg class="text-fg text-[13px] leading-relaxed whitespace-pre-wrap line-clamp-2 pl-12">${escapeHtml(msg)}</p>
+        ${longMsg ? `<button type="button" data-crm-toggle onclick="toggleCrmCard(this)" aria-expanded="false" class="pl-12 text-xs text-indigo-400 hover:underline"><span data-crm-toggle-label>Show more</span></button>` : ""}
 
-        <!-- Contact Intelligence & AI Moderation Metadata Bar -->
-        <div class="p-2.5 rounded-lg bg-raised border border-line grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-fg-2">
-          <div class="space-y-0.5">
-            <div><strong class="text-fg">GeoIP & Origin:</strong> ${locationStr} ${inq.referrer ? `· <span class="text-fg-2">Ref: ${escapeHtml(inq.referrer)}</span>` : ''}</div>
-            <div><strong class="text-fg">Client IP:</strong> <span class="text-emerald-400">${escapeHtml(inq.ipAddress || "Scrubbed / Redacted")}</span> ${inq.browserHash ? `· <strong class="text-fg">Browser Hash:</strong> <code class="text-indigo-300 font-mono">${escapeHtml(String(inq.browserHash))}</code>` : ""}</div>
-            ${inq.userAgent ? `<div class="truncate" title="${escapeHtml(inq.userAgent)}"><strong class="text-fg">User-Agent:</strong> ${escapeHtml(inq.userAgent)}</div>` : ""}
-          </div>
-          <div class="space-y-0.5">
-            <div><strong class="text-fg">AI Moderation Reason:</strong> ${escapeHtml(inq.moderationReason || "Verified inquiry")}</div>
-            <div><strong class="text-fg">Recommended Action:</strong> <span class="text-indigo-400">${escapeHtml(inq.recommendedAction || "ALLOW_AND_LOG")}</span></div>
-          </div>
-        </div>
+        <dl data-crm-details class="hidden ml-12 p-3 rounded-xl bg-raised border border-line grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-xs">${rows}</dl>
 
-        <!-- Admin Moderation & Triage Controls -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-          <div class="flex flex-wrap items-center gap-2">
-            <button type="button" onclick="handleUpdateInquiryModeration('${inq.id}', 'REVIEWED', 'CONTACTED')" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs transition-colors">
-              ✓ Mark Reviewed
-            </button>
-            <button type="button" onclick="handleUpdateInquiryModeration('${inq.id}', 'FALSE_POSITIVE', 'NEW')" class="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs transition-colors">
-              ★ Mark Genuine (False Positive)
-            </button>
-            <button type="button" onclick="handleUpdateInquiryModeration('${inq.id}', 'CONFIRMED_SPAM', 'REJECTED')" class="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs transition-colors">
-              ⊘ Confirm Spam
-            </button>
+        <div class="flex items-center justify-between gap-2 pl-12">
+          <div class="flex items-center gap-1.5">
+            ${iconBtn(`handleUpdateInquiryModeration('${id}', 'REVIEWED', 'CONTACTED')`, "check", "Mark reviewed", "text-emerald-400")}
+            ${iconBtn(`handleUpdateInquiryModeration('${id}', 'FALSE_POSITIVE', 'NEW')`, "star", "Mark genuine (false positive)", "text-indigo-400")}
+            ${iconBtn(`handleUpdateInquiryModeration('${id}', 'CONFIRMED_SPAM', 'REJECTED')`, "ban", "Confirm spam", "text-amber-400")}
           </div>
-          <button type="button" onclick="handleDeleteInquiry('${inq.id}')" class="px-3 py-1 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 text-xs transition-colors">
-            🗑 Delete Inquiry & Notification
-          </button>
+          ${iconBtn(`handleDeleteInquiry('${id}')`, "trash-2", "Delete inquiry", "text-rose-400")}
         </div>
-      </div>
-    `;
+      </article>`;
   }).join("");
+  if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
 }
 
 async function handleUpdateInquiryModeration(id, moderationStatus, inquiryStatus) {
@@ -2744,7 +2661,7 @@ async function handleUpdateInquiryModeration(id, moderationStatus, inquiryStatus
       })
     });
     if (res.ok) {
-      showToast(`Inquiry marked as ${moderationStatus} in Neon DB!`, "success");
+      showToast(`Inquiry marked as ${moderationStatus}!`, "success");
       await loadAdminCrm();
     } else {
       showToast("Failed to update moderation status", "warning");
@@ -2766,6 +2683,8 @@ async function handleRetentionCleanup() {
       const count = json?.data?.anonymizedRecords ?? 0;
       showToast(`Privacy retention policy applied (${count} older records anonymized).`, "success");
       await loadAdminCrm();
+    } else {
+      showToast("Retention cleanup failed (server " + res.status + ")", "warning");
     }
   } catch (e) {
     showToast("Retention cleanup error: " + e.message, "warning");
@@ -2777,10 +2696,12 @@ async function handleDeleteInquiry(id) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/inquiries/${id}`, { method: "DELETE", headers });
     if (res.ok) {
-      showToast("Inquiry and linked notification deleted from Neon DB!", "success");
+      showToast("Inquiry and its notification deleted.", "success");
       await loadAdminCrm();
       await loadAdminNotifications();
       await loadAdminDashboardMetrics();
+    } else {
+      showToast("Could not delete the inquiry (server " + res.status + ")", "warning");
     }
   } catch (e) {
     showToast("Error deleting inquiry: " + e.message, "warning");
@@ -2905,7 +2826,7 @@ function renderEditorMilestones(milestones) {
   const listEl = document.getElementById('pe-milestones-list');
   if (!listEl) return;
   if (!milestones || milestones.length === 0) {
-    listEl.innerHTML = `<div class="p-4 rounded-xl bg-card border border-line text-center text-fg-3">No milestones recorded in Neon DB for this project yet. Use "+ Add Milestone" above.</div>`;
+    listEl.innerHTML = `<div class="p-4 rounded-xl bg-card border border-line text-center text-fg-3">No milestones recorded for this project yet. Use "+ Add Milestone" above.</div>`;
     return;
   }
   listEl.innerHTML = milestones.map(m => `
@@ -2940,7 +2861,7 @@ async function handleAddProjectMilestone() {
       body: JSON.stringify({ title, versionTag, status, description, displayOrder: 1 })
     });
     if (res.ok) {
-      showToast(`Milestone "${title}" added to Neon DB!`, "success");
+      showToast(`Milestone "${title}" added!`, "success");
       document.getElementById('pe-ms-title').value = '';
       document.getElementById('pe-ms-desc').value = '';
       await loadProjectInto13TabEditor(projId);
@@ -2956,7 +2877,7 @@ async function handleDeleteProjectMilestone(msId) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/projects/${projId}/milestones/${msId}`, { method: 'DELETE', headers });
     if (res.ok) {
-      showToast("Milestone deleted from Neon DB!", "success");
+      showToast("Milestone deleted!", "success");
       await loadProjectInto13TabEditor(projId);
     }
   } catch (e) {}
@@ -2966,7 +2887,7 @@ function renderEditorChangelogs(changelogs) {
   const listEl = document.getElementById('pe-changelogs-list');
   if (!listEl) return;
   if (!changelogs || changelogs.length === 0) {
-    listEl.innerHTML = `<div class="p-4 rounded-xl bg-card border border-line text-center text-fg-3">No changelog entries recorded in Neon DB for this project yet. Use "+ Log Release" above.</div>`;
+    listEl.innerHTML = `<div class="p-4 rounded-xl bg-card border border-line text-center text-fg-3">No changelog entries recorded for this project yet. Use "+ Log Release" above.</div>`;
     return;
   }
   listEl.innerHTML = changelogs.map(c => `
@@ -2999,7 +2920,7 @@ async function handleAddProjectChangelog() {
       body: JSON.stringify({ versionTag, commitHash, releaseSummary })
     });
     if (res.ok) {
-      showToast(`Changelog "${versionTag}" saved to Neon DB!`, "success");
+      showToast(`Changelog "${versionTag}" saved!`, "success");
       document.getElementById('pe-cl-version').value = '';
       document.getElementById('pe-cl-commit').value = '';
       document.getElementById('pe-cl-summary').value = '';
@@ -3014,7 +2935,7 @@ async function handleDeleteProjectChangelog(clId) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/projects/${projId}/changelogs/${clId}`, { method: 'DELETE', headers });
     if (res.ok) {
-      showToast("Changelog deleted from Neon DB!", "success");
+      showToast("Changelog deleted!", "success");
       await loadProjectInto13TabEditor(projId);
     }
   } catch (e) {}
@@ -3024,7 +2945,7 @@ function renderEditorDecisions(decisions) {
   const listEl = document.getElementById('pe-decisions-list');
   if (!listEl) return;
   if (!decisions || decisions.length === 0) {
-    listEl.innerHTML = `<div class="p-4 rounded-xl bg-card border border-line text-center text-fg-3">No Architectural Decision Records (ADRs) in Neon DB for this project yet. Use "+ Save ADR" above.</div>`;
+    listEl.innerHTML = `<div class="p-4 rounded-xl bg-card border border-line text-center text-fg-3">No Architectural Decision Records (ADRs) for this project yet. Use "+ Save ADR" above.</div>`;
     return;
   }
   listEl.innerHTML = decisions.map(d => `
@@ -3066,7 +2987,7 @@ async function handleAddProjectDecision() {
       })
     });
     if (res.ok) {
-      showToast(`ADR "${decisionTitle}" saved to Neon DB!`, "success");
+      showToast(`ADR "${decisionTitle}" saved!`, "success");
       document.getElementById('pe-adr-title').value = '';
       document.getElementById('pe-adr-context').value = '';
       document.getElementById('pe-adr-decision').value = '';
@@ -3081,7 +3002,7 @@ async function handleDeleteProjectDecision(adrId) {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/projects/${projId}/decisions/${adrId}`, { method: 'DELETE', headers });
     if (res.ok) {
-      showToast("ADR decision deleted from Neon DB!", "success");
+      showToast("ADR decision deleted!", "success");
       await loadProjectInto13TabEditor(projId);
     }
   } catch (e) {}
@@ -3148,12 +3069,12 @@ async function save13TabProject(desiredStatus) {
 
     const res = await fetch(url, { method, headers, body: JSON.stringify(payload) });
     if (res.ok) {
-      showToast(`Project "${title}" saved to Neon DB successfully!`, 'success');
+      showToast(`Project "${title}" saved successfully!`, 'success');
       await loadAdminProjects();
       await populateProjectEditorSelector(id || slug);
     } else {
       const err = await res.json().catch(() => ({}));
-      showToast(err.message || 'Failed to save project to Neon DB', 'warning');
+      showToast(err.message || 'Failed to save project', 'warning');
     }
   } catch (err) {
     showToast('Network error while saving project', 'warning');
@@ -3169,7 +3090,7 @@ const defaultHomepageSections = [
   { id: 'projects', title: 'Featured Production Projects', desc: 'Case studies, architecture breakdowns, and live demos', visible: true },
   { id: 'experience', title: 'Experience, Education & Credentials', desc: 'Work history, BCA degree, achievements, and certifications', visible: true },
   { id: 'contributions', title: 'Open-Source Contribution Stories', desc: 'Engineering narratives and upstream PRs', visible: true },
-  { id: 'coding', title: 'Coding Journey & DSA Problem Notes', desc: 'Authored algorithmic problem solutions from Neon DB', visible: true },
+  { id: 'coding', title: 'Coding Journey & DSA Problem Notes', desc: 'Authored algorithmic problem solutions', visible: true },
   { id: 'research', title: 'Research Hub & Investigations', desc: 'Technical papers and empirical benchmarks', visible: true },
   { id: 'lab', title: 'Engineering Lab Prototypes', desc: 'Experimental systems and sandbox builds', visible: true },
   { id: 'writing', title: 'Technical Writing & Engineering Notes', desc: 'Published markdown essays and architecture guides', visible: true },
@@ -3259,7 +3180,7 @@ async function saveHomepageLayout(skipConfirm = false) {
       });
     }
     if (res.ok) {
-      showToast("Homepage section order & visibility saved to Neon DB!", "success");
+      showToast("Homepage section order & visibility saved!", "success");
     } else {
       showToast("Failed to save homepage layout", "warning");
     }
@@ -3269,7 +3190,7 @@ async function saveHomepageLayout(skipConfirm = false) {
 }
 
 // ==========================================
-// ADMIN PASSWORD UPDATE (Neon DB)
+// ADMIN PASSWORD UPDATE
 // ==========================================
 async function openChangePasswordModal() {
   const modal = document.getElementById('modal-change-password');
@@ -3360,12 +3281,12 @@ async function handleRequestAdminUpdateOtp() {
       return;
     }
 
-    // Never show or auto-fill OTP on screen; admin retrieves it from Neon DB (admin_credential_otps)
+    // Never show or auto-fill OTP on screen; admin retrieves it (admin_credential_otps)
     if (otpInput) otpInput.value = '';
     if (step1) step1.classList.add('hidden');
     if (step2) step2.classList.remove('hidden');
     if (otpInput) setTimeout(() => otpInput.focus(), 60);
-    showToast('OTP saved in Neon DB (admin_credential_otps).', 'success');
+    showToast('OTP saved (admin_credential_otps).', 'success');
   } catch (e) {
     showToast('Network error generating OTP.', 'warning');
   } finally {
@@ -3425,7 +3346,7 @@ async function handleChangePassword(e) {
       if (d.accessToken) localStorage.setItem('raviranjan_auth_token', d.accessToken);
       if (d.username) localStorage.setItem('raviranjan_admin_user', d.username);
 
-      showToast('Credentials updated in Neon DB!', 'success');
+      showToast('Credentials updated!', 'success');
       if (typeof loadAdminAuditLogs === 'function') loadAdminAuditLogs();
       if (typeof loadAdminIdentityMetadata === 'function') loadAdminIdentityMetadata();
       setTimeout(() => closeChangePasswordModal(), 600);
@@ -3471,11 +3392,11 @@ async function loadAdminIntegrationsCenter() {
 }
 
 async function triggerGlobalSync() {
-  showToast('Synchronizing GitHub, LeetCode, and GFG with Neon DB...', 'info');
+  showToast('Synchronizing GitHub, LeetCode, and GFG...', 'info');
   try {
     const res = await fetch('/api/activity/sync', { method: 'POST' });
     if (res.ok) {
-      showToast('All external platforms synchronized to Neon DB!', 'success');
+      showToast('All external platforms synchronized!', 'success');
       await loadAdminDashboardMetrics();
       await loadAdminIntegrationsCenter();
       await loadAdminGitHub();
@@ -3490,7 +3411,7 @@ async function triggerGlobalSync() {
     for (const p of ['GITHUB', 'LEETCODE', 'GFG']) {
       await fetch(`/api/admin/integrations/${p}/sync?mode=MANUAL`, { method: 'POST', headers }).catch(() => {});
     }
-    showToast('External platforms synchronized to Neon DB!', 'success');
+    showToast('External platforms synchronized!', 'success');
     await loadAdminDashboardMetrics();
     await loadAdminIntegrationsCenter();
   } catch (e) {
@@ -3502,7 +3423,7 @@ async function triggerGlobalSync() {
 // ANALYTICS CSV EXPORT (NEON DB)
 // ==========================================
 async function exportAnalyticsCsv() {
-  showToast('Generating and downloading Neon DB Analytics CSV report...', 'info');
+  showToast('Generating the analytics CSV report…', 'info');
   try {
     const headers = await getAuthHeaders();
     const res = await fetch('/api/admin/analytics/export-csv', { headers });
@@ -3582,7 +3503,69 @@ function applyAdminTheme(theme) {
 // ==========================================
 // PLATFORM EXECUTIVE TELEMETRY & ANALYTICS (DYNAMIC NEON DB)
 // ==========================================
+
+// ---- Live integration + system status (replaces hard-coded "HEALTHY / 42ms" and "Neon DB / Redis" chips) ----
+const PROVIDER_LABELS = { GITHUB: "GitHub", LEETCODE: "LeetCode", GFG: "GeeksforGeeks", WHATSAPP: "WhatsApp", EMAIL: "Email", ANALYTICS: "Analytics", AI: "AI assistant" };
+
+async function loadIntegrationHealth() {
+  const box = document.getElementById("dash-integration-health");
+  if (!box) return;
+  try {
+    const headers = await getAuthHeaders();
+    const res = await fetch("/api/admin/integrations", { headers });
+    if (!res.ok) throw new Error("Server responded " + res.status);
+    const list = (await res.json())?.data || [];
+    if (!list.length) { box.innerHTML = '<div class="p-4 text-center text-fg-3 text-sm">No integrations reported.</div>'; return; }
+    box.innerHTML = list.map(i => {
+      const state = String(i.healthStatus || "").toUpperCase();
+      const tone = state === "HEALTHY" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+        : state === "DEGRADED" ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
+        : state === "ERROR" ? "bg-rose-500/10 text-rose-400 border-rose-500/30"
+        : "bg-raised text-fg-3 border-line";
+      const label = state ? state.charAt(0) + state.slice(1).toLowerCase() : "Unknown";
+      const when = i.lastSuccessfulSync ? new Date(i.lastSuccessfulSync).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "Never synced";
+      const records = Number.isFinite(Number(i.recordsProcessed)) && Number(i.recordsProcessed) > 0 ? `${Number(i.recordsProcessed)} records` : "";
+      return `
+        <div class="p-3 rounded-xl bg-card border border-line space-y-1">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-medium text-fg truncate">${escapeHtml(PROVIDER_LABELS[i.provider] || String(i.provider || ""))}</span>
+            <span class="px-2 py-0.5 rounded-full text-xs border ${tone}">${label}</span>
+          </div>
+          <div class="flex items-center justify-between gap-2 text-xs text-fg-3">
+            <span class="truncate">Last sync: ${when}</span><span class="shrink-0">${records}</span>
+          </div>
+          ${i.lastErrorMessage ? `<p class="text-xs text-rose-400 line-clamp-2" title="${escapeHtml(i.lastErrorMessage)}">${escapeHtml(i.lastErrorMessage)}</p>` : ""}
+        </div>`;
+    }).join("");
+  } catch (e) {
+    box.innerHTML = `<div class="p-4 text-center space-y-3"><p class="text-fg-2 text-sm">Could not load integration status.</p><button type="button" onclick="loadIntegrationHealth()" class="btn btn--pill">Try again</button></div>`;
+  }
+}
+
+async function loadSystemStatus() {
+  const paint = (key, state) => {
+    const dot = document.getElementById(`admin-${key}-dot`);
+    const chip = dot?.parentElement;
+    if (!dot || !chip) return;
+    if (state === null) { chip.style.display = "none"; return; }     // component not reported -> don't claim anything
+    chip.style.display = "";
+    dot.className = "w-1.5 h-1.5 rounded-full " + (state === "UP" ? "bg-emerald-400" : "bg-rose-400");
+    chip.title = state === "UP" ? "Operational" : "Unavailable";
+  };
+  try {
+    const res = await fetch("/actuator/health");
+    const j = await res.json().catch(() => ({}));
+    const c = j.components || {};
+    paint("db", (c.db && c.db.status) || j.status || "DOWN");
+    paint("redis", c.redis ? c.redis.status : null);
+  } catch (e) {
+    paint("db", "DOWN"); paint("redis", null);
+  }
+}
+
 async function loadAdminDashboardMetrics() {
+  loadIntegrationHealth();
+  loadSystemStatus();
   try {
     let headers = await getAuthHeaders();
     let res = await fetch("/api/admin/dashboard/metrics", { headers }).catch(() => null);
@@ -3655,7 +3638,7 @@ async function loadAdminDashboardMetrics() {
     setT("dash-ai-queries", Number(m.aiQueries || 0).toLocaleString());
     setT("dash-active-sprints", m.activeSprints ?? 0);
     setT("dash-sprints-breakdown", `Avg Progress ${m.avgProgress || 0}%`);
-    setT("dash-health-status", m.healthStatus || "100%");
+    setT("dash-health-status", m.healthStatus || "—");
 
     // Also update Analytics View cards
     setT("analytics-views", Number(m.portfolioViews || 0).toLocaleString());
@@ -3700,7 +3683,7 @@ async function loadAdminDashboardMetrics() {
     const milestonesContainer = document.getElementById("dash-project-milestones-list");
     if (milestonesContainer && Array.isArray(m.projectMilestones)) {
       if (m.projectMilestones.length === 0) {
-        milestonesContainer.innerHTML = `<div class="text-fg-3 text-xs">No active projects in Neon DB. Create a project in the Projects tab.</div>`;
+        milestonesContainer.innerHTML = `<div class="text-fg-3 text-xs">No active projects. Create a project in the Projects tab.</div>`;
       } else {
         milestonesContainer.innerHTML = m.projectMilestones.map(pm => {
           const pVal = pm.progress !== undefined ? pm.progress : 85;
@@ -3815,7 +3798,7 @@ async function handleSaveSiteSettings(e) {
   const saveBtn = document.getElementById('btn-save-site-settings');
   if (saveBtn) {
     saveBtn.disabled = true;
-    saveBtn.innerText = 'Saving to Neon DB...';
+    saveBtn.innerText = 'Saving...';
   }
   const title = document.getElementById('setting-site-title')?.value?.trim() || '';
   const theme = document.getElementById('setting-theme-color-text')?.value?.trim() || '#6366f1';
@@ -3871,7 +3854,7 @@ async function handleSaveSiteSettings(e) {
     }
 
     if (res.ok) {
-      showToast('Site settings, Accent Theme, Typography, Hero Texts & Contact saved to Neon DB!', 'success');
+      showToast('Site settings, Accent Theme, Typography, Hero Texts & Contact saved!', 'success');
       await loadSiteSettings();
       if (typeof loadAdminAuditLogs === 'function') loadAdminAuditLogs();
       if (typeof loadAdminIdentityMetadata === 'function') loadAdminIdentityMetadata();
@@ -3883,7 +3866,7 @@ async function handleSaveSiteSettings(e) {
   } finally {
     if (saveBtn) {
       saveBtn.disabled = false;
-      saveBtn.innerText = 'Save Settings to Neon DB';
+      saveBtn.innerText = 'Save Settings';
     }
   }
 }
@@ -3989,7 +3972,7 @@ async function loadAiConfig() {
           if (input) input.value = c.apiKey;
           const badge = document.getElementById('gemini-status-badge');
           if (badge) {
-            badge.innerText = 'Connected (Neon DB)';
+            badge.innerText = 'Connected';
             badge.className = 'text-xs  px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
           }
         }
@@ -4061,12 +4044,12 @@ async function loadAiConfig() {
 }
 
 async function handleDeleteAiLog(id) {
-  if (!confirm("Are you sure you want to delete this AI conversation record from Neon DB?")) return;
+  if (!(await window.confirmDialog({ title: "Delete this AI conversation?", message: "The visitor conversation record is removed permanently." }))) return;
   try {
     const headers = await getAuthHeaders();
     const res = await fetch(`/api/admin/ai/logs/${id}`, { method: 'DELETE', headers });
     if (res.ok) {
-      showToast("AI conversation log deleted from Neon DB!", "success");
+      showToast("AI conversation log deleted!", "success");
       loadAiConfig();
       loadAdminDashboardMetrics();
     }
@@ -4074,12 +4057,12 @@ async function handleDeleteAiLog(id) {
 }
 
 async function handleClearAllAiLogs() {
-  if (!confirm("Are you sure you want to CLEAR ALL visitor AI conversation logs from Neon DB?")) return;
+  if (!(await window.confirmDialog({ title: "Clear ALL AI conversation logs?", message: "Every visitor AI conversation will be removed permanently. This cannot be undone.", confirmText: "Clear all", requireText: "CLEAR ALL" }))) return;
   try {
     const headers = await getAuthHeaders();
     const res = await fetch('/api/admin/ai/logs', { method: 'DELETE', headers });
     if (res.ok) {
-      showToast("All AI conversation logs cleared from Neon DB!", "success");
+      showToast("All AI conversation logs cleared!", "success");
       loadAiConfig();
       loadAdminDashboardMetrics();
     }
@@ -4108,10 +4091,10 @@ async function saveGeminiKey() {
     });
 
     if (res.ok) {
-      showToast('Gemini API key saved to Neon DB! AI Assistant active.', 'success');
+      showToast('Gemini API key saved! AI Assistant active.', 'success');
       const badge = document.getElementById('gemini-status-badge');
       if (badge) {
-        badge.innerText = 'Connected (Neon DB)';
+        badge.innerText = 'Connected';
         badge.className = 'text-xs  px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
       }
     }
@@ -4144,13 +4127,14 @@ async function loadAdminNotifications() {
       }
     }
 
-    if (listRes.ok) {
-      const listJson = await listRes.json();
-      cachedAdminNotifications = listJson?.data?.content || listJson?.data || [];
-      renderAdminNotifications(cachedAdminNotifications);
-    }
+    if (!listRes.ok) throw new Error('Server responded ' + listRes.status);
+    const listJson = await listRes.json();
+    cachedAdminNotifications = listJson?.data?.content || listJson?.data || [];
+    renderAdminNotifications(cachedAdminNotifications);
   } catch (e) {
     console.warn('Notifications load note:', e);
+    const c = document.getElementById('notif-items-container');
+    if (c) c.innerHTML = `<div class="p-6 text-center space-y-3"><p class="text-fg-2 text-sm">Could not load notifications.</p><button type="button" onclick="loadAdminNotifications()" class="btn btn--pill btn--primary">Try again</button></div>`;
   }
 }
 
@@ -4158,40 +4142,46 @@ function renderAdminNotifications(items) {
   const container = document.getElementById('notif-items-container');
   if (!container) return;
   if (!Array.isArray(items) || items.length === 0) {
-    container.innerHTML = `<div class="p-6 text-center text-fg-3 text-xs">No notifications in Neon DB yet. When a recruiter submits the Contact Form, it will appear here immediately!</div>`;
+    container.innerHTML = `<div class="p-6 text-center text-fg-3 text-sm">You're all caught up. New inquiries and system alerts appear here.</div>`;
     return;
   }
 
   container.innerHTML = items.map(n => {
+    const id = escapeHtml(String(n.id));
     const isRead = Boolean(n.read);
     const priority = n.priority || (n.level === 'ALERT' ? 'URGENT' : 'LOW');
     const type = n.type || (n.title && n.title.toLowerCase().includes('inquiry') ? 'CRM' : 'SYSTEM');
-    const pColor = priority === 'URGENT'
-      ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-      : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+    const isCrm = type === 'CRM' || type === 'NEW_CONTACT_INQUIRY' || type === 'CONTACT_INQUIRY';
+    const urgent = priority === 'URGENT' || priority === 'HIGH';
+    const pColor = urgent ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
     const timeStr = n.createdAt ? new Date(n.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+    const label = String(type).replace(/_/g, ' ').toLowerCase().replace(/^\w/, c => c.toUpperCase());
+    const msg = String(n.message || '');
+    const longMsg = msg.length > 90;
 
     return `
-      <div class="notif-item p-3.5 rounded-xl bg-card border border-line space-y-2 hover:border-indigo-500/30 transition-all ${isRead ? 'opacity-70' : ''}" data-type="${escapeHtml(type)}" data-priority="${escapeHtml(priority)}" data-read="${isRead}">
-        <div class="flex items-center justify-between text-xs">
-          <div class="flex items-center space-x-1.5">
-            <span class="px-1.5 py-0.5 rounded border font-bold ${pColor}">${escapeHtml(priority)}</span>
-            <span class="text-fg-2">${escapeHtml(type)}</span>
-          </div>
-          <span class="text-fg-3">${timeStr}</span>
+      <article class="notif-item p-3 rounded-xl bg-card border border-line space-y-1.5 ${isRead ? 'opacity-70' : ''}" data-type="${escapeHtml(type)}" data-priority="${escapeHtml(priority)}" data-read="${isRead}">
+        <div class="flex items-center gap-2 text-xs">
+          ${isRead ? '' : '<span class="w-2 h-2 rounded-full bg-indigo-400 shrink-0" aria-label="Unread"></span>'}
+          <span class="px-2 py-0.5 rounded-full border ${pColor}">${escapeHtml(urgent ? 'Urgent' : label)}</span>
+          <span class="text-fg-3 ml-auto shrink-0">${timeStr}</span>
         </div>
-        <p class="font-bold text-fg text-xs">${escapeHtml(n.title)}</p>
-        <p class="text-fg text-xs leading-relaxed">${escapeHtml(n.message || '')}</p>
-        <div class="pt-2 border-t border-line flex items-center justify-between text-xs">
-          <a href="#crm" onclick="switchView('${(type === 'CRM' || type === 'NEW_CONTACT_INQUIRY' || type === 'CONTACT_INQUIRY') ? 'crm' : 'dashboard'}'); toggleNotificationDrawer(); return false;" class="text-indigo-400 hover:underline">Open Module ↗</a>
-          <div class="flex items-center space-x-3">
-            ${isRead ? '<span class="text-fg-3">Read</span>' : `<button type="button" onclick="markNotificationReadById('${n.id}', this)" class="text-emerald-400 hover:underline rounded-lg">Mark read</button>`}
-            <button type="button" onclick="deleteNotificationById('${n.id}')" class="text-rose-400 hover:underline rounded-lg">Delete</button>
+        <p class="font-semibold text-fg text-[13px] leading-snug truncate" title="${escapeHtml(n.title || '')}">${escapeHtml(n.title || '')}</p>
+        ${msg ? `<p data-notif-msg class="text-fg-2 text-[13px] leading-relaxed line-clamp-2">${escapeHtml(msg)}</p>` : ''}
+        <div class="flex items-center justify-between gap-2 pt-1 text-xs">
+          <div class="flex items-center gap-3">
+            ${isCrm ? `<a href="#crm" onclick="switchView('crm'); toggleNotificationDrawer(); return false;" class="text-indigo-400 hover:underline">Open in CRM</a>` : ''}
+            ${longMsg ? `<button type="button" onclick="const p=this.closest('.notif-item').querySelector('[data-notif-msg]'); const o=p.classList.toggle('line-clamp-2'); this.textContent=o?'Show more':'Show less';" class="text-fg-3 hover:text-fg">Show more</button>` : ''}
+          </div>
+          <div class="flex items-center gap-1">
+            ${isRead ? '' : `<button type="button" onclick="markNotificationReadById('${id}', this)" class="btn btn--icon btn--pill text-emerald-400" aria-label="Mark as read" title="Mark as read"><i data-lucide="check" class="w-4 h-4" aria-hidden="true"></i></button>`}
+            <button type="button" onclick="deleteNotificationById('${id}')" class="btn btn--icon btn--pill text-rose-400" aria-label="Delete notification" title="Delete"><i data-lucide="trash-2" class="w-4 h-4" aria-hidden="true"></i></button>
           </div>
         </div>
-      </div>
-    `;
+      </article>`;
   }).join('');
+  if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+  filterNotifications(currentNotifFilter);
 }
 
 async function markNotificationReadById(id, btn) {
@@ -4200,9 +4190,10 @@ async function markNotificationReadById(id, btn) {
     const res = await fetch(`/api/admin/notifications/${id}/read`, { method: 'PUT', headers });
     if (res.ok) {
       await loadAdminNotifications();
-      showToast('Notification marked as read in Neon DB', 'info');
+    } else {
+      showToast('Could not mark as read (server ' + res.status + ')', 'warning');
     }
-  } catch (e) {}
+  } catch (e) { showToast('Could not mark as read: ' + e.message, 'warning'); }
 }
 
 const origToggleNotificationDrawer = toggleNotificationDrawer;
@@ -4221,9 +4212,11 @@ markAllNotificationsRead = async function() {
     const res = await fetch('/api/admin/notifications/read-all', { method: 'PUT', headers });
     if (res.ok) {
       await loadAdminNotifications();
-      showToast('All notifications marked as read in Neon DB!', 'success');
+      showToast('All notifications marked as read.', 'success');
+    } else {
+      showToast('Could not mark all as read (server ' + res.status + ')', 'warning');
     }
-  } catch (e) {}
+  } catch (e) { showToast('Could not mark all as read: ' + e.message, 'warning'); }
 };
 
 async function deleteNotificationById(id) {
@@ -4232,7 +4225,9 @@ async function deleteNotificationById(id) {
     const res = await fetch(`/api/admin/notifications/${id}`, { method: 'DELETE', headers });
     if (res.ok) {
       await loadAdminNotifications();
-      showToast('Notification deleted from Neon DB!', 'success');
+      showToast('Notification deleted.', 'success');
+    } else {
+      showToast('Could not delete the notification (server ' + res.status + ')', 'warning');
     }
   } catch (e) {
     showToast('Error deleting notification: ' + e.message, 'warning');

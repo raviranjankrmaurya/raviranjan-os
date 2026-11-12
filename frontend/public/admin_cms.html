@@ -391,7 +391,7 @@
         </button>
         <div class="hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded bg-card border border-line text-fg">
           <span id="admin-db-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="admin-db-status-text">Neon DB</span>
+          <span id="admin-db-status-text">Database</span>
         </div>
         <div class="hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded bg-card border border-line text-fg">
           <span id="admin-redis-dot" class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
@@ -418,10 +418,7 @@
             <h2 class="text-xl font-bold tracking-tight text-fg">Platform Executive Telemetry</h2>
             <p class="text-xs text-fg-2 mt-0.5">Aggregated metrics from CMS manual domain and external automated integrations.</p>
           </div>
-          <div class="flex items-center space-x-2 text-xs">
-            <span class="text-fg-3">Live Auto-Sync:</span>
-            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">EVERY 15M</span>
-          </div>
+          
         </div>
 
         <!-- 10 Stat Cards Grid (Live Dynamic Neon DB Telemetry) -->
@@ -432,7 +429,7 @@
               <i data-lucide="folder-kanban" class="w-4 h-4 text-indigo-400"></i>
             </div>
             <div id="dash-total-projects" class="text-2xl font-bold text-fg my-2">--</div>
-            <div id="dash-projects-breakdown" class="text-xs text-fg-3">Loading from Neon DB...</div>
+            <div id="dash-projects-breakdown" class="text-xs text-fg-3">Loading...</div>
           </div>
 
           <div class="p-3.5 rounded-xl bg-card border border-line hover:border-emerald-500/30 transition-all stat-card">
@@ -468,7 +465,7 @@
               <i data-lucide="eye" class="w-4 h-4 text-purple-400"></i>
             </div>
             <div id="dash-portfolio-views" class="text-2xl font-bold text-purple-400 my-2">--</div>
-            <div class="text-xs text-fg-3">Real-time Neon DB Analytics</div>
+            <div class="text-xs text-fg-3">Real-time analytics</div>
           </div>
 
           <div class="p-3.5 rounded-xl bg-card border border-line hover:border-indigo-500/30 transition-all stat-card">
@@ -504,7 +501,7 @@
               <i data-lucide="activity" class="w-4 h-4 text-yellow-400"></i>
             </div>
             <div id="dash-active-sprints" class="text-2xl font-bold text-yellow-400 my-2">--</div>
-            <div id="dash-sprints-breakdown" class="text-xs text-fg-3">Neon DB Projects</div>
+            <div id="dash-sprints-breakdown" class="text-xs text-fg-3">Across all projects</div>
           </div>
 
           <div class="p-3.5 rounded-xl bg-card border border-line hover:border-green-500/30 transition-all stat-card">
@@ -529,7 +526,7 @@
                 <span class="text-xs text-fg-3">Live PostgreSQL Stream</span>
               </div>
               <div id="dash-audit-feed" class="space-y-2.5 text-xs">
-                <div class="p-4 text-center text-fg-3 text-xs">Loading live activity stream from Neon DB...</div>
+                <div class="p-4 text-center text-fg-3 text-xs">Loading live activity stream...</div>
               </div>
             </div>
 
@@ -539,7 +536,7 @@
                 <i data-lucide="milestone" class="w-4 h-4 text-amber-400"></i> Project Progress & Milestones
               </h3>
               <div id="dash-project-milestones-list" class="space-y-4 text-xs">
-                <div class="text-fg-3 text-xs">Loading project milestones from Neon DB...</div>
+                <div class="text-fg-3 text-xs">Loading project milestones...</div>
               </div>
             </div>
           </div>
@@ -550,48 +547,7 @@
               <h3 class="text-sm font-semibold text-fg flex items-center gap-2 mb-4">
                 <i data-lucide="network" class="w-4 h-4 text-emerald-400"></i> Integration Health Matrix
               </h3>
-              <div class="space-y-3 text-xs">
-                <div class="p-3 rounded-xl bg-card border border-line flex flex-col gap-1">
-                  <div class="flex justify-between items-center">
-                    <span class="font-medium text-fg">GitHub REST & GraphQL</span>
-                    <span class="text-xs px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HEALTHY</span>
-                  </div>
-                  <div class="flex justify-between text-xs text-fg-3">
-                    <span>Last sync: 10m ago</span>
-                    <span>42ms</span>
-                  </div>
-                </div>
-                <div class="p-3 rounded-xl bg-card border border-line flex flex-col gap-1">
-                  <div class="flex justify-between items-center">
-                    <span class="font-medium text-fg">LeetCode Public Endpoint</span>
-                    <span class="text-xs px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HEALTHY</span>
-                  </div>
-                  <div class="flex justify-between text-xs text-fg-3">
-                    <span>Last sync: 1h ago</span>
-                    <span>180ms</span>
-                  </div>
-                </div>
-                <div class="p-3 rounded-xl bg-card border border-line flex flex-col gap-1">
-                  <div class="flex justify-between items-center">
-                    <span class="font-medium text-fg">GeeksforGeeks Scraper</span>
-                    <span class="text-xs px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HEALTHY</span>
-                  </div>
-                  <div class="flex justify-between text-xs text-fg-3">
-                    <span>Last sync: 3h ago</span>
-                    <span>210ms</span>
-                  </div>
-                </div>
-                <div class="p-3 rounded-xl bg-card border border-line flex flex-col gap-1">
-                  <div class="flex justify-between items-center">
-                    <span class="font-medium text-fg">WhatsApp Business Cloud</span>
-                    <span class="text-xs px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">WEBHOOK LIVE</span>
-                  </div>
-                  <div class="flex justify-between text-xs text-fg-3">
-                    <span>Inbound listener</span>
-                    <span>15ms</span>
-                  </div>
-                </div>
-              </div>
+              <div id="dash-integration-health" class="space-y-2.5"><div class="p-4 text-center text-fg-3 text-sm">Loading integration status…</div></div>
             </div>
           </div>
         </div>
@@ -605,7 +561,7 @@
             <p class="text-xs text-fg-2 mt-0.5">Manage production architectures, open source repositories, and technical deliverables.</p>
           </div>
           <div class="flex items-center space-x-2.5">
-            <button onclick="handleDeleteAllProjects()" class="px-3 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold text-xs transition-colors flex items-center gap-1.5" title="Delete all projects from Neon DB">
+            <button onclick="handleDeleteAllProjects()" class="px-3 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold text-xs transition-colors flex items-center gap-1.5" title="Delete all projects">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               <span>Delete All Projects</span>
             </button>
@@ -653,7 +609,7 @@
                 <td colspan="6" class="p-8 text-center text-fg-3 text-xs">
                   <div class="flex items-center justify-center space-x-2">
                     <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
-                    <span>Loading projects from Neon DB...</span>
+                    <span>Loading projects...</span>
                   </div>
                 </td>
               </tr>
@@ -664,20 +620,24 @@
 
       <!-- VIEW: PROJECT EDITOR (13 TABS) -->
       <section id="view-project-editor" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
+        <div class="flex items-center justify-between gap-3">
+          <button type="button" class="btn btn--pill" onclick="closeProjectEditor()"><i data-lucide="arrow-left" class="w-4 h-4" aria-hidden="true"></i><span>Back to projects</span></button>
+          <button type="button" class="btn btn--icon btn--pill" onclick="closeProjectEditor()" aria-label="Close editor" title="Close (Esc)"><i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i></button>
+        </div>
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line">
           <div>
             <div class="flex items-center gap-2">
               <h2 id="pe-header-title" class="text-xl font-bold tracking-tight text-fg">Project Architecture Editor</h2>
               <span id="pe-status-badge" class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">PUBLISHED</span>
             </div>
-            <p class="text-xs text-fg-2 mt-0.5">Complete architectural breakdown, milestones, decision logs, and media assets saved to Neon DB.</p>
+            <p class="text-xs text-fg-2 mt-0.5">Complete architectural breakdown, milestones, decision logs, and media assets saved.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2.5 text-xs">
             <select id="pe-project-select" onchange="loadProjectInto13TabEditor(this.value)" class="p-1.5 rounded-lg bg-raised border border-line text-indigo-400 text-xs focus:outline-none focus:border-indigo-400">
               <option value="">Loading projects...</option>
             </select>
             <button type="button" onclick="save13TabProject('DRAFT')" class="px-3 py-1.5 rounded-lg bg-raised border border-line text-fg hover:text-fg">Save Draft</button>
-            <button type="button" onclick="save13TabProject('PUBLISHED')" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md">Publish to Neon DB</button>
+            <button type="button" onclick="save13TabProject('PUBLISHED')" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md">Publish</button>
           </div>
         </div>
 
@@ -786,7 +746,7 @@
         <!-- Tab 5: Technology -->
         <div id="etab-technology" class="editor-content hidden space-y-4 text-xs bg-card border border-line p-5 rounded-xl">
           <div>
-            <label class="block text-fg-2 mb-1">Core Technologies & Frameworks (comma-separated, saved to Neon DB)</label>
+            <label class="block text-fg-2 mb-1">Core Technologies & Frameworks (comma-separated, saved)</label>
             <input type="text" id="pe-tech-tab" placeholder="Java 21, Spring Boot 3.3, PostgreSQL, Redis, Docker, React" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none" oninput="document.getElementById('pe-tech').value = this.value">
           </div>
           <div>
@@ -794,7 +754,7 @@
             <input type="text" id="pe-arch-style-tab" placeholder="Event-Driven Modular Monolith / Microservices" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none" oninput="document.getElementById('pe-arch-style').value = this.value">
           </div>
           <div class="pt-2">
-            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Technology Stack to Neon DB</button>
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Technology Stack</button>
           </div>
         </div>
 
@@ -815,14 +775,14 @@
             </div>
           </div>
           <div class="pt-2">
-            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Progress & Dates to Neon DB</button>
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Progress & Dates</button>
           </div>
         </div>
 
         <!-- Tab 7: Milestones -->
         <div id="etab-milestones" class="editor-content hidden space-y-4 text-xs">
           <div class="p-4 rounded-xl bg-card border border-line space-y-3">
-            <h4 class="font-bold text-fg">Add Project Milestone to Neon DB</h4>
+            <h4 class="font-bold text-fg">Add Project Milestone</h4>
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <input type="text" id="pe-ms-title" placeholder="Milestone Title (e.g. Core Engine)" class="sm:col-span-2 bg-card border border-line rounded-lg p-2 text-fg">
               <input type="text" id="pe-ms-version" placeholder="Version (e.g. v1.0)" value="v1.0" class="bg-card border border-line rounded-lg p-2 text-fg">
@@ -838,14 +798,14 @@
             </div>
           </div>
           <div id="pe-milestones-list" class="space-y-2">
-            <div class="p-4 text-center text-fg-3">Select a project to view or add milestones in Neon DB.</div>
+            <div class="p-4 text-center text-fg-3">Select a project to view or add milestones.</div>
           </div>
         </div>
 
         <!-- Tab 8: Changelog -->
         <div id="etab-changelog" class="editor-content hidden space-y-4 text-xs">
           <div class="p-4 rounded-xl bg-card border border-line space-y-3">
-            <h4 class="font-bold text-fg">Add Release Changelog Entry to Neon DB</h4>
+            <h4 class="font-bold text-fg">Add Release Changelog Entry</h4>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <input type="text" id="pe-cl-version" placeholder="Version Tag (e.g. v1.2.0)" class="bg-card border border-line rounded-lg p-2 text-fg">
               <input type="text" id="pe-cl-commit" placeholder="Commit Hash (e.g. 8f4a2c1)" class="bg-card border border-line rounded-lg p-2 text-fg">
@@ -854,14 +814,14 @@
             <input type="text" id="pe-cl-summary" placeholder="Release summary and key changes shipped..." class="w-full bg-card border border-line rounded-lg p-2 text-fg">
           </div>
           <div id="pe-changelogs-list" class="space-y-2">
-            <div class="p-4 text-center text-fg-3">Select a project to view or add changelogs in Neon DB.</div>
+            <div class="p-4 text-center text-fg-3">Select a project to view or add changelogs.</div>
           </div>
         </div>
 
         <!-- Tab 9: Technical Decisions (ADRs) -->
         <div id="etab-decisions" class="editor-content hidden space-y-4 text-xs">
           <div class="p-4 rounded-xl bg-card border border-line space-y-3">
-            <h4 class="font-bold text-fg">Add Architectural Decision Record (ADR) to Neon DB</h4>
+            <h4 class="font-bold text-fg">Add Architectural Decision Record (ADR)</h4>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <input type="text" id="pe-adr-title" placeholder="ADR Title (e.g. ADR #1: PostGIS over MongoDB)" class="sm:col-span-2 bg-card border border-line rounded-lg p-2 text-fg">
               <select id="pe-adr-status" class="bg-card border border-line rounded-lg p-2 text-fg">
@@ -877,7 +837,7 @@
             </div>
           </div>
           <div id="pe-decisions-list" class="space-y-2">
-            <div class="p-4 text-center text-fg-3">Select a project to view or add ADRs in Neon DB.</div>
+            <div class="p-4 text-center text-fg-3">Select a project to view or add ADRs.</div>
           </div>
         </div>
 
@@ -888,7 +848,7 @@
             <input type="text" id="pe-image-url" placeholder="https://.../architecture-diagram.png" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">
           </div>
           <div class="pt-2">
-            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Media URL to Neon DB</button>
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Media URL</button>
           </div>
         </div>
 
@@ -909,7 +869,7 @@
             <input type="text" id="pe-doc-url" placeholder="https://github.com/.../README.md" class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none">
           </div>
           <div class="pt-2">
-            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Repository & Demo Links to Neon DB</button>
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save Repository & Demo Links</button>
           </div>
         </div>
 
@@ -924,7 +884,7 @@
             <textarea id="pe-seo-desc" rows="3" placeholder="Search engine description for this engineering case study..." class="w-full bg-card border border-line rounded-lg p-2.5 text-fg focus:border-indigo-500 focus:outline-none"></textarea>
           </div>
           <div class="pt-2">
-            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save SEO Metadata to Neon DB</button>
+            <button type="button" onclick="save13TabProject()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save SEO Metadata</button>
           </div>
         </div>
 
@@ -952,8 +912,8 @@
             </div>
           </div>
           <div class="flex items-center justify-between pt-3 border-t border-line">
-            <button type="button" onclick="handleDeleteProject(document.getElementById('pe-id').value)" class="px-4 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold">Delete Project from Neon DB</button>
-            <button type="button" onclick="save13TabProject('PUBLISHED')" class="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold">Publish Project to Neon DB</button>
+            <button type="button" onclick="handleDeleteProject(document.getElementById('pe-id').value)" class="px-4 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold">Delete Project</button>
+            <button type="button" onclick="save13TabProject('PUBLISHED')" class="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold">Publish Project</button>
           </div>
         </div>
       </section>
@@ -962,14 +922,14 @@
       <section id="view-skills" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
         <div class="flex items-center justify-between pb-4 border-b border-line">
           <div>
-            <h2 class="text-xl font-bold tracking-tight text-fg">Skills Taxonomy & Matrix (Neon DB)</h2>
+            <h2 class="text-xl font-bold tracking-tight text-fg">Skills Taxonomy & Matrix</h2>
             <p class="text-xs text-fg-2 mt-0.5">Add, edit, or delete technical skills stored in Neon Cloud PostgreSQL.</p>
           </div>
           <button onclick="openSkillModal()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs">+ Add Skill</button>
         </div>
 
         <div id="skills-categories-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-          <div class="col-span-2 p-6 text-center text-fg-3 text-xs">Loading skills from Neon DB...</div>
+          <div class="col-span-2 p-6 text-center text-fg-3 text-xs">Loading skills...</div>
         </div>
       </section>
 
@@ -977,13 +937,13 @@
       <section id="view-writing" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
         <div class="flex items-center justify-between pb-4 border-b border-line">
           <div>
-            <h2 class="text-xl font-bold tracking-tight text-fg">Technical Writing Engine (Neon DB)</h2>
-            <p class="text-xs text-fg-2 mt-0.5">Author, edit, and delete technical articles stored directly in Neon DB.</p>
+            <h2 class="text-xl font-bold tracking-tight text-fg">Technical Writing Engine</h2>
+            <p class="text-xs text-fg-2 mt-0.5">Author, edit, and delete technical articles stored directly.</p>
           </div>
           <div class="flex items-center space-x-2 text-xs">
             <button type="button" onclick="resetArticleEditor()" class="px-3 py-1.5 rounded-lg bg-raised border border-line text-fg hover:text-fg">+ New Article</button>
             <button type="button" onclick="handleSaveArticle('DRAFT')" class="px-3 py-1.5 rounded-lg bg-raised border border-line text-fg hover:text-fg">Save Draft</button>
-            <button type="button" onclick="handleSaveArticle('PUBLISHED')" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold shadow-md">Save & Publish to Neon DB</button>
+            <button type="button" onclick="handleSaveArticle('PUBLISHED')" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold shadow-md">Save & Publish</button>
           </div>
         </div>
 
@@ -1021,10 +981,10 @@ Write your technical essay here...</textarea>
           </div>
         </div>
 
-        <!-- Existing Articles in Neon DB -->
+        <!-- Existing Articles -->
         <div class="saas-card overflow-hidden">
           <div class="p-3 bg-card border-b border-line flex justify-between items-center text-xs">
-            <span class="font-bold text-fg">Published & Draft Articles in Neon DB</span>
+            <span class="font-bold text-fg">Published & Draft Articles</span>
           </div>
           <table class="w-full text-left text-xs border-collapse">
             <thead>
@@ -1037,7 +997,7 @@ Write your technical essay here...</textarea>
               </tr>
             </thead>
             <tbody id="admin-articles-tbody" class="divide-y divide-line">
-              <tr><td colspan="5" class="p-6 text-center text-fg-3">Loading articles from Neon DB...</td></tr>
+              <tr><td colspan="5" class="p-6 text-center text-fg-3">Loading articles...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1047,17 +1007,17 @@ Write your technical essay here...</textarea>
       <section id="view-homepage" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
         <div class="flex items-center justify-between pb-4 border-b border-line">
           <div>
-            <h2 class="text-xl font-bold tracking-tight text-fg">Homepage Section Builder (Neon DB)</h2>
-            <p class="text-xs text-fg-2 mt-0.5">Reorder sections (↑ / ↓) or toggle visibility on the public portfolio. Saved directly in Neon DB.</p>
+            <h2 class="text-xl font-bold tracking-tight text-fg">Homepage Section Builder</h2>
+            <p class="text-xs text-fg-2 mt-0.5">Reorder sections (↑ / ↓) or toggle visibility on the public portfolio. Saved directly.</p>
           </div>
           <div class="flex items-center space-x-2">
             <button type="button" onclick="resetHomepageLayout()" class="px-3 py-1.5 rounded-lg bg-raised border border-line text-fg hover:text-fg text-xs">Reset Default</button>
-            <button type="button" onclick="saveHomepageLayout()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md">Save Layout to Neon DB</button>
+            <button type="button" onclick="saveHomepageLayout()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md">Save Layout</button>
           </div>
         </div>
 
         <div id="admin-homepage-sections-list" class="space-y-2.5 max-w-3xl text-xs">
-          <div class="p-4 text-center text-fg-3">Loading homepage section order from Neon DB...</div>
+          <div class="p-4 text-center text-fg-3">Loading homepage section order...</div>
         </div>
       </section>
 
@@ -1066,11 +1026,11 @@ Write your technical essay here...</textarea>
         <div class="flex items-center justify-between pb-4 border-b border-line">
           <div>
             <h2 class="text-xl font-bold tracking-tight text-fg">Immutable Audit Logs (Last 5 Recent Edits)</h2>
-            <p class="text-xs text-fg-2 mt-0.5">Showing only the 5 most recent user edit & mutation audits recorded in Neon DB.</p>
+            <p class="text-xs text-fg-2 mt-0.5">Showing only the 5 most recent user edit & mutation audits recorded.</p>
           </div>
           <div class="flex items-center space-x-2">
             <button type="button" onclick="loadAdminAuditLogs()" class="px-3 py-1 rounded-lg bg-raised hover:bg-raised border border-line text-xs text-fg">Refresh</button>
-            <span class="text-xs text-emerald-400 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20">Last 5 Audits · Neon DB</span>
+            <span class="text-xs text-emerald-400 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20">Last 5 audits</span>
           </div>
         </div>
 
@@ -1087,7 +1047,7 @@ Write your technical essay here...</textarea>
               </tr>
             </thead>
             <tbody id="admin-audit-logs-tbody" class="divide-y divide-line">
-              <tr><td colspan="6" class="p-6 text-center text-fg-3">Loading last 5 recent edit audits from Neon DB...</td></tr>
+              <tr><td colspan="6" class="p-6 text-center text-fg-3">Loading last 5 recent edit audits...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1101,7 +1061,7 @@ Write your technical essay here...</textarea>
               <h2 class="text-xl font-bold tracking-tight text-fg">Contact Intelligence, AI Moderation & CRM Pipeline</h2>
               <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">3/10m IP Rate-Limited</span>
             </div>
-            <p class="text-xs text-fg-2 mt-0.5">Inspect recruiter inquiries, approximate GeoIP location, repeat-submission signals, and AI spam/abuse moderation in Neon DB.</p>
+            <p class="text-xs text-fg-2 mt-0.5">Inspect recruiter inquiries, approximate GeoIP location, repeat-submission signals, and AI spam/abuse moderation.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2 text-xs">
             <button type="button" onclick="handleRetentionCleanup()" class="px-3 py-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-amber-400 transition-colors" title="Scrub IP & User-Agent metadata older than 90 days">
@@ -1129,7 +1089,7 @@ Write your technical essay here...</textarea>
         </div>
 
         <div id="admin-crm-container" class="space-y-3 text-xs">
-          <div class="p-6 text-center text-fg-3">Loading inquiries from Neon DB...</div>
+          <div class="p-6 text-center text-fg-3">Loading inquiries...</div>
         </div>
       </section>
 
@@ -1138,9 +1098,9 @@ Write your technical essay here...</textarea>
         <div class="flex items-center justify-between pb-4 border-b border-line">
           <div>
             <h2 class="text-xl font-bold tracking-tight text-fg">Site Settings & Theme</h2>
-            <p class="text-xs text-fg-2 mt-0.5">Manage branding, accent color, typography, Hero animations, and contact details in Neon DB.</p>
+            <p class="text-xs text-fg-2 mt-0.5">Manage branding, accent color, typography, Hero animations, and contact details.</p>
           </div>
-          <button id="btn-save-site-settings" type="button" onclick="handleSaveSiteSettings(event)" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer">Save Settings to Neon DB</button>
+          <button id="btn-save-site-settings" type="button" onclick="handleSaveSiteSettings(event)" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer">Save Settings</button>
         </div>
 
         <div class="space-y-6 text-xs bg-card border border-line p-6 rounded-xl">
@@ -1163,10 +1123,10 @@ Write your technical essay here...</textarea>
             <textarea id="setting-meta-desc" rows="2" class="w-full bg-card border border-line rounded-lg p-2 text-fg focus:border-indigo-500 focus:outline-none">Production-grade developer operating system combining portfolio, CMS, project management, and real-time external telemetry.</textarea>
           </div>
 
-          <!-- Typography Font Pairing & Animated Hero Headline Config (Stored in Neon DB) -->
+          <!-- Typography Font Pairing & Animated Hero Headline Config (Stored) -->
           <div class="p-4 rounded-xl bg-card border border-indigo-500/30 space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">✨ Premium Typography & Animated Hero Texts (Neon DB)</span>
+              <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">✨ Premium Typography & Animated Hero Texts</span>
               <span class="text-xs text-fg-2">Live updates Overview Hero typewriter & global font pairing</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1371,11 +1331,11 @@ What AI projects has he worked on?</textarea>
             </div>
           </div>
 
-          <!-- Right Col: AI Usage Metrics & Visitor Conversation Logs (Neon DB) -->
+          <!-- Right Col: AI Usage Metrics & Visitor Conversation Logs -->
           <div class="space-y-5">
             <div class="p-5 rounded-xl bg-card border border-line space-y-3">
               <div class="flex items-center justify-between pb-2 border-b border-line">
-                <span class="font-bold text-fg">RAG Telemetry & Usage (Neon DB)</span>
+                <span class="font-bold text-fg">RAG Telemetry & Usage</span>
                 <button type="button" onclick="loadAiConfig()" class="text-xs text-indigo-400 hover:underline rounded-lg">Refresh</button>
               </div>
               <div class="space-y-2 text-xs">
@@ -1393,7 +1353,7 @@ What AI projects has he worked on?</textarea>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-fg-2">Visitor IP & Device Tracking</span>
-                  <span class="text-emerald-400 font-bold">Active (Neon DB)</span>
+                  <span class="text-emerald-400 font-bold">Active</span>
                 </div>
               </div>
             </div>
@@ -1401,11 +1361,11 @@ What AI projects has he worked on?</textarea>
             <!-- Visitor AI Conversation Logs (Question, Answer, IP, Device, Language) -->
             <div class="p-5 rounded-xl bg-card border border-line space-y-3">
               <div class="flex items-center justify-between pb-2 border-b border-line">
-                <span class="font-bold text-fg">Visitor AI Conversations (Neon DB)</span>
+                <span class="font-bold text-fg">Visitor AI Conversations</span>
                 <button type="button" onclick="handleClearAllAiLogs()" class="text-xs text-rose-400 hover:underline rounded-lg">Clear All</button>
               </div>
               <div id="admin-ai-query-logs-list" class="space-y-2.5 text-xs max-h-[420px] overflow-y-auto pr-1">
-                <div class="p-3 text-center text-fg-3">Loading visitor AI conversations from Neon DB...</div>
+                <div class="p-3 text-center text-fg-3">Loading visitor AI conversations...</div>
               </div>
             </div>
           </div>
@@ -1552,7 +1512,7 @@ What AI projects has he worked on?</textarea>
               <h2 class="text-xl font-bold tracking-tight text-fg">GeeksforGeeks (GFG) Database Manager</h2>
               <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">NEON DB LINKED</span>
             </div>
-            <p class="text-xs text-fg-2 mt-0.5">Enter or edit your GeeksforGeeks statistics below. Saved values are stored in Neon DB and displayed on the public portfolio and dashboard.</p>
+            <p class="text-xs text-fg-2 mt-0.5">Enter or edit your GeeksforGeeks statistics below. Saved values are stored and displayed on the public portfolio and dashboard.</p>
           </div>
           <div class="flex items-center space-x-2 text-xs">
             <button type="button" onclick="handleDeleteGfgData()" class="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold transition-colors">
@@ -1565,22 +1525,22 @@ What AI projects has he worked on?</textarea>
           <div class="p-4 rounded-xl bg-card border border-line">
             <span class="text-fg-2 block mb-1">GFG Username</span>
             <span id="admin-gfg-username" class="text-lg font-bold text-fg">raviranjankrmaurya</span>
-            <span class="text-xs text-emerald-400 block mt-1">Stored in Neon DB</span>
+            <span class="text-xs text-emerald-400 block mt-1">Stored</span>
           </div>
           <div class="p-4 rounded-xl bg-card border border-line">
             <span class="text-fg-2 block mb-1">Coding Score</span>
             <span id="admin-gfg-score" class="text-2xl font-bold text-emerald-400">--</span>
-            <span class="text-xs text-fg-3 block mt-1">Live from Neon DB</span>
+            <span class="text-xs text-fg-3 block mt-1">Live</span>
           </div>
           <div class="p-4 rounded-xl bg-card border border-line">
             <span class="text-fg-2 block mb-1">Total Problems Solved</span>
             <span id="admin-gfg-solved" class="text-2xl font-bold text-fg">--</span>
-            <span class="text-xs text-fg-3 block mt-1">Live from Neon DB</span>
+            <span class="text-xs text-fg-3 block mt-1">Live</span>
           </div>
           <div class="p-4 rounded-xl bg-card border border-line">
             <span class="text-fg-2 block mb-1">Institute Rank</span>
             <span id="admin-gfg-rank" class="text-2xl font-bold text-indigo-400">--</span>
-            <span class="text-xs text-fg-3 block mt-1">Live from Neon DB</span>
+            <span class="text-xs text-fg-3 block mt-1">Live</span>
           </div>
         </div>
 
@@ -1588,11 +1548,10 @@ What AI projects has he worked on?</textarea>
         <div class="p-6 rounded-xl bg-card border border-line space-y-4 text-xs">
           <div class="border-b border-line pb-3 flex justify-between items-center">
             <div>
-              <span class="font-bold text-fg text-sm">Add / Edit GeeksforGeeks Data in Neon DB</span>
+              <span class="font-bold text-fg text-sm">Add / Edit GeeksforGeeks Data</span>
               <span class="text-xs text-fg-2 block mt-0.5">Update your GFG Coding Score, Problems Solved, and Institute Rank in Neon PostgreSQL.</span>
             </div>
-            <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Direct Neon DB Storage</span>
-          </div>
+            </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label class="block text-fg-2 mb-1">GFG Username *</label>
@@ -1613,7 +1572,7 @@ What AI projects has he worked on?</textarea>
           </div>
           <div class="flex justify-end pt-2">
             <button type="button" onclick="handleGfgManualImport()" class="px-5 py-2 rounded-lg bg-emerald-500 text-zinc-950 font-bold hover:bg-emerald-400 transition-colors shadow-md">
-              Save GFG Data to Neon DB
+              Save GFG Data
             </button>
           </div>
         </div>
@@ -1623,8 +1582,8 @@ What AI projects has he worked on?</textarea>
       <section id="view-dsa" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
         <div class="flex items-center justify-between pb-4 border-b border-line">
           <div>
-            <h2 class="text-xl font-bold tracking-tight text-fg">DSA Knowledge & Problem Notes (Neon DB)</h2>
-            <p class="text-xs text-fg-2 mt-0.5">Add, edit, or delete algorithmic problem solutions stored in Neon DB.</p>
+            <h2 class="text-xl font-bold tracking-tight text-fg">DSA Knowledge & Problem Notes</h2>
+            <p class="text-xs text-fg-2 mt-0.5">Add, edit, or delete algorithmic problem solutions stored.</p>
           </div>
           <button type="button" onclick="resetDsaForm()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold text-xs">+ New Problem Note</button>
         </div>
@@ -1632,7 +1591,7 @@ What AI projects has he worked on?</textarea>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
           <!-- Problem Creation / Edit Form -->
           <div class="p-5 rounded-xl bg-card border border-line space-y-3">
-            <span id="dsa-form-heading" class="font-bold text-fg block pb-2 border-b border-line">Add / Edit Solution Note in Neon DB</span>
+            <span id="dsa-form-heading" class="font-bold text-fg block pb-2 border-b border-line">Add / Edit Solution Note</span>
             <input type="hidden" id="dsa-id" value="">
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -1674,14 +1633,14 @@ What AI projects has he worked on?</textarea>
               <label class="block text-fg-2 mb-1">Solution Code (Java / C++ / Python)</label>
               <textarea id="dsa-code" rows="4" placeholder="class Solution { ... }" class="w-full bg-card border border-line rounded-lg p-2 text-fg font-mono"></textarea>
             </div>
-            <button type="button" onclick="handleSaveManualProblem()" class="w-full py-2 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">Save Problem Note to Neon DB</button>
+            <button type="button" onclick="handleSaveManualProblem()" class="w-full py-2 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">Save Problem Note</button>
           </div>
 
-          <!-- Existing Problem Table from Neon DB -->
+          <!-- Existing Problem Table -->
           <div class="p-5 rounded-xl bg-card border border-line space-y-3">
-            <span class="font-bold text-fg block pb-2 border-b border-line">Authored Problem Notes in Neon DB</span>
+            <span class="font-bold text-fg block pb-2 border-b border-line">Authored Problem Notes</span>
             <div id="admin-dsa-notes-list" class="space-y-2">
-              <div class="p-4 text-center text-fg-3">Loading DSA problem notes from Neon DB...</div>
+              <div class="p-4 text-center text-fg-3">Loading DSA problem notes...</div>
             </div>
           </div>
         </div>
@@ -1703,7 +1662,7 @@ What AI projects has he worked on?</textarea>
         </div>
 
         <div id="unified-timeline-container" class="space-y-3 text-xs max-w-3xl">
-          <div class="p-4 text-center text-fg-3">Loading unified developer activity from Neon DB...</div>
+          <div class="p-4 text-center text-fg-3">Loading unified developer activity...</div>
         </div>
       </section>
 
@@ -1802,11 +1761,11 @@ What AI projects has he worked on?</textarea>
         <div class="saas-card p-6 space-y-4 text-xs">
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
             <div>
-              <h3 class="text-sm font-bold text-fg">Interactive Resume Builder & PDF Configuration (Neon DB)</h3>
+              <h3 class="text-sm font-bold text-fg">Interactive Resume Builder & PDF Configuration</h3>
               <p class="text-xs text-fg-2 mt-0.5">Customize the header and executive summary shown when visitors click "Resume" on the public portfolio and download as PDF.</p>
             </div>
             <div class="flex items-center space-x-2">
-              <button type="button" onclick="saveProfile()" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold">Save Profile & Resume to Neon DB</button>
+              <button type="button" onclick="saveProfile()" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold">Save Profile & Resume</button>
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1823,7 +1782,7 @@ What AI projects has he worked on?</textarea>
             <label class="block text-fg-2 mb-1">Resume Executive Summary (Printed at top of PDF Resume)</label>
             <textarea id="resume-builder-summary" rows="3" class="w-full p-2.5 rounded-lg bg-card border border-line text-fg font-sans">Full-stack software developer focused on Java 21, Spring Boot, Python, FastAPI, React, PostgreSQL, and AI/LLM applications. Experienced in building resilient backend systems, REST/GraphQL telemetry pipelines, and grounded RAG assistants.</textarea>
           </div>
-          <p class="text-xs text-fg-3">Note: Work Experience, Education, Skills Matrix, Featured Projects, Achievements, and Certifications are automatically pulled live from their respective Neon DB modules into the interactive Resume & PDF download.</p>
+          <p class="text-xs text-fg-3">Note: Work Experience, Education, Skills Matrix, Featured Projects, Achievements, and Certifications are pulled live from their own modules into the interactive Resume & PDF download.</p>
         </div>
       </section>
 
@@ -1831,7 +1790,7 @@ What AI projects has he worked on?</textarea>
       <section id="view-experience" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
         <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-line">
           <div>
-            <h2 class="text-xl font-bold tracking-tight text-fg">Internships, Experience & Education (Neon DB)</h2>
+            <h2 class="text-xl font-bold tracking-tight text-fg">Internships, Experience & Education</h2>
             <p class="text-xs text-fg-2 mt-0.5">Add, edit, or update pursuing/completed internships, offer letters, completion certificates, work experience, and degrees.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
@@ -1851,7 +1810,7 @@ What AI projects has he worked on?</textarea>
             
           </div>
           <div id="admin-internships-container" class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
-            <div class="col-span-2 p-4 rounded-xl bg-card border border-line text-center text-fg-3 text-xs">Loading internships from Neon DB...</div>
+            <div class="col-span-2 p-4 rounded-xl bg-card border border-line text-center text-fg-3 text-xs">Loading internships...</div>
           </div>
         </div>
 
@@ -1882,8 +1841,8 @@ What AI projects has he worked on?</textarea>
       <section id="view-achievements" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
         <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-line">
           <div>
-            <h2 class="text-xl font-bold tracking-tight text-fg">Achievements & Certifications (Neon DB)</h2>
-            <p class="text-xs text-fg-2 mt-0.5">Add, edit, or delete competitive programming achievements and professional certifications in Neon DB.</p>
+            <h2 class="text-xl font-bold tracking-tight text-fg">Achievements & Certifications</h2>
+            <p class="text-xs text-fg-2 mt-0.5">Add, edit, or delete competitive programming achievements and professional certifications.</p>
           </div>
           <div class="flex items-center space-x-2">
             <button type="button" onclick="openCredentialModal('achievement')" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold text-xs transition-colors">+ Add Achievement</button>
@@ -1895,20 +1854,20 @@ What AI projects has he worked on?</textarea>
           <div class="saas-card p-5 space-y-3">
             <h3 class="text-sm font-bold text-fg border-b border-line pb-2 flex items-center justify-between">
               <span>Academic & Coding Achievements</span>
-              <span class="text-xs text-amber-400">Neon DB</span>
+              <span class="text-xs text-amber-400">Database</span>
             </h3>
             <div id="admin-achievements-container" class="space-y-2.5 text-xs">
-              <div class="p-4 text-center text-fg-3">Loading achievements from Neon DB...</div>
+              <div class="p-4 text-center text-fg-3">Loading achievements...</div>
             </div>
           </div>
 
           <div class="saas-card p-5 space-y-3">
             <h3 class="text-sm font-bold text-fg border-b border-line pb-2 flex items-center justify-between">
               <span>Certifications & Accreditations</span>
-              <span class="text-xs text-indigo-400">Neon DB</span>
+              <span class="text-xs text-indigo-400">Database</span>
             </h3>
             <div id="admin-certifications-container" class="space-y-2.5 text-xs">
-              <div class="p-4 text-center text-fg-3">Loading certifications from Neon DB...</div>
+              <div class="p-4 text-center text-fg-3">Loading certifications...</div>
             </div>
           </div>
         </div>
@@ -1944,14 +1903,14 @@ What AI projects has he worked on?</textarea>
       <section id="view-lab" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
         <div class="flex items-center justify-between pb-4 border-b border-line">
           <div>
-            <h2 class="text-xl font-bold tracking-tight text-fg">Engineering Lab Experiments (Neon DB)</h2>
-            <p class="text-xs text-fg-2 mt-0.5">Create, edit, and delete experimental prototypes stored in Neon DB.</p>
+            <h2 class="text-xl font-bold tracking-tight text-fg">Engineering Lab Experiments</h2>
+            <p class="text-xs text-fg-2 mt-0.5">Create, edit, and delete experimental prototypes stored.</p>
           </div>
           <button onclick="openLabModal()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors">+ New Experiment</button>
         </div>
 
         <div id="admin-lab-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div class="col-span-3 p-6 text-center text-fg-3 text-xs">Loading lab experiments from Neon DB...</div>
+          <div class="col-span-3 p-6 text-center text-fg-3 text-xs">Loading lab experiments...</div>
         </div>
       </section>
 
@@ -1959,14 +1918,14 @@ What AI projects has he worked on?</textarea>
       <section id="view-contributions" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
         <div class="flex items-center justify-between pb-4 border-b border-line">
           <div>
-            <h2 class="text-xl font-bold tracking-tight text-fg">Contribution Stories (Neon DB)</h2>
-            <p class="text-xs text-fg-2 mt-0.5">Create, edit, and delete open-source contribution stories in Neon DB.</p>
+            <h2 class="text-xl font-bold tracking-tight text-fg">Contribution Stories</h2>
+            <p class="text-xs text-fg-2 mt-0.5">Create, edit, and delete open-source contribution stories.</p>
           </div>
           <button onclick="openStoryModal()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors">+ New Story</button>
         </div>
 
         <div id="admin-stories-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="col-span-2 p-6 text-center text-fg-3 text-xs">Loading contribution stories from Neon DB...</div>
+          <div class="col-span-2 p-6 text-center text-fg-3 text-xs">Loading contribution stories...</div>
         </div>
       </section>
 
@@ -1974,7 +1933,7 @@ What AI projects has he worked on?</textarea>
       <section id="view-integrations" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
         <div class="flex items-center justify-between pb-4 border-b border-line">
           <div>
-            <h2 class="text-xl font-bold tracking-tight text-fg">Integration Center (Neon DB & Live APIs)</h2>
+            <h2 class="text-xl font-bold tracking-tight text-fg">Integration Center</h2>
             <p class="text-xs text-fg-2 mt-0.5">Manage external developer platform connections, trigger immediate syncs, and configure handles.</p>
           </div>
           <button type="button" onclick="triggerGlobalSync()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-sm">Sync All Adapters</button>
@@ -1995,7 +1954,7 @@ What AI projects has he worked on?</textarea>
             </div>
             <div class="space-y-2 text-xs text-fg bg-card p-3 rounded-xl border border-line">
               <div class="flex justify-between"><span>Connected Account:</span><span id="int-gh-account" class="text-fg">@raviranjankrmaurya</span></div>
-              <div class="flex justify-between"><span>Live Contributions:</span><span id="int-gh-stats" class="text-emerald-400">Synced with Neon DB</span></div>
+              <div class="flex justify-between"><span>Live Contributions:</span><span id="int-gh-stats" class="text-emerald-400">Synced</span></div>
               <div class="flex justify-between"><span>Last Synchronization:</span><span id="int-gh-last-sync" class="text-fg-2">Live API</span></div>
               <div class="flex justify-between"><span>Webhooks Status:</span><span class="text-emerald-400">Active (SHA256 HMAC Verified)</span></div>
             </div>
@@ -2019,10 +1978,9 @@ What AI projects has he worked on?</textarea>
             </div>
             <div class="space-y-2 text-xs text-fg bg-card p-3 rounded-xl border border-line">
               <div class="flex justify-between"><span>Target Handle:</span><span id="int-lc-account" class="text-fg">raviranjanmaurya</span></div>
-              <div class="flex justify-between"><span>Problems Solved:</span><span id="int-lc-stats" class="text-amber-400">Synced with Neon DB</span></div>
+              <div class="flex justify-between"><span>Problems Solved:</span><span id="int-lc-stats" class="text-amber-400">Synced</span></div>
               <div class="flex justify-between"><span>Last Synchronization:</span><span id="int-lc-last-sync" class="text-fg-2">Live API</span></div>
-              <div class="flex justify-between"><span>Degradation Mode:</span><span class="text-emerald-400">Neon DB Snapshot Active</span></div>
-            </div>
+              </div>
             <div class="flex items-center justify-between text-xs pt-1">
               <button type="button" onclick="triggerLeetCodeSync()" class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-semibold">Sync Now</button>
               <button type="button" onclick="switchView('leetcode')" class="text-indigo-400 hover:underline rounded-lg">Open LeetCode Hub →</button>
@@ -2036,14 +1994,14 @@ What AI projects has he worked on?</textarea>
                 <i data-lucide="terminal" class="w-5 h-5 text-emerald-400"></i>
                 <div>
                   <h3 class="text-sm font-bold text-fg">GeeksforGeeks Adapter</h3>
-                  <span class="text-xs text-fg-3">Neon DB Manual & Verified Storage</span>
+                  <span class="text-xs text-fg-3">Manual & verified data</span>
                 </div>
               </div>
               <span class="px-2 py-0.5 rounded text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">NEON DB</span>
             </div>
             <div class="space-y-2 text-xs text-fg bg-card p-3 rounded-xl border border-line">
               <div class="flex justify-between"><span>Profile Handle:</span><span id="int-gfg-account" class="text-fg">raviranjankrmaurya</span></div>
-              <div class="flex justify-between"><span>Current Metrics:</span><span id="int-gfg-stats" class="text-emerald-400">Stored in Neon DB</span></div>
+              <div class="flex justify-between"><span>Current Metrics:</span><span id="int-gfg-stats" class="text-emerald-400">Stored</span></div>
               <div class="flex justify-between"><span>Manual DB CRUD:</span><span class="text-indigo-400">Enabled</span></div>
               <div class="flex justify-between"><span>Verification:</span><span class="text-emerald-400">Factual telemetry</span></div>
             </div>
@@ -2060,14 +2018,13 @@ What AI projects has he worked on?</textarea>
                 <i data-lucide="bell-ring" class="w-5 h-5 text-rose-400"></i>
                 <div>
                   <h3 class="text-sm font-bold text-fg">Recruiter CRM & Notification Pipeline</h3>
-                  <span class="text-xs text-fg-3">Instant Neon DB Inquiry & Alert Storage</span>
+                  <span class="text-xs text-fg-3">Inquiry & alert storage</span>
                 </div>
               </div>
               <span class="px-2 py-0.5 rounded text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ACTIVE</span>
             </div>
             <div class="space-y-2 text-xs text-fg bg-card p-3 rounded-xl border border-line">
               <div class="flex justify-between"><span>Trigger Events:</span><span class="text-fg">Public Contact Form & AI Queries</span></div>
-              <div class="flex justify-between"><span>Storage Target:</span><span class="text-emerald-400">Neon DB (notifications + contact_inquiries)</span></div>
               <div class="flex justify-between"><span>Visitor IP Logging:</span><span class="text-indigo-400">Enabled (X-Forwarded-For)</span></div>
               <div class="flex justify-between"><span>Notification Drawer:</span><span class="text-emerald-400">Live Bell Sync</span></div>
             </div>
@@ -2083,7 +2040,7 @@ What AI projects has he worked on?</textarea>
       <section id="view-analytics" class="view-panel hidden space-y-6 max-w-7xl mx-auto">
         <div class="flex items-center justify-between pb-4 border-b border-line">
           <div>
-            <h2 class="text-xl font-bold tracking-tight text-fg">Platform Analytics & Insights (Neon DB)</h2>
+            <h2 class="text-xl font-bold tracking-tight text-fg">Platform Analytics & Insights</h2>
             <p class="text-xs text-fg-2 mt-0.5">Real-time visitor metrics, resume downloads, AI query volume, and CSV report export.</p>
           </div>
           <button type="button" onclick="exportAnalyticsCsv()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-colors shadow-md flex items-center gap-1.5">
@@ -2096,7 +2053,7 @@ What AI projects has he worked on?</textarea>
           <div class="saas-card p-4 space-y-1">
             <span class="text-xs text-fg-3">PORTFOLIO VIEWS</span>
             <div id="analytics-views" class="text-2xl font-bold text-fg">--</div>
-            <span class="text-xs text-emerald-400">Tracked in Neon DB</span>
+            <span class="text-xs text-emerald-400">Tracked</span>
           </div>
           <div class="saas-card p-4 space-y-1">
             <span class="text-xs text-fg-3">UNIQUE VISITORS (IP HASHES)</span>
@@ -2111,7 +2068,7 @@ What AI projects has he worked on?</textarea>
           <div class="saas-card p-4 space-y-1">
             <span class="text-xs text-fg-3">AI ASSISTANT QUERIES</span>
             <div id="analytics-ai-queries" class="text-2xl font-bold text-fg">--</div>
-            <span class="text-xs text-purple-400">Logged in Neon DB</span>
+            <span class="text-xs text-purple-400">Logged</span>
           </div>
         </div>
       </section>
@@ -2217,19 +2174,11 @@ What AI projects has he worked on?</textarea>
     </div>
 
     <!-- Event Test Simulator Toolbar -->
-    <div class="p-3 bg-card border-b border-line space-y-1.5">
-      <span class="text-xs text-fg-3 uppercase tracking-wider block font-bold">Simulate Live Real-time Events:</span>
-      <div class="grid grid-cols-2 gap-1.5 text-xs">
-        <button onclick="simulateEvent('INQUIRY')" class="p-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-rose-300 text-left truncate">+ New Inquiry (WhatsApp)</button>
-        <button onclick="simulateEvent('MILESTONE')" class="p-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-amber-300 text-left truncate">+ Milestone (Email)</button>
-        <button onclick="simulateEvent('GITHUB')" class="p-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-indigo-300 text-left truncate">+ GitHub Ingestion</button>
-        <button onclick="simulateEvent('FAILURE')" class="p-1.5 rounded-lg bg-raised hover:bg-raised border border-line text-rose-400 text-left truncate">! Integration Failure</button>
-      </div>
-    </div>
+    
 
-    <!-- Notification List (Populated 100% from Neon DB) -->
+    <!-- Notification List (Populated 100%) -->
     <div id="notif-items-container" class="flex-1 overflow-y-auto p-4 space-y-3 font-sans text-xs">
-      <div class="p-6 text-center text-fg-3 text-xs">Loading notifications from Neon DB...</div>
+      <div class="p-6 text-center text-fg-3 text-xs">Loading notifications...</div>
     </div>
   </div>
 
@@ -2391,7 +2340,7 @@ What AI projects has he worked on?</textarea>
         </div>
         <div class="flex items-center justify-end space-x-3 pt-3 border-t border-line">
           <button type="button" onclick="closeCareerModal()" class="px-4 py-2 rounded-lg bg-raised hover:bg-raised border border-line text-fg">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save to Neon DB</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save</button>
         </div>
       </form>
     </div>
@@ -2651,13 +2600,13 @@ What AI projects has he worked on?</textarea>
         </div>
         <div class="flex items-center justify-end space-x-3 pt-3 border-t border-line">
           <button type="button" onclick="closeCredentialModal()" class="px-4 py-2 rounded-lg bg-raised hover:bg-raised border border-line text-fg">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save to Neon DB</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Save</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal: Update Admin Username & Password (2-Step OTP Verification in Neon DB) -->
+  <!-- Modal: Update Admin Username & Password (2-Step OTP Verification) -->
   <div id="modal-change-password" onclick="if(event.target === this) closeChangePasswordModal()" class="fixed inset-0 z-[110] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="w-full max-w-sm bg-card border border-line rounded-xl shadow-xl p-5 space-y-3.5 text-xs admin-modal-box">
       <div class="flex items-center justify-between border-b border-line pb-2.5">
@@ -2672,7 +2621,7 @@ What AI projects has he worked on?</textarea>
 
       <div class="px-3 py-2 rounded-lg bg-card border border-line flex items-center justify-between text-xs">
         <span class="text-fg">Identity & OTP Verification</span>
-        <span class="text-emerald-400 text-xs">Neon DB Protected</span>
+        <span class="text-emerald-400 text-xs">Protected</span>
       </div>
 
       <form id="form-change-password" onsubmit="handleChangePassword(event)" autocomplete="off" class="space-y-3">
@@ -2691,10 +2640,10 @@ What AI projects has he worked on?</textarea>
           </button>
         </div>
 
-        <!-- Step 2: Enter OTP from Neon DB + New Username & Password -->
+        <!-- Step 2: Enter OTP + New Username & Password -->
         <div id="cp-step-2" class="hidden space-y-2.5">
           <div id="cp-otp-status-box" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300">
-            ✓ OTP saved in Neon DB. Enter code below.
+            ✓ OTP saved. Enter code below.
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -2751,7 +2700,7 @@ What AI projects has he worked on?</textarea>
           <pre id="audit-diff-old" class="p-3 rounded bg-canvas border border-rose-500/20 text-rose-300 text-xs overflow-x-auto whitespace-pre-wrap"></pre>
         </div>
         <div class="space-y-1">
-          <span class="text-xs text-emerald-400 font-bold uppercase">Committed State (Neon DB)</span>
+          <span class="text-xs text-emerald-400 font-bold uppercase">Committed State</span>
           <pre id="audit-diff-new" class="p-3 rounded bg-canvas border border-emerald-500/20 text-emerald-300 text-xs overflow-x-auto whitespace-pre-wrap"></pre>
         </div>
       </div>
