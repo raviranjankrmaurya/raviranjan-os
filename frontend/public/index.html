@@ -76,59 +76,56 @@
         <div class="flex items-center space-x-3 flex-1">
           <i data-lucide="search" class="w-4 h-4 text-fg-2 shrink-0"></i>
           <input id="cmd-input" type="text" placeholder="Jump to section, project, or search technical notes..." class="w-full bg-transparent text-xs text-fg focus:outline-none placeholder:text-fg-3 rounded-lg" oninput="handleCommandSearch(this.value)" onkeydown="if(event.key === 'Escape') toggleCommandPalette(false)">
+        <button type="button" onclick="toggleCommandPalette(false)" class="btn btn--icon btn--pill shrink-0" aria-label="Close search" title="Close (Esc)"><i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i></button>
         </div>
         <div class="flex items-center space-x-2 shrink-0">
-          <kbd onclick="toggleCommandPalette(false)" class="text-xs font-mono px-1.5 py-0.5 rounded bg-raised text-fg-2 border border-line cursor-pointer hover:text-fg" title="Close Search (ESC)">ESC</kbd>
-          <button type="button" onclick="toggleCommandPalette(false)" class="p-1 rounded-lg hover:bg-raised text-fg-2 hover:text-fg transition-colors" title="Close">
-            <i data-lucide="x" class="w-3.5 h-3.5"></i>
-          </button>
-        </div>
+          </div>
       </div>
       <div id="cmd-results" class="max-h-80 overflow-y-auto p-2 text-xs space-y-1">
-
-        <div onclick="navigateSection('overview')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
+<div onclick="navigateSection('overview')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
           <span>👤 Developer Profile & Focus</span>
           <span class="text-xs text-fg-3">#overview</span>
         </div>
+
         <div onclick="navigateSection('projects')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
           <span>📁 Featured Projects & Architecture</span>
           <span class="text-xs text-fg-3">#projects</span>
         </div>
-        <div onclick="navigateSection('experience')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
-          <span>🎓 Experience, Education & Credentials</span>
-          <span class="text-xs text-fg-3">#experience</span>
-        </div>
+
         <div onclick="navigateSection('activity')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
           <span>⚡ Live Developer Activity & Heatmap</span>
           <span class="text-xs text-fg-3">#activity</span>
         </div>
-        <div onclick="navigateSection('coding')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
-          <span>💻 Coding Journey & DSA Problem Notes</span>
-          <span class="text-xs text-fg-3">#coding</span>
+
+        <div onclick="navigateSection('experience')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
+          <span>🎓 Experience, Education & Credentials</span>
+          <span class="text-xs text-fg-3">#experience</span>
         </div>
+
         <div onclick="navigateSection('contributions')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
           <span>🤝 Contribution Stories (Why I Contributed)</span>
           <span class="text-xs text-fg-3">#contributions</span>
         </div>
+
+        <div onclick="navigateSection('coding')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
+          <span>💻 Coding Journey & DSA Problem Notes</span>
+          <span class="text-xs text-fg-3">#coding</span>
+        </div>
+
         <div onclick="navigateSection('research')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
           <span>📄 Research Hub</span>
           <span class="text-xs text-fg-3">#research</span>
         </div>
+
         <div onclick="navigateSection('lab')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
           <span>🔬 Engineering Lab (Experiments)</span>
           <span class="text-xs text-fg-3">#lab</span>
         </div>
+
         <div onclick="navigateSection('writing')" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-fg hover:text-fg">
           <span>✍️ Technical Writing & Engineering Notes</span>
           <span class="text-xs text-fg-3">#writing</span>
         </div>
-        <div onclick="toggleRecruiterMode(true); toggleCommandPalette(false);" class="p-2 rounded hover:bg-emerald-500/10 cursor-pointer flex justify-between items-center text-emerald-400">
-          <span>⚡ Recruiter Mode (1-Minute Quick Scan)</span>
-          <span class="text-xs text-emerald-500">/recruiter</span>
-        </div>
-        <div onclick="openAiWithQuery('Which skills and technologies are listed?'); toggleCommandPalette()" class="p-2 rounded hover:bg-raised cursor-pointer flex justify-between items-center text-indigo-300 hover:text-indigo-200">
-          <span>🤖 Ask AI: "Explain RakshaGrid."</span>
-          <span class="text-xs text-indigo-500">RAG Query</span>
         </div>
 
       </div>
@@ -291,12 +288,12 @@
     </div>
     <div id="mobile-nav-menu" class="hidden lg:hidden mobile-menu">
       <nav class="mobile-menu__grid" aria-label="Mobile">
-        <a href="#overview" onclick="toggleMobileNavMenu(false)" class="mobile-link">Overview</a>
+        <a href="#overview" onclick="toggleMobileNavMenu(false)" class="mobile-link">Home</a>
         <a href="#projects" onclick="toggleMobileNavMenu(false)" class="mobile-link">Projects</a>
         <a href="#activity" onclick="toggleMobileNavMenu(false)" class="mobile-link">Activity</a>
         <a href="#experience" onclick="toggleMobileNavMenu(false)" class="mobile-link">Experience &amp; Education</a>
-        <a href="#coding" onclick="toggleMobileNavMenu(false)" class="mobile-link">Coding &amp; DSA</a>
         <a href="#contributions" onclick="toggleMobileNavMenu(false)" class="mobile-link">Contributions</a>
+        <a href="#coding" onclick="toggleMobileNavMenu(false)" class="mobile-link">Coding &amp; DSA</a>
         <a href="#research" onclick="toggleMobileNavMenu(false)" class="mobile-link">Research</a>
         <a href="#lab" onclick="toggleMobileNavMenu(false)" class="mobile-link">Lab</a>
         <a href="#writing" onclick="toggleMobileNavMenu(false)" class="mobile-link">Writing</a>
@@ -535,10 +532,6 @@
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div class="flex items-center gap-2">
             <h2 class="text-xl font-bold text-fg">Developer Activity</h2>
-            <span id="telemetry-live-badge" class="text-xs px-2.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 font-semibold">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              LIVE TELEMETRY · SYNCHRONIZED
-            </span>
           </div>
           <span class="text-xs text-fg-3">Activity synchronized from connected platforms</span>
         </div>
@@ -554,7 +547,6 @@
               <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
               <span class="text-sm font-semibold text-fg">GitHub</span>
             </div>
-            <span id="gh-sync-badge" class="text-xs px-1.5 py-0.5 rounded bg-raised text-indigo-400 border border-line">Active Sync</span>
           </div>
 
           <div class="grid grid-cols-2 gap-3 text-xs">
@@ -578,8 +570,8 @@
           <div class="pt-3 border-t border-line flex flex-col space-y-1 text-xs text-fg-3">
             <div><span class="text-fg-2">Data Source:</span> GitHub GraphQL & Webhook Telemetry</div>
             <div class="flex items-center justify-between">
-              <span id="gh-last-sync">Last sync: Real-time</span>
-              <span id="gh-health-status" class="text-emerald-400 flex items-center gap-1">● Connected</span>
+              <span id="gh-last-sync"></span>
+              <span id="gh-health-status" class="text-emerald-400 flex items-center gap-1"></span>
             </div>
           </div>
         </div>
@@ -591,7 +583,6 @@
               <i data-lucide="code" class="w-4 h-4 text-amber-400"></i>
               <span class="text-sm font-semibold text-fg">LeetCode</span>
             </div>
-            <span id="lc-sync-badge" class="text-xs px-1.5 py-0.5 rounded bg-raised text-amber-400 border border-line">Active Sync</span>
           </div>
 
           <div class="grid grid-cols-2 gap-3 text-xs">
@@ -615,8 +606,8 @@
           <div class="pt-3 border-t border-line flex flex-col space-y-1 text-xs text-fg-3">
             <div><span class="text-fg-2">Data Source:</span> LeetCode GraphQL Adapter</div>
             <div class="flex items-center justify-between">
-              <span id="lc-last-sync">Last sync: Real-time</span>
-              <span id="lc-health-status" class="text-emerald-400 flex items-center gap-1">● Connected</span>
+              <span id="lc-last-sync"></span>
+              <span id="lc-health-status" class="text-emerald-400 flex items-center gap-1"></span>
             </div>
           </div>
         </div>
@@ -628,7 +619,6 @@
               <i data-lucide="terminal" class="w-4 h-4 text-emerald-400"></i>
               <span class="text-sm font-semibold text-fg">GeeksforGeeks</span>
             </div>
-            <span id="gfg-sync-badge" class="text-xs px-1.5 py-0.5 rounded bg-raised text-emerald-400 border border-line">Active Sync</span>
           </div>
 
           <div class="grid grid-cols-2 gap-3 text-xs">
@@ -652,8 +642,8 @@
           <div class="pt-3 border-t border-line flex flex-col space-y-1 text-xs text-fg-3">
             <div><span class="text-fg-2">Data Source:</span> GFG Adapter</div>
             <div class="flex items-center justify-between">
-              <span id="gfg-last-sync">Last sync: Real-time</span>
-              <span id="gfg-health-status" class="text-emerald-400 flex items-center gap-1">● Connected</span>
+              <span id="gfg-last-sync"></span>
+              <span id="gfg-health-status" class="text-emerald-400 flex items-center gap-1"></span>
             </div>
           </div>
         </div>

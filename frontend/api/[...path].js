@@ -18,6 +18,7 @@ module.exports = async (req, res) => {
   const transport = isHttps ? https : http;
 
   const fwdHeaders = { ...req.headers };
+  if (String(fwdHeaders["accept"] || "").includes("text/event-stream")) delete fwdHeaders["accept-encoding"];
   delete fwdHeaders["host"];
   fwdHeaders["host"] = targetUrl.host;
 
@@ -28,7 +29,16 @@ module.exports = async (req, res) => {
     method: req.method,
     headers: fwdHeaders
   }, (clientRes) => {
-    res.writeHead(clientRes.statusCode, clientRes.headers);
+    const outHeaders = Object.assign({}, clientRes.headers);
+    const isSse = String(outHeaders["content-type"] || "").toLowerCase().includes("text/event-stream");
+    if (isSse) {
+      // Server-Sent Events (AI streaming): never buffer or transform, flush every chunk immediately
+      outHeaders["cache-control"] = "no-cache, no-transform";
+      outHeaders["x-accel-buffering"] = "no";
+      delete outHeaders["content-length"];
+    }
+    res.writeHead(clientRes.statusCode, outHeaders);
+    if (isSse && typeof res.flushHeaders === "function") res.flushHeaders();
     clientRes.pipe(res);
   });
 

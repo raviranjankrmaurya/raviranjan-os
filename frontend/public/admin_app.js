@@ -728,6 +728,11 @@ async function handleSendAiMessage(e) {
 
   const query = input.value.trim();
   if (!query) return;
+  if (window.__adminAiAbort) { try { window.__adminAiAbort.abort(); } catch (_) {} }
+  const ctrl = new AbortController();
+  window.__adminAiAbort = ctrl;
+  const nearBottom = () => container.scrollHeight - container.scrollTop - container.clientHeight < 90;
+  const toBottom = () => { container.scrollTop = container.scrollHeight; };
 
   const userBubble = document.createElement('div');
   userBubble.className = 'flex justify-end';
@@ -738,42 +743,52 @@ async function handleSendAiMessage(e) {
   `;
   container.appendChild(userBubble);
   input.value = '';
-  container.scrollTop = container.scrollHeight;
 
+  const aiBubble = document.createElement('div');
+  aiBubble.className = 'flex items-start space-x-2.5 animate-in fade-in duration-200';
+  aiBubble.setAttribute('aria-busy', 'true');
+  aiBubble.innerHTML = `
+    <div class="w-6 h-6 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
+      <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+    </div>
+    <div class="p-3 rounded-xl bg-card border border-line text-fg leading-relaxed max-w-[85%] font-sans">
+      <div data-ai-text><span class="ai-typing" role="status" aria-label="Thinking"><i></i><i></i><i></i></span></div>
+      <button type="button" data-ai-stop class="mt-1.5 text-xs text-fg-3 hover:text-fg underline">Stop</button>
+    </div>`;
+  container.appendChild(aiBubble);
+  if (window.lucide) window.lucide.createIcons();
+  toBottom();
+
+  const textEl = aiBubble.querySelector('[data-ai-text]');
+  const stopBtn = aiBubble.querySelector('[data-ai-stop]');
+  stopBtn.addEventListener('click', () => ctrl.abort());
+  let partial = '';
   try {
-    const res = await fetch('/api/ai/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: query,
-        sessionId: 'admin-console',
-        pageUrl: '/admin'
-      })
+    const result = await window.streamAiReply({
+      signal: ctrl.signal,
+      body: { query: query, sessionId: 'admin-console', pageUrl: '/admin' },
+      onText: (t) => {
+        partial = t;
+        const stick = nearBottom();
+        textEl.innerHTML = window.formatAiText(t) + '<span class="ai-caret" aria-hidden="true"></span>';
+        if (stick) toBottom();
+      }
     });
-    const json = await res.json().catch(() => ({}));
-    const d = json?.data || {};
-    const answer = d.answer || "Connected RAG Engine.";
-    const formatted = escapeHtml(answer)
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-fg">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-xs">&nearr;</span></a>')
-      .replace(/\n/g, '<br>');
-
-    const aiBubble = document.createElement('div');
-    aiBubble.className = 'flex items-start space-x-2.5 animate-in fade-in duration-200';
-    aiBubble.innerHTML = `
-      <div class="w-6 h-6 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
-        <i data-lucide="bot" class="w-3.5 h-3.5"></i>
-      </div>
-      <div class="p-3 rounded-xl bg-card border border-line text-fg leading-relaxed max-w-[85%] font-sans">
-        ${formatted}
-      </div>
-    `;
-    container.appendChild(aiBubble);
-    if (window.lucide) window.lucide.createIcons();
-    container.scrollTop = container.scrollHeight;
+    textEl.innerHTML = window.formatAiText(result.text || 'No answer was returned.');
     loadAdminDashboardMetrics();
     loadAiConfig();
   } catch (err) {
-    showToast("AI query error: " + err.message, "warning");
+    if (err && err.name === 'AbortError') {
+      textEl.innerHTML = (partial ? window.formatAiText(partial) + ' ' : '') + '<span class="text-fg-3">(stopped)</span>';
+    } else {
+      textEl.textContent = partial || 'The AI request failed.';
+      showToast('AI query error: ' + err.message, 'warning');
+    }
+  } finally {
+    aiBubble.setAttribute('aria-busy', 'false');
+    stopBtn.remove();
+    if (window.__adminAiAbort === ctrl) window.__adminAiAbort = null;
+    if (nearBottom()) toBottom();
   }
 }
 

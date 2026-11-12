@@ -189,8 +189,8 @@
       <div class="p-3 border-b border-line flex items-center space-x-3">
         <i data-lucide="search" class="w-4 h-4 text-fg-2"></i>
         <input id="cmd-input" type="text" placeholder="Type a command or jump to module..." class="w-full bg-transparent text-sm text-fg focus:outline-none placeholder:text-fg-3 rounded-lg">
-        <kbd class="text-xs font-mono px-1.5 py-0.5 rounded bg-raised text-fg-2 border border-line-strong">ESC</kbd>
-      </div>
+        <button type="button" onclick="toggleCommandPalette(false)" class="btn btn--icon btn--pill shrink-0" aria-label="Close search" title="Close (Esc)"><i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i></button>
+        </div>
       <div id="cmd-results" class="max-h-80 overflow-y-auto p-2 text-xs space-y-1">
         <!-- populated via js -->
       </div>

@@ -169,6 +169,177 @@
     return window.confirmDialog({ title: 'Leave without saving?', message: 'You have unsaved changes in this project. They will be lost.', confirmText: 'Discard changes' }).then(function (y) { if (y) go(); });
   };
 
+
+  /* ======================================================================
+     AI streaming — real SSE when the backend offers /api/ai/chat/stream,
+     otherwise the normal JSON endpoint revealed progressively.
+     ====================================================================== */
+  window.formatAiText = function (raw) {
+    var esc = window.escapeHtml || function (t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+    return esc(String(raw || ''))
+      .replace(/\*\*(.+?)\*\*/g, '<strong class="text-fg">$1</strong>')
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (m, label, href) {
+        var clean = href.replace(/&amp;/g, '&');
+        return /^(https?:\/\/|mailto:|#|\/)/i.test(clean)
+          ? '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">' + label + '</a>' : label;
+      })
+      .replace(/\n/g, '<br>');
+  };
+
+  function aiStreamKnown() { try { return sessionStorage.getItem('ai_stream_ok'); } catch (e) { return null; } }
+  function aiStreamRemember(v) { try { sessionStorage.setItem('ai_stream_ok', v ? '1' : '0'); } catch (e) {} }
+
+  function sleep(ms, signal) {
+    return new Promise(function (resolve, reject) {
+      var t = setTimeout(resolve, ms);
+      if (signal) signal.addEventListener('abort', function () { clearTimeout(t); reject(new DOMException('Aborted', 'AbortError')); }, { once: true });
+    });
+  }
+
+  async function revealProgressively(text, opts) {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var parts = text.match(/\S+\s*/g) || [];
+    if (reduce || parts.length < 3) { opts.onText(text); return; }
+    var perTick = Math.max(1, Math.ceil(parts.length / 80));          // cap the reveal at roughly 2 seconds
+    var shown = '';
+    for (var i = 0; i < parts.length; i += perTick) {
+      shown += parts.slice(i, i + perTick).join('');
+      opts.onText(shown);
+      await sleep(26, opts.signal);
+    }
+    opts.onText(text);
+  }
+
+  async function readSse(res, opts) {
+    var reader = res.body.getReader(), dec = new TextDecoder(), buf = '', text = '', meta = {}, finished = false;
+    var flush = function () { opts.onText(text); };
+    while (!finished) {
+      var chunk = await reader.read();
+      if (chunk.done) break;
+      buf += dec.decode(chunk.value, { stream: true });
+      var blocks = buf.split(/\r?\n\r?\n/); buf = blocks.pop();
+      for (var b = 0; b < blocks.length; b++) {
+        var ev = 'message', data = [];
+        blocks[b].split(/\r?\n/).forEach(function (line) {
+          if (line.indexOf('event:') === 0) ev = line.slice(6).trim();
+          else if (line.indexOf('data:') === 0) data.push(line.slice(5).replace(/^ /, ''));
+        });
+        var payload = data.join('\n'); if (!payload) continue;
+        if (ev === 'meta') { try { meta = JSON.parse(payload); opts.onMeta && opts.onMeta(meta); } catch (e) {} }
+        else if (ev === 'error') { throw new Error(payload); }
+        else if (ev === 'done') { finished = true; }
+        else {
+          var piece = payload;
+          try { var j = JSON.parse(payload); piece = (typeof j === 'string') ? j : (j.text || j.token || j.delta || ''); } catch (e) {}
+          text += piece; flush();
+        }
+      }
+    }
+    return { text: text, meta: meta };
+  }
+
+  window.streamAiReply = async function (opts) {
+    var t0 = performance.now();
+    var headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+    var body = JSON.stringify(opts.body || {});
+    if (aiStreamKnown() !== '0') {
+      try {
+        var res = await fetch(opts.streamUrl || '/api/ai/chat/stream', { method: 'POST', headers: Object.assign({ Accept: 'text/event-stream' }, headers), body: body, signal: opts.signal });
+        var ct = (res.headers.get('content-type') || '').toLowerCase();
+        if (res.ok && ct.indexOf('text/event-stream') !== -1 && res.body) {
+          aiStreamRemember(true);
+          var out = await readSse(res, opts);
+          return { text: out.text, meta: out.meta, ms: Math.round(performance.now() - t0), streamed: true };
+        }
+        aiStreamRemember(false);              // endpoint missing: don't probe again this session
+      } catch (e) { if (e && e.name === 'AbortError') throw e; aiStreamRemember(false); }
+    }
+    var r = await fetch(opts.fallbackUrl || '/api/ai/chat', { method: 'POST', headers: headers, body: body, signal: opts.signal });
+    if (!r.ok) throw new Error('AI service responded ' + r.status);
+    var json = await r.json(); var d = (json && json.data) || {};
+    if (opts.onMeta) opts.onMeta({ sessionId: d.sessionId, latencyMs: d.latencyMs, sources: d.sources });
+    var answer = d.answer || '';
+    await revealProgressively(answer, opts);
+    return { text: answer, meta: d, ms: Math.round(performance.now() - t0), streamed: false };
+  };
+
+  /* ======================================================================
+     Mobile: one section at a time. Home shows everything; every other
+     nav item shows only that section.
+     ====================================================================== */
+  (function () {
+    var main = document.getElementById('standard-view');
+    if (!main || !window.matchMedia) return;
+    var MQ = window.matchMedia('(max-width: 1023px)');
+    var secs = [].slice.call(main.children).filter(function (el) { return el.tagName === 'SECTION' && el.id; });
+    var ids = secs.map(function (s) { return s.id; });
+    var current = '';
+    window.__mobileFocusActive = function () { return MQ.matches; };
+
+    function paintNav(id) {
+      [].forEach.call(document.querySelectorAll('.bottom-nav--public [data-spy]'), function (a) {
+        var on = (id === '' && a.getAttribute('data-spy') === 'overview') || a.getAttribute('data-spy') === id;
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      });
+    }
+    function show(id, push) {
+      if (!MQ.matches) return false;
+      id = (id === 'overview') ? '' : id;
+      current = id;
+      if (id) document.body.setAttribute('data-mobile-focus', id); else document.body.removeAttribute('data-mobile-focus');
+      secs.forEach(function (s) { s.classList.toggle('is-focus', s.id === id); });
+      paintNav(id);
+      var menu = document.getElementById('mobile-nav-menu'); if (menu) menu.classList.add('hidden');
+      if (push) { try { history.pushState({ mf: id }, '', id ? '#' + id : location.pathname + location.search); } catch (e) {} }
+      window.scrollTo(0, 0);
+      return true;
+    }
+    function reset() {
+      document.body.removeAttribute('data-mobile-focus');
+      secs.forEach(function (s) { s.classList.remove('is-focus'); });
+      current = '';
+    }
+
+    document.addEventListener('click', function (e) {
+      if (!MQ.matches || !e.target.closest) return;
+      var brand = e.target.closest('.brand');
+      if (brand && brand.closest('.site-header')) { show('', true); return; }
+      var a = e.target.closest('a[href^="#"]'); if (!a) return;
+      var id = a.getAttribute('href').slice(1);
+      if (ids.indexOf(id) === -1) return;
+      e.preventDefault(); show(id, true);
+    }, true);
+
+    var origNav = window.navigateSection;
+    window.navigateSection = function (id) {
+      if (MQ.matches) { if (typeof window.toggleCommandPalette === 'function') window.toggleCommandPalette(false); show(id, true); return; }
+      return origNav ? origNav.apply(this, arguments) : undefined;
+    };
+
+    window.addEventListener('popstate', function (e) {
+      if (!MQ.matches) return;
+      var h = (location.hash || '').slice(1);
+      show((e.state && typeof e.state.mf === 'string') ? e.state.mf : (ids.indexOf(h) !== -1 ? h : ''), false);
+    });
+    var onMq = function () {
+      if (!MQ.matches) { reset(); return; }
+      var h = (location.hash || '').slice(1);
+      show(ids.indexOf(h) !== -1 ? h : '', false);
+    };
+    if (MQ.addEventListener) MQ.addEventListener('change', onMq); else if (MQ.addListener) MQ.addListener(onMq);
+    document.addEventListener('DOMContentLoaded', function () {
+      try { history.replaceState({ mf: current }, '', location.href); } catch (e) {}
+      onMq();
+    });
+  })();
+
+  // screen readers: announce streamed AI answers politely
+  document.addEventListener('DOMContentLoaded', function () {
+    ['ai-chat-messages', 'ai-messages-container'].forEach(function (id) {
+      var el = document.getElementById(id); if (el) { el.setAttribute('role', 'log'); el.setAttribute('aria-live', 'polite'); }
+    });
+  });
+
   document.addEventListener('DOMContentLoaded', function () {
 
     gateDestructive();
@@ -195,14 +366,6 @@
       x.addEventListener('click', function () { window.toggleAdminMobileSidebar(false); });
       sbHead.appendChild(x);
     }
-    var cmdInput = document.querySelector('#command-modal input');
-    if (cmdInput && cmdInput.parentElement && !cmdInput.parentElement.querySelector('[data-close-cmd]')) {
-      var cx = document.createElement('button'); cx.type = 'button'; cx.setAttribute('data-close-cmd', ''); cx.setAttribute('aria-label', 'Close search');
-      cx.className = 'kbd'; cx.style.cursor = 'pointer'; cx.textContent = 'Esc';
-      cx.addEventListener('click', function () { if (typeof window.toggleCommandPalette === 'function') window.toggleCommandPalette(); });
-      cmdInput.parentElement.appendChild(cx);
-    }
-
     // Browser / phone Back button works between admin views
     if (isAdmin && typeof window.switchView === 'function') {
       var rawSwitch = window.switchView, fromPop = false;
@@ -236,7 +399,7 @@
       spyLinks.forEach(function (a) { var id = a.getAttribute('href').slice(1); (map[id] = map[id] || []).push(a); });
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {
-          if (!en.isIntersecting) return;
+          if (!en.isIntersecting || (window.__mobileFocusActive && window.__mobileFocusActive())) return;
           spyLinks.forEach(function (a) { a.removeAttribute('aria-current'); });
           (map[en.target.id] || []).forEach(function (a) { a.setAttribute('aria-current', 'true'); });
         });

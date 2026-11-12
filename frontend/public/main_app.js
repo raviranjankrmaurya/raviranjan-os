@@ -1067,38 +1067,53 @@ function setPublicAiLanguage(lang) {
 async function sendAiMessage(query) {
   const chatContainer = document.getElementById('ai-chat-messages');
   if (!chatContainer) return;
+  if (window.__aiAbort) { try { window.__aiAbort.abort(); } catch (_) {} }
+  const ctrl = new AbortController();
+  window.__aiAbort = ctrl;
+
+  const nearBottom = () => chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < 90;
+  const toBottom = () => { chatContainer.scrollTop = chatContainer.scrollHeight; };
 
   const userBubble = document.createElement('div');
   userBubble.className = 'p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-200 text-xs  ml-6';
   userBubble.innerText = query;
   chatContainer.appendChild(userBubble);
-  chatContainer.scrollTop = chatContainer.scrollHeight;
 
-  const loadingBubble = document.createElement('div');
-  loadingBubble.className = 'p-3 rounded-lg bg-raised border border-line text-fg-2 text-xs  mr-6 flex items-center space-x-2';
-  loadingBubble.innerHTML = '<span class="inline-block animate-spin mr-1">⟳</span> Thinking…';
-  chatContainer.appendChild(loadingBubble);
-  chatContainer.scrollTop = chatContainer.scrollHeight;
+  const aiBubble = document.createElement('div');
+  aiBubble.className = 'p-3 rounded-lg bg-raised border border-line text-fg text-xs font-sans leading-relaxed mr-6 space-y-2';
+  aiBubble.setAttribute('aria-busy', 'true');
+  aiBubble.innerHTML = `
+    <div class="flex items-center justify-between text-xs text-indigo-400 border-b border-line pb-1 mb-1">
+      <span>🤖 Ask AI · Grounded</span>
+      <span class="flex items-center gap-2"><span data-ai-latency class="text-fg-3"></span><button type="button" data-ai-stop class="text-fg-3 hover:text-fg underline">Stop</button></span>
+    </div>
+    <div data-ai-text><span class="ai-typing" role="status" aria-label="Thinking"><i></i><i></i><i></i></span></div>`;
+  chatContainer.appendChild(aiBubble);
+  toBottom();
 
+  const textEl = aiBubble.querySelector('[data-ai-text]');
+  const stopBtn = aiBubble.querySelector('[data-ai-stop]');
+  const latencyEl = aiBubble.querySelector('[data-ai-latency]');
+  stopBtn.addEventListener('click', () => ctrl.abort());
+  const settle = () => { aiBubble.setAttribute('aria-busy', 'false'); stopBtn.remove(); if (window.__aiAbort === ctrl) window.__aiAbort = null; };
+
+  let partial = '';
   try {
     const geo = await resolveClientGeoForContact();
     const bHash = getOrCreateBrowserFingerprint();
     const originUrl = window.location.origin || (window.location.protocol + '//' + window.location.host);
     const refUrl = document.referrer || window.location.href;
 
-    const res = await fetch('/api/ai/chat', {
-      method: 'POST',
+    const result = await window.streamAiReply({
+      signal: ctrl.signal,
       headers: {
-        'Content-Type': 'application/json',
         'X-Visitor-Public-Ip': geo.ip || '',
         'X-Visitor-City': geo.city || '',
         'X-Visitor-Region': geo.region || '',
         'X-Visitor-Country': geo.country || '',
-        'X-Browser-Hash': bHash,
-        'Origin': originUrl,
-        'Referer': refUrl
+        'X-Browser-Hash': bHash
       },
-      body: JSON.stringify({
+      body: {
         query: query,
         sessionId: visitorAiSessionId,
         language: currentPublicAiLang,
@@ -1110,46 +1125,34 @@ async function sendAiMessage(query) {
         browserHash: bHash,
         origin: originUrl,
         referrer: refUrl
-      })
+      },
+      onMeta: (m) => {
+        if (m && m.sessionId) {
+          visitorAiSessionId = m.sessionId;
+          localStorage.setItem('raviranjan_ai_session_id', visitorAiSessionId);
+        }
+      },
+      onText: (t) => {
+        partial = t;
+        const stick = nearBottom();
+        textEl.innerHTML = window.formatAiText(t) + '<span class="ai-caret" aria-hidden="true"></span>';
+        if (stick) toBottom();
+      }
     });
 
-    loadingBubble.remove();
-    const aiBubble = document.createElement('div');
-    aiBubble.className = 'p-3 rounded-lg bg-raised border border-line text-fg text-xs font-sans leading-relaxed mr-6 space-y-2';
-
-    if (res.ok) {
-      const json = await res.json();
-      const d = json?.data;
-      if (d && d.sessionId) {
-        visitorAiSessionId = d.sessionId;
-        localStorage.setItem("raviranjan_ai_session_id", visitorAiSessionId);
-      }
-      const rawAns = d?.answer || evaluatePortfolioRag(query);
-      const formattedAns = escapeHtml(rawAns)
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-fg">$1</strong>').replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline font-semibold inline-flex items-center gap-0.5">$1 <span class="text-xs">&nearr;</span></a>')
-        .replace(/\n/g, '<br>');
-      aiBubble.innerHTML = `
-        <div class="flex items-center justify-between text-xs text-indigo-400 border-b border-line pb-1 mb-1">
-          <span>🤖 Ask AI · Grounded</span>
-          <span class="text-fg-3">${d?.latencyMs || 45}ms</span>
-        </div>
-        <div>${formattedAns}</div>
-      `;
-    } else {
-      aiBubble.innerHTML = evaluatePortfolioRag(query);
-    }
-
-    chatContainer.appendChild(aiBubble);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    if (window.lucide) window.lucide.createIcons();
+    const finalText = result.text || evaluatePortfolioRag(query);
+    textEl.innerHTML = window.formatAiText(finalText);
+    const ms = (result.meta && result.meta.latencyMs) || result.ms;
+    if (ms) latencyEl.textContent = ms + 'ms';
   } catch (err) {
-    loadingBubble.remove();
-    const aiBubble = document.createElement('div');
-    aiBubble.className = 'p-3 rounded-lg bg-raised border border-line text-fg text-xs font-sans leading-relaxed mr-6 space-y-2';
-    aiBubble.innerHTML = evaluatePortfolioRag(query);
-    chatContainer.appendChild(aiBubble);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    if (window.lucide) window.lucide.createIcons();
+    if (err && err.name === 'AbortError') {
+      textEl.innerHTML = (partial ? window.formatAiText(partial) + ' ' : '') + '<span class="text-fg-3">(stopped)</span>';
+    } else {
+      textEl.textContent = partial || evaluatePortfolioRag(query);
+    }
+  } finally {
+    settle();
+    if (nearBottom()) toBottom();
   }
 }
 
