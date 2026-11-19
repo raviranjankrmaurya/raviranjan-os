@@ -26,8 +26,18 @@ public class JwtTokenProvider {
     public JwtTokenProvider(
             @Value("${app.jwt.secret:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}") String secret,
             @Value("${app.jwt.expiration-ms:86400000}") long jwtExpirationMs,
-            @Value("${app.jwt.refresh-expiration-ms:604800000}") long refreshExpirationMs
+            @Value("${app.jwt.refresh-expiration-ms:604800000}") long refreshExpirationMs,
+            @Value("${app.security.require-custom-jwt-secret:false}") boolean requireCustomSecret
     ) {
+        // The default below is committed in a public repository, so anybody can forge admin tokens while it is in use.
+        if ("404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970".equals(secret)) {
+            String message = "SECURITY: app.jwt.secret is the publicly known default value. Set the JWT_SECRET environment "
+                    + "variable to a long random string (e.g. `openssl rand -base64 48`).";
+            if (requireCustomSecret) {
+                throw new IllegalStateException(message);
+            }
+            log.error(message);
+        }
         byte[] keyBytes;
         try {
             keyBytes = Decoders.BASE64.decode(secret);

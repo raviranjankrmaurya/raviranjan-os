@@ -37,7 +37,7 @@ public class AiQueryLog {
     private String clientIp;
 
     @Column(name = "country", length = 100)
-    private String country = "India";
+    private String country;
 
     @Column(name = "region", length = 100)
     private String region = "Delhi NCR / Bihar";

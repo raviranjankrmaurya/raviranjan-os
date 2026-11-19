@@ -1,6 +1,10 @@
 package com.raviranjan.os.service.impl;
 
 import com.raviranjan.os.ai.AiChatEngine;
+import com.raviranjan.os.ai.AnswerBuilder;
+import com.raviranjan.os.ai.AssistantIdentity;
+import com.raviranjan.os.ai.IntentClassifier;
+import com.raviranjan.os.ai.IntentClassifier.Classification;
 import com.raviranjan.os.ai.PortfolioRagRetriever;
 import com.raviranjan.os.domain.entity.AiConfiguration;
 import com.raviranjan.os.domain.entity.AiKnowledgeChunk;
@@ -57,7 +61,7 @@ public class AiAssistantServiceImpl implements AiAssistantService {
                 .orElseGet(() -> {
                     AiConfiguration defaultConfig = new AiConfiguration();
                     defaultConfig.setEnabled(true);
-                    defaultConfig.setSystemPrompt("You are 'Ask AI', the verified portfolio assistant for Raviranjan Kumar.");
+                    defaultConfig.setSystemPrompt("You are \"" + AssistantIdentity.NAME + "\", the portfolio assistant on Raviranjan's website.");
                     defaultConfig.setModelName("gemini-1.5-flash");
                     return configRepository.save(defaultConfig);
                 });
@@ -77,17 +81,29 @@ public class AiAssistantServiceImpl implements AiAssistantService {
                 ? "[Preferred Language: " + langPref + "] " + rawQuery
                 : rawQuery;
 
-        List<AiKnowledgeChunk> relevantChunks = ragRetriever.retrieveRelevantChunks(rawQuery, 4);
+        // 1. Decide what the message is BEFORE any retrieval or database work.
+        Classification intent = IntentClassifier.classify(effectiveQuery);
+        List<AiKnowledgeChunk> relevantChunks = List.of();
+        String answer;
+        switch (intent.intent()) {
+            case GREETING -> answer = AnswerBuilder.greeting(intent.lang());                  // no retrieval, no DB
+            case ACKNOWLEDGEMENT -> answer = AnswerBuilder.acknowledgement(intent.lang());     // no retrieval, no DB
+            case UNKNOWN -> answer = AssistantIdentity.UNKNOWN_ANSWER;                          // private / empty: nothing to search
+            default -> {
+                relevantChunks = ragRetriever.retrieveRelevantChunks(rawQuery, 4);
+                answer = chatEngine.generateAnswer(effectiveQuery, relevantChunks, config);
+            }
+        }
+        boolean answered = answer != null && !AssistantIdentity.UNKNOWN_ANSWER.equals(answer);
         String detectedLang = chatEngine.detectLanguageLabel(effectiveQuery);
-        String answer = chatEngine.generateAnswer(effectiveQuery, relevantChunks, config);
-        int latency = Math.max(12, (int) (System.currentTimeMillis() - startTime));
+        int latency = Math.max(1, (int) (System.currentTimeMillis() - startTime));
 
         AiQueryLog queryLog = new AiQueryLog();
         queryLog.setSessionId(request.getSessionId() != null && !request.getSessionId().isBlank()
                 ? request.getSessionId()
                 : "sess-" + UUID.randomUUID().toString().substring(0, 8));
         queryLog.setUserQuery(rawQuery);
-        queryLog.setRetrievedChunksCount(Math.max(1, relevantChunks.size()));
+        queryLog.setRetrievedChunksCount(relevantChunks.size());
         queryLog.setAnswer(answer);
         queryLog.setLatencyMs(latency);
         String resolvedIp = clientIp != null && !clientIp.isBlank() ? clientIp : "127.0.0.1";
@@ -101,7 +117,7 @@ public class AiAssistantServiceImpl implements AiAssistantService {
                 ? request.getBrowserHash()
                 : "bh-" + Integer.toHexString((resolvedIp + (userAgent != null ? userAgent : "")).hashCode()));
         queryLog.setReferrer(request.getReferrer() != null && !request.getReferrer().isBlank() ? request.getReferrer() : queryLog.getPageUrl());
-        queryLog.setOrigin(request.getOrigin() != null && !request.getOrigin().isBlank() ? request.getOrigin() : "https://raviranjan.dev");
+        queryLog.setOrigin(request.getOrigin() != null && !request.getOrigin().isBlank() ? request.getOrigin() : null);
 
         if (request.getCountry() != null && !request.getCountry().isBlank()) queryLog.setCountry(request.getCountry());
         if (request.getRegion() != null && !request.getRegion().isBlank()) queryLog.setRegion(request.getRegion());
@@ -119,13 +135,12 @@ public class AiAssistantServiceImpl implements AiAssistantService {
                 }
             } catch (Exception ignored) {}
         }
-        if (queryLog.getCountry() == null || queryLog.getCountry().isBlank()) {
-            queryLog.setCountry("India");
-        }
 
         queryLogRepository.save(queryLog);
 
-        List<KnowledgeSourceDto> sourceDtos = relevantChunks.stream()
+        // sources are shown only when an answer was actually found (never for greetings or "not in the portfolio")
+        List<KnowledgeSourceDto> sourceDtos = !answered ? List.<KnowledgeSourceDto>of() : relevantChunks.stream()
+                .limit(3)
                 .map(c -> new KnowledgeSourceDto(c.getTitle(), c.getUrl(), c.getSourceType()))
                 .collect(Collectors.toList());
 

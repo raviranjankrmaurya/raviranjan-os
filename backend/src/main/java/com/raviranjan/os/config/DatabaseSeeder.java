@@ -21,6 +21,10 @@ import java.util.*;
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
 
+    /** Set APP_SEED_DEMO_CONTENT=false once your real content is in place; admin/roles/schema are always ensured. */
+    @org.springframework.beans.factory.annotation.Value("${app.seed.demo-content:true}")
+    private boolean seedDemoContent;
+
     private static final Logger log = LoggerFactory.getLogger(DatabaseSeeder.class);
 
     private final RoleRepository roleRepository;
@@ -115,44 +119,55 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         ensureSchemaColumnsAligned();
         seedRolesAndAdmin();
-        seedProfile();
-        seedSkills();
-        seedProjects();
-        seedResearch();
-        seedLabExperiments();
-        seedArticles();
-        seedContributionStories();
-        seedCareerAndEducation();
-        seedDsaProblems();
-        seedAiConfigAndChunks();
-        seedSiteSettingsAndNotifications();
+        if (seedDemoContent) {
+            seedProfile();
+            seedSkills();
+            seedProjects();
+            seedResearch();
+            seedLabExperiments();
+            seedArticles();
+            seedContributionStories();
+            seedCareerAndEducation();
+            seedDsaProblems();
+            seedAiConfigAndChunks();
+            seedSiteSettingsAndNotifications();
+        } else {
+            log.info(">>> [DatabaseSeeder] Demo content seeding disabled (app.seed.demo-content=false)");
+        }
         cleanupLegacyHardcodedGfg();
         cleanupDuplicateAndOrphanedContactNotifications();
 
         log.info(">>> [DatabaseSeeder] Database verification complete! Executing live platform synchronization...");
 
-        try {
-            gitHubProvider.sync(SyncMode.SCHEDULED);
-        } catch (Exception e) {
-            log.warn("Initial GitHub sync warning: {}", e.getMessage());
-        }
-        try {
-            leetCodeProvider.sync(SyncMode.SCHEDULED);
-        } catch (Exception e) {
-            log.warn("Initial LeetCode sync warning: {}", e.getMessage());
-        }
-        try {
-            gfgProvider.sync(SyncMode.SCHEDULED);
-        } catch (Exception e) {
-            log.warn("Initial GFG sync warning: {}", e.getMessage());
-        }
+        // Run the first platform sync in the background: a slow GitHub / LeetCode / GfG call must never delay the
+        // moment the API becomes ready (this is what makes a sleeping Render instance wake up faster).
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                gitHubProvider.sync(SyncMode.SCHEDULED);
+            } catch (Exception e) {
+                log.warn("Initial GitHub sync warning: {}", e.getMessage());
+            }
+            try {
+                leetCodeProvider.sync(SyncMode.SCHEDULED);
+            } catch (Exception e) {
+                log.warn("Initial LeetCode sync warning: {}", e.getMessage());
+            }
+            try {
+                gfgProvider.sync(SyncMode.SCHEDULED);
+            } catch (Exception e) {
+                log.warn("Initial GFG sync warning: {}", e.getMessage());
+            }
+        });
     }
 
     private void ensureSchemaColumnsAligned() {
         String[] sqlStatements = {
-            "ALTER TABLE ai_query_logs ADD COLUMN IF NOT EXISTS country VARCHAR(100) DEFAULT 'India'",
-            "ALTER TABLE ai_query_logs ADD COLUMN IF NOT EXISTS region VARCHAR(100) DEFAULT 'Delhi NCR / Bihar'",
-            "ALTER TABLE ai_query_logs ADD COLUMN IF NOT EXISTS city VARCHAR(100) DEFAULT 'New Delhi'",
+            "ALTER TABLE ai_query_logs ADD COLUMN IF NOT EXISTS country VARCHAR(100)",
+            "ALTER TABLE ai_query_logs ALTER COLUMN country DROP DEFAULT",
+            "ALTER TABLE ai_query_logs ADD COLUMN IF NOT EXISTS region VARCHAR(100)",
+            "ALTER TABLE ai_query_logs ALTER COLUMN region DROP DEFAULT",
+            "ALTER TABLE ai_query_logs ADD COLUMN IF NOT EXISTS city VARCHAR(100)",
+            "ALTER TABLE ai_query_logs ALTER COLUMN city DROP DEFAULT",
             "ALTER TABLE ai_query_logs ADD COLUMN IF NOT EXISTS browser_hash VARCHAR(128)",
             "ALTER TABLE ai_query_logs ADD COLUMN IF NOT EXISTS referrer VARCHAR(512)",
             "ALTER TABLE ai_query_logs ADD COLUMN IF NOT EXISTS origin VARCHAR(255)",
@@ -160,7 +175,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             "ALTER TABLE ai_query_logs ADD COLUMN IF NOT EXISTS page_url VARCHAR(300)",
             "ALTER TABLE ai_query_logs ADD COLUMN IF NOT EXISTS user_agent VARCHAR(500)",
             "UPDATE ai_query_logs SET browser_hash = 'bh-' || SUBSTRING(MD5(COALESCE(client_ip, '127.0.0.1') || COALESCE(user_agent, 'client')), 1, 10) WHERE browser_hash IS NULL OR browser_hash = '' OR browser_hash = '#session'",
-            "UPDATE ai_query_logs SET origin = 'https://raviranjan.dev' WHERE origin IS NULL OR origin = '' OR origin = '/'",
             "CREATE TABLE IF NOT EXISTS site_settings (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), setting_key VARCHAR(100) NOT NULL UNIQUE, setting_value TEXT NOT NULL, setting_group VARCHAR(50) NOT NULL DEFAULT 'GENERAL', is_public BOOLEAN NOT NULL DEFAULT TRUE, description TEXT, created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(), updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW())",
             "ALTER TABLE audit_logs ALTER COLUMN old_state TYPE TEXT USING old_state::TEXT",
             "ALTER TABLE audit_logs ALTER COLUMN new_state TYPE TEXT USING new_state::TEXT",

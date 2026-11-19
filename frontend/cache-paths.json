@@ -1,0 +1,21 @@
+{
+  "_comment": "Public GET endpoints that are safe to cache. Keep in sync with PUBLIC_PATHS in public/data-layer.js. Never add /api/admin/*, /api/v1/auth/* or anything personalised.",
+  "paths": [
+    "/api/profile",
+    "/api/settings",
+    "/api/projects?size=50",
+    "/api/projects?size=20",
+    "/api/skills",
+    "/api/experiences",
+    "/api/education",
+    "/api/achievements",
+    "/api/certifications",
+    "/api/activity?size=5",
+    "/api/activity/telemetry",
+    "/api/dsa/problems?size=50",
+    "/api/research",
+    "/api/lab",
+    "/api/articles",
+    "/api/stories"
+  ]
+}

@@ -31,9 +31,9 @@ public class GitHubWebhookController {
     ) {
         log.info("Received GitHub webhook event: {}", event);
 
-        // Verify HMAC if signature is provided
-        if (signature != null && !gitHubProvider.verifyWebhookSignature(payload, signature)) {
-            log.warn("Invalid GitHub webhook signature received");
+        // The HMAC signature is mandatory: an unsigned request must never trigger a sync.
+        if (signature == null || !gitHubProvider.verifyWebhookSignature(payload, signature)) {
+            log.warn("Rejected GitHub webhook: missing or invalid HMAC signature");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid HMAC signature");
         }
 

@@ -10,6 +10,7 @@ import com.raviranjan.os.domain.enums.ActivityType;
 import com.raviranjan.os.domain.enums.ProviderType;
 import com.raviranjan.os.domain.enums.SyncMode;
 import com.raviranjan.os.dto.integration.DeveloperActivityDto;
+import com.raviranjan.os.integration.gfg.GfgProvider;
 import com.raviranjan.os.integration.github.GitHubProvider;
 import com.raviranjan.os.integration.leetcode.LeetCodeProvider;
 import com.raviranjan.os.realtime.SseEmitterRegistry;
@@ -52,6 +53,7 @@ public class PublicActivityController {
     private final IntegrationManagementService integrationService;
     private final GitHubProvider gitHubProvider;
     private final LeetCodeProvider leetCodeProvider;
+    private final GfgProvider gfgProvider;
 
     public PublicActivityController(
             DeveloperActivityService activityService,
@@ -64,7 +66,8 @@ public class PublicActivityController {
             DeveloperActivityRepository activityRepository,
             IntegrationManagementService integrationService,
             GitHubProvider gitHubProvider,
-            LeetCodeProvider leetCodeProvider
+            LeetCodeProvider leetCodeProvider,
+            GfgProvider gfgProvider
     ) {
         this.activityService = activityService;
         this.sseEmitterRegistry = sseEmitterRegistry;
@@ -77,6 +80,7 @@ public class PublicActivityController {
         this.integrationService = integrationService;
         this.gitHubProvider = gitHubProvider;
         this.leetCodeProvider = leetCodeProvider;
+        this.gfgProvider = gfgProvider;
     }
 
     @GetMapping("/api/activity")
@@ -140,16 +144,19 @@ public class PublicActivityController {
         gh.put("username", gitHubProvider.getActiveUsername());
         gh.put("repositories", repoCount);
         gh.put("contributions", contribCount);
-        gh.put("contributions2026", gitHubProvider.getLiveContributionsByYear(2026));
-        gh.put("contributions2025", gitHubProvider.getLiveContributionsByYear(2025));
+        // Real per-year calendars only; the years are whatever GitHub reports (no hard-coded 2025 / 2026)
+        gh.put("contributionsByYear", gitHubProvider.getLiveContributionsByYearMap());
         gh.put("pullRequests", prCount);
         gh.put("activeRepos", repoCount);
         gh.put("stars", gitHubProvider.getLiveStarsCount());
-        gh.put("heatmap", gitHubProvider.getLiveHeatmapByYear(2026));
+        gh.put("heatmapYears", gitHubProvider.getHeatmapYears());
+        gh.put("heatmapByYear", gitHubProvider.getLiveHeatmapsByYear());
+        // legacy keys kept for older cached frontends: real data or empty, never relabelled or generated
+        gh.put("heatmap", gitHubProvider.getLiveHeatmap());
         gh.put("heatmap2026", gitHubProvider.getLiveHeatmapByYear(2026));
         gh.put("heatmap2025", gitHubProvider.getLiveHeatmapByYear(2025));
-        gh.put("lastSync", gitHubProvider.getLastSuccessfulSync() != null ? gitHubProvider.getLastSuccessfulSync().toString() : "Real-time");
-        gh.put("status", "Connected");
+        gh.put("lastSync", gitHubProvider.getLastSuccessfulSync() != null ? gitHubProvider.getLastSuccessfulSync().toString() : null);
+        gh.put("status", gitHubProvider.getStatus() != null ? gitHubProvider.getStatus().name() : null);
         data.put("github", gh);
 
         Map<String, Object> lc = new LinkedHashMap<>();
@@ -167,19 +174,20 @@ public class PublicActivityController {
                     ? (streak + (streak == 1 ? " Day" : " Days"))
                     : (activeDays > 0 ? (activeDays + " Active Days") : (p.getEasySolved() + " Easy Solved"));
             lc.put("streakDays", streakLabel);
-            lc.put("ranking", p.getRanking() > 0 ? "#" + p.getRanking() : "Synced");
-            lc.put("acceptanceRate", p.getAcceptanceRate() > 0 ? p.getAcceptanceRate() + "%" : "Synced");
+            lc.put("ranking", p.getRanking() > 0 ? "#" + p.getRanking() : null);
+            lc.put("acceptanceRate", p.getAcceptanceRate() > 0 ? p.getAcceptanceRate() + "%" : null);
         } else {
             lc.put("username", leetCodeProvider.getActiveUsername());
             lc.put("solvedTotal", 0);
             lc.put("easySolved", 0);
             lc.put("mediumSolved", 0);
             lc.put("hardSolved", 0);
-            lc.put("streakDays", "0 Days");
-            lc.put("ranking", "Unranked");
-            lc.put("acceptanceRate", "0%");
+            lc.put("streakDays", null);
+            lc.put("ranking", null);
+            lc.put("acceptanceRate", null);
         }
-        lc.put("status", "Connected");
+        lc.put("status", leetCodeProvider.getStatus() != null ? leetCodeProvider.getStatus().name() : null);
+        lc.put("lastSync", leetCodeProvider.getLastSuccessfulSync() != null ? leetCodeProvider.getLastSuccessfulSync().toString() : null);
         data.put("leetcode", lc);
 
         Map<String, Object> gfg = new LinkedHashMap<>();
@@ -192,16 +200,17 @@ public class PublicActivityController {
             gfg.put("problems", gp.getTotalProblemsSolved());
             gfg.put("instituteRank", gp.getInstituteRank());
             gfg.put("articles", notesCount + " DSA Notes");
-            gfg.put("rank", gp.getInstituteRank() > 0 ? "Institute Rank #" + gp.getInstituteRank() : "Active Profile");
+            gfg.put("rank", gp.getInstituteRank() > 0 ? "Institute Rank #" + gp.getInstituteRank() : null);
         } else {
-            gfg.put("username", "raviranjankrmaurya");
+            gfg.put("username", null);
             gfg.put("score", 0);
             gfg.put("problems", 0);
             gfg.put("instituteRank", 0);
             gfg.put("articles", notesCount + " DSA Notes");
-            gfg.put("rank", "Active Profile");
+            gfg.put("rank", null);
         }
-        gfg.put("status", "Connected");
+        gfg.put("status", gfgProvider.getStatus() != null ? gfgProvider.getStatus().name() : null);
+        gfg.put("lastSync", gfgProvider.getLastSuccessfulSync() != null ? gfgProvider.getLastSuccessfulSync().toString() : null);
         data.put("gfg", gfg);
 
         return ResponseEntity.ok(ApiResponse.success(data));

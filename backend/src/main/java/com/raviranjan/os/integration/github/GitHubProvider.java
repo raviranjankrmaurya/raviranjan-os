@@ -67,13 +67,12 @@ public class GitHubProvider implements IntegrationProvider {
 
     // Live synced GitHub profile metrics & per-year heatmaps
     private volatile int liveContributionsCount = 0;
-    private volatile int liveContributions2026 = 0;
-    private volatile int liveContributions2025 = 0;
+    private volatile Map<Integer, Integer> liveContributionsByYear = new TreeMap<>(Comparator.reverseOrder());
     private volatile int livePullRequestsCount = 0;
     private volatile int liveRepositoriesCount = 0;
     private volatile int liveStarsCount = 0;
-    private volatile List<Map<String, Object>> liveHeatmap2026 = new ArrayList<>();
-    private volatile List<Map<String, Object>> liveHeatmap2025 = new ArrayList<>();
+    /** year (newest first) -> real per-day contributions; nothing here is generated. */
+    private volatile Map<Integer, List<Map<String, Object>>> liveHeatmapsByYear = new TreeMap<>(Comparator.reverseOrder());
 
     public GitHubProvider(
             GitHubRepositoryRepository repoRepository,
@@ -299,18 +298,18 @@ public class GitHubProvider implements IntegrationProvider {
                 }
             }
 
-            // 4. Fetch multi-year contribution calendar (2026 & 2025 & lastYear) from GitHub Contributions API
+            // 4. Real contribution calendar for EVERY year GitHub reports (no hard-coded years, nothing invented)
             Map<String, Map<String, Object>> apiDayMap = new HashMap<>();
+            Map<Integer, Integer> apiTotalsByYear = new TreeMap<>();
             int apiLastYearTotal = -1;
-            int api2026Total = -1;
-            int api2025Total = -1;
+            boolean calendarFetched = false;
 
-            for (String querySuffix : List.of("", "?y=last")) {
+            for (String querySuffix : List.of("?y=all", "?y=last")) {
                 try {
                     HttpRequest contribReq = HttpRequest.newBuilder()
                             .uri(URI.create("https://github-contributions-api.jogruber.de/v4/" + activeUser + querySuffix))
                             .header("User-Agent", "Raviranjan-OS-Backend")
-                            .timeout(Duration.ofSeconds(8))
+                            .timeout(Duration.ofSeconds(10))
                             .GET()
                             .build();
                     HttpResponse<String> contribResp = httpClient.send(contribReq, HttpResponse.BodyHandlers.ofString());
@@ -320,16 +319,11 @@ public class GitHubProvider implements IntegrationProvider {
                         if (totalNode.has("lastYear")) {
                             apiLastYearTotal = totalNode.path("lastYear").asInt(-1);
                         }
-                        if (totalNode.has("2026")) {
-                            api2026Total = totalNode.path("2026").asInt(-1);
+                        Iterator<String> totalKeys = totalNode.fieldNames();
+                        while (totalKeys.hasNext()) {
+                            String k = totalKeys.next();
+                            if (k.matches("\\d{4}")) apiTotalsByYear.put(Integer.parseInt(k), totalNode.path(k).asInt(0));
                         }
-                        if (totalNode.has("2025")) {
-                            api2025Total = totalNode.path("2025").asInt(-1);
-                        }
-                        if (totalNode.has("2024") && api2025Total <= 0) {
-                            // Keep track if needed
-                        }
-
                         JsonNode contribsArr = cRoot.path("contributions");
                         if (contribsArr.isArray()) {
                             for (JsonNode dayNode : contribsArr) {
@@ -342,14 +336,16 @@ public class GitHubProvider implements IntegrationProvider {
                                     apiDayMap.put(dt, dayMap);
                                 }
                             }
+                            calendarFetched = calendarFetched || contribsArr.size() > 0;
                         }
                     }
                 } catch (Exception e) {
                     log.debug("GitHub contributions calendar fetch note ({}): {}", querySuffix, e.getMessage());
                 }
+                if (calendarFetched && "?y=all".equals(querySuffix)) break;        // one successful call is enough
             }
 
-            // Also overlay all commits stored in Neon DB onto commitDateCounts
+            // Commits stored in the database are real too: merge them on top of the API calendar
             for (GitHubCommit c : commitRepository.findAll()) {
                 if (c.getAuthorDate() != null) {
                     String dayKey = c.getAuthorDate().atZone(ZoneOffset.UTC).toLocalDate().toString();
@@ -357,34 +353,34 @@ public class GitHubProvider implements IntegrationProvider {
                 }
             }
 
-            // Build 364-day calendar for 2026 and 2025
-            List<Map<String, Object>> built2026 = buildYearHeatmap(2026, apiDayMap, commitDateCounts);
-            List<Map<String, Object>> built2025 = buildYearHeatmap(2025, apiDayMap, commitDateCounts);
-
-            int sum2026 = built2026.stream().mapToInt(m -> (int) m.getOrDefault("count", 0)).sum();
-            int sum2025 = built2025.stream().mapToInt(m -> (int) m.getOrDefault("count", 0)).sum();
-
-            // If real GitHub server clock is in 2025 so 2026 dates have 0 contributions on GitHub.com,
-            // map the rolling last-364-days active window into 2026 so 2026 displays the latest active year,
-            // while 2025 displays the 2025/2024 calendar year!
-            if (sum2026 == 0 && sum2025 > 0) {
-                List<Map<String, Object>> built2024 = buildYearHeatmap(2024, apiDayMap, commitDateCounts);
-                int sum2024 = built2024.stream().mapToInt(m -> (int) m.getOrDefault("count", 0)).sum();
-                this.liveHeatmap2026 = built2025;
-                this.liveContributions2026 = api2025Total > 0 ? api2025Total : sum2025;
-                this.liveHeatmap2025 = sum2024 > 0 ? built2024 : shiftYearLabels(built2025, 2025);
-                this.liveContributions2025 = sum2024;
-            } else {
-                this.liveHeatmap2026 = built2026;
-                this.liveContributions2026 = api2026Total > 0 ? api2026Total : sum2026;
-                this.liveHeatmap2025 = built2025;
-                this.liveContributions2025 = api2025Total > 0 ? api2025Total : sum2025;
+            // Years = every year the API reported + every year that has stored commits (newest first, at most 6)
+            SortedSet<Integer> years = new TreeSet<>(Comparator.reverseOrder());
+            years.addAll(apiTotalsByYear.keySet());
+            for (String day : commitDateCounts.keySet()) {
+                try { years.add(Integer.parseInt(day.substring(0, 4))); } catch (Exception ignored) { /* not a date */ }
+            }
+            Map<Integer, List<Map<String, Object>>> builtByYear = new TreeMap<>(Comparator.reverseOrder());
+            Map<Integer, Integer> totalsByYear = new TreeMap<>(Comparator.reverseOrder());
+            LocalDate today = LocalDate.now(ZoneOffset.UTC);
+            for (int year : years) {
+                if (builtByYear.size() >= 6) break;
+                List<Map<String, Object>> built = HeatmapSupport.buildYear(year, apiDayMap, commitDateCounts, today);
+                int total = Math.max(apiTotalsByYear.getOrDefault(year, 0), HeatmapSupport.total(built));
+                if (total > 0) {
+                    builtByYear.put(year, built);
+                    totalsByYear.put(year, total);
+                }
+            }
+            // A failed fetch must never wipe the last good (real) calendar
+            if (calendarFetched || !builtByYear.isEmpty()) {
+                this.liveHeatmapsByYear = builtByYear;
+                this.liveContributionsByYear = totalsByYear;
             }
 
             if (apiLastYearTotal > 0) {
                 this.liveContributionsCount = apiLastYearTotal;
-            } else if (this.liveContributions2026 + this.liveContributions2025 > 0) {
-                this.liveContributionsCount = this.liveContributions2026 + this.liveContributions2025;
+            } else if (!totalsByYear.isEmpty()) {
+                this.liveContributionsCount = totalsByYear.values().stream().mapToInt(Integer::intValue).sum();
             } else {
                 this.liveContributionsCount = (int) commitRepository.count();
             }
@@ -423,70 +419,6 @@ public class GitHubProvider implements IntegrationProvider {
         return newActivities.size();
     }
 
-    private List<Map<String, Object>> buildYearHeatmap(
-            int year,
-            Map<String, Map<String, Object>> apiDayMap,
-            Map<String, Integer> commitDateCounts
-    ) {
-        List<Map<String, Object>> days = new ArrayList<>(364);
-        LocalDate start = LocalDate.of(year, 1, 1);
-        int totalFound = 0;
-        for (int i = 0; i < 364; i++) {
-            LocalDate d = start.plusDays(i);
-            String key = d.toString();
-            int count = 0;
-            int level = 0;
-            if (apiDayMap != null && apiDayMap.containsKey(key)) {
-                Map<String, Object> m = apiDayMap.get(key);
-                count = (int) m.getOrDefault("count", 0);
-                level = (int) m.getOrDefault("level", 0);
-            }
-            if (commitDateCounts != null) {
-                int dbCommits = commitDateCounts.getOrDefault(key, 0);
-                if (dbCommits > count) {
-                    count = dbCommits;
-                }
-            }
-            if (count > 0) {
-                totalFound += count;
-                if (level == 0) {
-                    level = count >= 6 ? 4 : (count >= 4 ? 3 : (count >= 2 ? 2 : 1));
-                }
-            }
-            Map<String, Object> dayObj = new LinkedHashMap<>();
-            dayObj.put("date", key);
-            dayObj.put("count", count);
-            dayObj.put("level", level);
-            days.add(dayObj);
-        }
-
-        if (totalFound == 0 && (year == 2026 || year == 2025)) {
-            int targetContribs = (year == 2026) ? 21 : 15;
-            int currentDay = Math.min(363, Math.max(30, LocalDate.now().getDayOfYear()));
-            int remaining = targetContribs;
-            for (int i = Math.max(0, currentDay - 75); i <= currentDay && remaining > 0; i += 3) {
-                Map<String, Object> dayObj = days.get(i);
-                int count = (remaining >= 2 && i % 2 == 0) ? 2 : 1;
-                dayObj.put("count", count);
-                dayObj.put("level", count >= 2 ? 2 : 1);
-                remaining -= count;
-            }
-        }
-        return days;
-    }
-
-    private List<Map<String, Object>> shiftYearLabels(List<Map<String, Object>> source, int targetYear) {
-        List<Map<String, Object>> result = new ArrayList<>(source.size());
-        LocalDate start = LocalDate.of(targetYear, 1, 1);
-        for (int i = 0; i < source.size(); i++) {
-            Map<String, Object> dayObj = new LinkedHashMap<>();
-            dayObj.put("date", start.plusDays(i).toString());
-            dayObj.put("count", 0);
-            dayObj.put("level", 0);
-            result.add(dayObj);
-        }
-        return result;
-    }
 
     public boolean verifyWebhookSignature(String payload, String signatureHeader) {
         if (encryptedWebhookSecret == null || signatureHeader == null || !signatureHeader.startsWith("sha256=")) {
@@ -513,8 +445,13 @@ public class GitHubProvider implements IntegrationProvider {
     }
 
     public int getLiveContributionsByYear(int year) {
-        if (year == 2025) return liveContributions2025;
-        return liveContributions2026 > 0 ? liveContributions2026 : getLiveContributionsCount();
+        return liveContributionsByYear.getOrDefault(year, 0);
+    }
+
+    /** Years that have real data, newest first. */
+    public List<Integer> getHeatmapYears() {
+        ensureHeatmapsPopulated();
+        return new ArrayList<>(liveHeatmapsByYear.keySet());
     }
 
     public int getLivePullRequestsCount() {
@@ -529,31 +466,37 @@ public class GitHubProvider implements IntegrationProvider {
         return liveStarsCount;
     }
 
+    /** The most recent year that has real data (empty list when there is none yet). */
     public synchronized List<Map<String, Object>> getLiveHeatmap() {
-        return getLiveHeatmapByYear(2026);
+        ensureHeatmapsPopulated();
+        return liveHeatmapsByYear.isEmpty() ? List.of() : liveHeatmapsByYear.values().iterator().next();
     }
 
     public synchronized List<Map<String, Object>> getLiveHeatmapByYear(int year) {
-        if (year == 2025 && liveHeatmap2025 != null && !liveHeatmap2025.isEmpty()) {
-            return liveHeatmap2025;
-        }
-        if (year == 2026 && liveHeatmap2026 != null && !liveHeatmap2026.isEmpty()) {
-            return liveHeatmap2026;
-        }
-
         ensureHeatmapsPopulated();
-
-        if (year == 2025 && liveHeatmap2025 != null && !liveHeatmap2025.isEmpty()) {
-            return liveHeatmap2025;
-        }
-        if (liveHeatmap2026 != null && !liveHeatmap2026.isEmpty()) {
-            return liveHeatmap2026;
-        }
-        return buildYearHeatmap(year, new HashMap<>(), new HashMap<>());
+        return liveHeatmapsByYear.getOrDefault(year, List.of());
     }
 
+    /** year -> days, as JSON-friendly string keys (newest year first). */
+    public synchronized Map<String, List<Map<String, Object>>> getLiveHeatmapsByYear() {
+        ensureHeatmapsPopulated();
+        Map<String, List<Map<String, Object>>> out = new LinkedHashMap<>();
+        liveHeatmapsByYear.forEach((y, days) -> out.put(String.valueOf(y), days));
+        return out;
+    }
+
+    public synchronized Map<String, Integer> getLiveContributionsByYearMap() {
+        Map<String, Integer> out = new LinkedHashMap<>();
+        liveContributionsByYear.forEach((y, n) -> out.put(String.valueOf(y), n));
+        return out;
+    }
+
+    /**
+     * Before the first sync completes, build calendars from the commits stored in the database. This is real data
+     * only: years without any stored commit are simply absent (the old code padded them with made-up contributions).
+     */
     private synchronized void ensureHeatmapsPopulated() {
-        if (liveHeatmap2026 != null && !liveHeatmap2026.isEmpty() && liveHeatmap2025 != null && !liveHeatmap2025.isEmpty()) {
+        if (!liveHeatmapsByYear.isEmpty()) {
             return;
         }
         Map<String, Integer> commitDateCounts = new HashMap<>();
@@ -566,15 +509,23 @@ public class GitHubProvider implements IntegrationProvider {
                     }
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) { /* no stored commits */ }
 
-        if (liveHeatmap2026 == null || liveHeatmap2026.isEmpty()) {
-            this.liveHeatmap2026 = buildYearHeatmap(2026, new HashMap<>(), commitDateCounts);
-            this.liveContributions2026 = Math.max(21, liveHeatmap2026.stream().mapToInt(m -> (int) m.getOrDefault("count", 0)).sum());
+        SortedSet<Integer> years = new TreeSet<>(Comparator.reverseOrder());
+        for (String day : commitDateCounts.keySet()) {
+            try { years.add(Integer.parseInt(day.substring(0, 4))); } catch (Exception ignored) { /* skip */ }
         }
-        if (liveHeatmap2025 == null || liveHeatmap2025.isEmpty()) {
-            this.liveHeatmap2025 = buildYearHeatmap(2025, new HashMap<>(), commitDateCounts);
-            this.liveContributions2025 = Math.max(15, liveHeatmap2025.stream().mapToInt(m -> (int) m.getOrDefault("count", 0)).sum());
+        Map<Integer, List<Map<String, Object>>> built = new TreeMap<>(Comparator.reverseOrder());
+        Map<Integer, Integer> totals = new TreeMap<>(Comparator.reverseOrder());
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        for (int year : years) {
+            List<Map<String, Object>> days = HeatmapSupport.buildYear(year, new HashMap<>(), commitDateCounts, today);
+            int total = HeatmapSupport.total(days);
+            if (total > 0) { built.put(year, days); totals.put(year, total); }
+        }
+        if (!built.isEmpty()) {
+            this.liveHeatmapsByYear = built;
+            this.liveContributionsByYear = totals;
         }
     }
 

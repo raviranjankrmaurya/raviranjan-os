@@ -47,7 +47,7 @@ public class GfgProvider implements IntegrationProvider {
 
     private String username;
     private ProviderHealth status = ProviderHealth.HEALTHY;
-    private Instant lastSuccessfulSync = Instant.now();
+    private Instant lastSuccessfulSync;     // null until a sync really succeeds
     private Instant lastAttempt = Instant.now();
     private int recordsProcessed = 0;
     private String lastError;

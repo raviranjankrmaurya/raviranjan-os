@@ -33,8 +33,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="/styles.css?v=20">
-  <link rel="stylesheet" href="/design-system.css?v=20">
+  <link rel="stylesheet" href="/styles.css?v=21">
+  <link rel="stylesheet" href="/design-system.css?v=21">
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -314,7 +314,8 @@
         <span id="hero-availability-status" class="text-fg font-medium"></span>
       </div>
       <div class="flex items-center space-x-3 text-fg-3">
-        <span id="hero-updated-date" data-hide-empty></span>
+        <span data-status-pill hidden class="data-status" role="status" aria-live="polite"><span class="data-status__dot" aria-hidden="true"></span><span data-status-text></span><span data-status-time></span></span>
+          <span id="hero-updated-date" data-hide-empty></span>
                 <span id="hero-profile-location" data-hide-empty></span>
       </div>
     </div>
@@ -568,7 +569,7 @@
             </div>
           </div>
           <div class="pt-3 border-t border-line flex flex-col space-y-1 text-xs text-fg-3">
-            <div><span class="text-fg-2">Data Source:</span> GitHub GraphQL & Webhook Telemetry</div>
+            <div><span class="text-fg-2">Data Source:</span> GitHub</div>
             <div class="flex items-center justify-between">
               <span id="gh-last-sync"></span>
               <span id="gh-health-status" class="text-emerald-400 flex items-center gap-1"></span>
@@ -653,14 +654,11 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-3">
           <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-fg uppercase tracking-wider">GitHub Contribution Heatmap</span>
-            <span class="text-xs px-1.5 py-0.5 rounded bg-raised text-fg-2 border border-line">Synced from GitHub API</span>
+            <span class="text-xs px-1.5 py-0.5 rounded bg-raised text-fg-2 border border-line">GitHub contribution calendar</span>
           </div>
           <div class="flex items-center space-x-3 text-xs text-fg-2">
             <span id="gh-heatmap-year-label">GitHub contribution calendar</span>
-            <div class="flex items-center gap-1 bg-card p-0.5 rounded border border-line">
-              <button onclick="setHeatmapYear(2026)" id="btn-year-2026" class="btn-year-active year-active px-2.5 py-1 rounded-lg bg-raised text-fg transition-colors">2026</button>
-              <button onclick="setHeatmapYear(2025)" id="btn-year-2025" class="btn-year-inactive year-inactive px-2.5 py-1 rounded-lg text-fg-2 hover:text-fg transition-colors">2025</button>
-            </div>
+            <div id="gh-year-buttons" class="hidden flex items-center gap-1 bg-card p-0.5 rounded border border-line"></div>
           </div>
         </div>
 
@@ -672,7 +670,7 @@
         </div>
 
         <div class="flex items-center justify-between text-xs text-fg-3 pt-1">
-          <span>Live activity stream connected · Real-time telemetry</span>
+          <span>Source: GitHub contribution data</span>
           <div class="flex items-center space-x-1.5">
             <span>Less</span>
             <span class="w-2.5 h-2.5 rounded-sm bg-raised"></span>
@@ -692,7 +690,7 @@
             <h3 class="text-sm font-bold text-fg uppercase tracking-wider">Recent Developer Activity</h3>
             <span class="text-xs text-fg-3">Cross-Platform Feed</span>
           </div>
-          <span class="text-xs text-fg-2">Streamed from integration adapters</span>
+          <span class="text-xs text-fg-2">From connected platforms</span>
         </div>
 
         <div id="activity-timeline-container" class="space-y-3 text-xs">
@@ -1091,6 +1089,7 @@
       </div>
       <div class="site-footer__bottom">
         <span>© <span id="footer-year"></span> <span id="footer-name"></span></span>
+        <span data-status-pill hidden class="data-status" role="status" aria-live="polite"><span class="data-status__dot" aria-hidden="true"></span><span data-status-text></span><span data-status-time></span></span>
       </div>
     </div>
   </footer>
@@ -1103,7 +1102,10 @@
   </nav>
   
 
-  <script src="/main_app.js?v=20"></script>
-  <script src="/design-system.js?v=20" defer></script>
+  <script src="/data-layer.js?v=21"></script>
+  
+
+  <script src="/main_app.js?v=21"></script>
+  <script src="/design-system.js?v=21" defer></script>
 </body>
 </html>

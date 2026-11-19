@@ -13,5 +13,24 @@
       "source": "/admin/",
       "destination": "/admin_cms.html"
     }
+  ],
+  "functions": {
+    "api/cache-refresh.js": {
+      "maxDuration": 60
+    },
+    "api/[...path].js": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/cache/(.*)\\.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=300, stale-while-revalidate=86400"
+        }
+      ]
+    }
   ]
 }

@@ -274,6 +274,9 @@
     var secs = [].slice.call(main.children).filter(function (el) { return el.tagName === 'SECTION' && el.id; });
     var ids = secs.map(function (s) { return s.id; });
     var current = '';
+    // sections that already have their own bottom-nav page are left off the Home view
+    var navIds = [].slice.call(document.querySelectorAll('.bottom-nav--public [data-spy]')).map(function (a) { return a.getAttribute('data-spy'); }).filter(function (id) { return id && id !== 'overview'; });
+    secs.forEach(function (s) { s.classList.toggle('in-bottom-nav', navIds.indexOf(s.id) !== -1); });
     window.__mobileFocusActive = function () { return MQ.matches; };
 
     function paintNav(id) {

@@ -123,10 +123,9 @@ let currentProfile = {
 
 let projectsList = [];
 let activityStream = [];
-let cachedHeatmapData = null;
-let cachedHeatmapByYear = { 2026: null, 2025: null };
-let cachedContribCountByYear = { 2026: 0, 2025: 0 };
-let currentHeatmapYear = 2026;
+let heatmapByYear = {};      // { 2026: [{date,count,level}, ...] } real GitHub data only
+let heatmapTotals = {};      // { 2026: 173 }
+let currentHeatmapYear = new Date().getFullYear();
 let dynamicDsaNotesList = [];
 let currentPublicAiLang = "AUTO";
 let visitorAiSessionId = localStorage.getItem("raviranjan_ai_session_id") || ("sess-" + Math.random().toString(36).substring(2, 10));
@@ -155,7 +154,6 @@ function triggerAllDynamicFetches() {
   if (typeof fetchDynamicProjects === 'function') fetchDynamicProjects();
   if (typeof fetchDynamicActivity === 'function') fetchDynamicActivity();
   if (typeof fetchDynamicContributions === 'function') fetchDynamicContributions();
-  if (typeof fetchDirectGitHubContributions === 'function') fetchDirectGitHubContributions();
   if (typeof fetchDynamicResearch === 'function') fetchDynamicResearch();
   if (typeof fetchDynamicLab === 'function') fetchDynamicLab();
   if (typeof fetchDynamicArticles === 'function') fetchDynamicArticles();
@@ -163,38 +161,22 @@ function triggerAllDynamicFetches() {
   if (typeof loadPublicBrandingSettings === 'function') loadPublicBrandingSettings();
 }
 
-function startBackendWarmupAndHydrationLoop() {
-  // 1. Instant pings directly to Render and through Vercel reverse proxy
-  fetch('/api', { cache: 'no-store' }).then(r => {
-    if (r && r.ok) {
-      backendIsAwake = true;
-      triggerAllDynamicFetches();
-    }
-  }).catch(() => {});
 
-  // 2. Continuous cold-start polling every 2.5s until 200 OK received
-  let attempts = 0;
-  if (backendWarmupInterval) clearInterval(backendWarmupInterval);
-  backendWarmupInterval = setInterval(async () => {
-    attempts++;
-    if (backendIsAwake || attempts > 30) {
-      clearInterval(backendWarmupInterval);
-      backendWarmupInterval = null;
-      return;
-    }
-    try {
-      const res = await fetch('/api', { cache: 'no-store' });
-      if (res && res.ok) {
-        backendIsAwake = true;
-        clearInterval(backendWarmupInterval);
-        backendWarmupInterval = null;
-        console.info('[Cloud Backend Awake] Live server responded. Hydrating all Neon DB data...');
-        triggerAllDynamicFetches();
-      }
-    } catch (e) {
-      // Server still booting up on Render cold start
-    }
-  }, 2500);
+
+// ---- cache layer: when fresher data arrives for a URL, re-run the loader that renders it ----
+if (window.DataLayer) {
+  window.DataLayer.register("/api/profile", fetchDynamicProfile);
+  window.DataLayer.register("/api/settings", loadPublicBrandingSettings);
+  window.DataLayer.register("/api/projects", fetchDynamicProjects);
+  window.DataLayer.register("/api/skills", fetchDynamicSkills);
+  window.DataLayer.register(["/api/experiences", "/api/education", "/api/achievements", "/api/certifications"], fetchDynamicCareerAndCredentials);
+  window.DataLayer.register(/^\/api\/activity(\?|$)/, fetchDynamicActivity);
+  window.DataLayer.register("/api/activity/telemetry", fetchDynamicIntegrations);
+  window.DataLayer.register("/api/dsa/problems", fetchDynamicDsaNotes);
+  window.DataLayer.register("/api/stories", fetchDynamicContributions);
+  window.DataLayer.register("/api/research", fetchDynamicResearch);
+  window.DataLayer.register("/api/lab", fetchDynamicLab);
+  window.DataLayer.register("/api/articles", fetchDynamicArticles);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -208,14 +190,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 1. Initial baseline UI render + 3D Neural Core + Animated Hero Headline + Visitor GeoIP Prefetch
-  renderGitHubHeatmap(2026);
+  renderGitHubHeatmap(currentHeatmapYear);
   if (typeof initHero3dVisual === "function") initHero3dVisual();
   if (typeof initHeroTextAnimator === "function") initHeroTextAnimator();
   if (typeof prefetchVisitorGeo === "function") prefetchVisitorGeo();
 
   // 2. Dynamic Fetch from REST API + Instant Backend Cold-Start Auto-Warmup
   triggerAllDynamicFetches();
-  startBackendWarmupAndHydrationLoop();
   trackAnalyticsEvent("PAGE_VIEW");
 
   // 3. Check for Recruiter Route
@@ -374,6 +355,7 @@ function updateProfileDom() {
   }
   const curl = byId("hero-curl-command");
   if (curl && !curl.textContent.trim()) curl.textContent = `curl -s ${location.origin}/api/profile | jq`;
+  if (typeof fetchDirectGitHubContributions === "function") fetchDirectGitHubContributions();
   if (p.fullName) document.title = p.fullName + " — Developer portfolio";
   if ((!window.__heroHeadlines || !window.__heroHeadlines.length) && typeof initHeroTextAnimator === "function") initHeroTextAnimator();
 }
@@ -568,118 +550,140 @@ function renderActivity(items) {
   }).join("");
 }
 
-function generateFallbackHeatmap(year, totalContribs = 21) {
-  const days = [];
-  const start = new Date(year, 0, 1);
-  const now = new Date();
-  const currentDayOfYear = Math.min(363, Math.max(30, Math.floor((now - start) / (86400000))));
 
-  const activeDays = new Map();
-  let remaining = totalContribs;
-  for (let i = Math.max(0, currentDayOfYear - 75); i <= currentDayOfYear && remaining > 0; i += 3) {
-    const c = (remaining >= 2 && i % 2 === 0) ? 2 : 1;
-    activeDays.set(i, c);
-    remaining -= c;
-  }
-
-  for (let i = 0; i < 364; i++) {
-    const d = new Date(year, 0, 1 + i);
-    const dateStr = d.toISOString().split("T")[0];
-    const count = activeDays.get(i) || 0;
-    const level = count >= 4 ? 4 : (count >= 3 ? 3 : (count >= 2 ? 2 : (count >= 1 ? 1 : 0)));
-    days.push({ date: dateStr, count, level });
-  }
-  return days;
-}
 
 // 52-Week GitHub Contribution Heatmap (Supports 2026 & 2025 Live GitHub Calendar Data)
-function renderGitHubHeatmap(year = 2026, liveDays = null) {
+function renderHeatmapYearButtons() {
+  const holder = document.getElementById("gh-year-buttons");
+  if (!holder) return;
+  const years = Object.keys(heatmapByYear).map(Number).filter(y => (heatmapByYear[y] || []).length > 0).sort((a, b) => b - a).slice(0, 5);
+  holder.innerHTML = years.map(y => {
+    const active = y === currentHeatmapYear;
+    return `<button type="button" onclick="setHeatmapYear(${y})" aria-pressed="${active}" class="${active ? "btn-year-active year-active" : "btn-year-inactive year-inactive"} px-2.5 py-1 rounded-lg bg-raised text-fg transition-colors">${y}</button>`;
+  }).join("");
+  holder.classList.toggle("hidden", years.length < 2);       // a single year needs no switcher
+}
+
+// Real GitHub calendar only: no generated or placeholder days.
+function renderGitHubHeatmap(year = currentHeatmapYear) {
   currentHeatmapYear = year;
   const grid = document.getElementById("gh-heatmap-grid");
   if (!grid) return;
   grid.innerHTML = "";
-
-  let yearDays = liveDays || cachedHeatmapByYear[year] || cachedHeatmapData;
   const labelEl = document.getElementById("gh-heatmap-year-label");
+  const days = heatmapByYear[year];
 
-  if (!Array.isArray(yearDays) || yearDays.length === 0) {
-    const defaultCount = (cachedContribCountByYear && cachedContribCountByYear[year]) ? cachedContribCountByYear[year] : (year === 2026 ? 21 : 15);
-    yearDays = generateFallbackHeatmap(year, defaultCount);
-    cachedHeatmapByYear[year] = yearDays;
-  }
-
-  const slice = yearDays.length > 364 ? yearDays.slice(-364) : yearDays;
-  let totalForYear = cachedContribCountByYear[year];
-  if (totalForYear === undefined || totalForYear === null) {
-    totalForYear = slice.reduce((acc, item) => acc + (Number(item.count) || 0), 0);
-  }
-  if (totalForYear === 0 && (year === 2026 || year === 2025)) {
-    totalForYear = (year === 2026) ? 21 : 15;
-  }
-  if (labelEl) {
-    labelEl.innerText = `${year}: ${totalForYear} contribution${totalForYear === 1 ? "" : "s"} (Live GitHub Sync)`;
+  if (!Array.isArray(days) || days.length === 0) {
+    if (labelEl) labelEl.textContent = "GitHub contribution calendar";
+    grid.innerHTML = '<p class="text-xs text-fg-3 py-3">No contribution data available yet.</p>';
+    return;
   }
 
-  let idx = 0;
-  for (let w = 0; w < 52; w++) {
-    const col = document.createElement("div");
-    col.className = "flex flex-col gap-1";
-    for (let d = 0; d < 7; d++) {
+  const total = Number.isFinite(Number(heatmapTotals[year])) ? Number(heatmapTotals[year]) : days.reduce((acc, d) => acc + (Number(d.count) || 0), 0);
+  if (labelEl) labelEl.textContent = `${year}: ${total} contribution${total === 1 ? "" : "s"}`;
+
+  // line the first day up with its weekday (Sunday = row 0), exactly like GitHub's own calendar
+  const first = new Date(`${days[0].date}T00:00:00Z`);
+  const lead = Number.isNaN(first.getTime()) ? 0 : first.getUTCDay();
+  const cells = Array(lead).fill(null).concat(days);
+  for (let col = 0; col * 7 < cells.length; col++) {
+    const colEl = document.createElement("div");
+    colEl.className = "flex flex-col gap-1";
+    for (let row = 0; row < 7; row++) {
+      const d = cells[col * 7 + row];
       const cell = document.createElement("div");
-      const dayObj = slice[idx] || { date: `${year}`, count: 0, level: 0 };
-      idx++;
-      const level = Math.min(4, Math.max(0, dayObj.level || 0));
-      cell.className = `gh-cell gh-level-${level}`;
-      cell.title = dayObj.date
-        ? `${dayObj.date}: ${dayObj.count || 0} contribution${dayObj.count === 1 ? "" : "s"}`
-        : `${year}: 0 contributions`;
-      col.appendChild(cell);
+      if (!d) {
+        cell.className = "gh-cell";
+        cell.style.visibility = "hidden";
+      } else {
+        const level = Math.min(4, Math.max(0, Number(d.level) || 0));
+        const count = Number(d.count) || 0;
+        cell.className = `gh-cell gh-level-${level}`;
+        cell.title = `${d.date}: ${count} contribution${count === 1 ? "" : "s"}`;
+      }
+      colEl.appendChild(cell);
     }
-    grid.appendChild(col);
+    grid.appendChild(colEl);
   }
 }
 
-async function fetchDirectGitHubContributions() {
-  try {
-    const ghLink = (currentProfile.socialLinks || []).find(l => /github/i.test(l.platform || ""));
-    const ghUser = ghLink && ghLink.url ? (ghLink.url.match(/github\.com\/([^/?#]+)/i) || [])[1] : "";
-    if (!ghUser) return;
-    const res = await fetch(`https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(ghUser)}?y=all`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.contributions && Array.isArray(data.contributions) && data.contributions.length > 0) {
-        const days2026 = data.contributions.filter(c => c.date && c.date.startsWith("2026"));
-        const days2025 = data.contributions.filter(c => c.date && c.date.startsWith("2025"));
-        if (days2026.length > 0) cachedHeatmapByYear[2026] = days2026;
-        if (days2025.length > 0) cachedHeatmapByYear[2025] = days2025;
-        if (data.total) {
-          if (data.total["2026"] !== undefined) cachedContribCountByYear[2026] = data.total["2026"];
-          if (data.total["2025"] !== undefined) cachedContribCountByYear[2025] = data.total["2025"];
-        }
-        renderGitHubHeatmap(currentHeatmapYear);
-      }
+// Merge real per-year data. A year is only replaced by data with at least as many contributions.
+function setHeatmapData(byYear, totals) {
+  let changed = false;
+  Object.keys(byYear || {}).forEach(key => {
+    const year = Number(key);
+    const days = byYear[key];
+    if (!Number.isInteger(year) || !Array.isArray(days) || days.length === 0) return;
+    const newTotal = Number.isFinite(Number(totals && totals[key])) ? Number(totals[key]) : days.reduce((a, d) => a + (Number(d.count) || 0), 0);
+    const oldTotal = heatmapTotals[year];
+    if (!heatmapByYear[year] || oldTotal === undefined || newTotal >= oldTotal) {
+      heatmapByYear[year] = days;
+      heatmapTotals[year] = newTotal;
+      changed = true;
     }
+  });
+  if (!changed) return;
+  const years = Object.keys(heatmapByYear).map(Number).sort((a, b) => b - a);
+  if (!heatmapByYear[currentHeatmapYear] || !heatmapByYear[currentHeatmapYear].length) currentHeatmapYear = years[0];
+  renderHeatmapYearButtons();
+  renderGitHubHeatmap(currentHeatmapYear);
+}
+
+// Live calendar straight from GitHub's public data: works even while the backend is asleep, cached for next visit.
+let ghDirectLoadedFor = "";
+async function fetchDirectGitHubContributions() {
+  // needs the profile (its GitHub link) first: updateProfileDom() calls this as soon as the profile is available
+  const ghLink = (currentProfile.socialLinks || []).find(l => /github/i.test(l.platform || ""));
+  const ghUser = ghLink && ghLink.url ? (ghLink.url.match(/github\.com\/([^/?#]+)/i) || [])[1] : "";
+  if (!ghUser || ghDirectLoadedFor === ghUser.toLowerCase()) return;
+  ghDirectLoadedFor = ghUser.toLowerCase();
+  const url = `https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(ghUser)}?y=all`;
+  const apply = (wrapper) => {
+    const data = wrapper && wrapper.data;
+    if (!data || !Array.isArray(data.contributions)) return;
+    const byYear = {};
+    data.contributions.forEach(c => {
+      if (!c || !c.date) return;
+      const y = c.date.slice(0, 4);
+      (byYear[y] = byYear[y] || []).push({ date: c.date, count: Number(c.count) || 0, level: Number(c.level) || 0 });
+    });
+    const totals = {};
+    Object.keys(data.total || {}).forEach(k => { if (/^\d{4}$/.test(k)) totals[k] = data.total[k]; });
+    setHeatmapData(byYear, totals);
+  };
+  const usable = j => !!j && Array.isArray(j.contributions) && j.contributions.length > 0;
+  try {
+    if (window.DataLayer) await window.DataLayer.swrJson("ext:github-contributions:" + ghUser.toLowerCase(), url, apply, { usable });
+    else { const res = await fetch(url); if (res.ok) { const j = await res.json(); if (usable(j)) apply({ data: j }); } }
   } catch (e) {
-    console.debug("Direct GitHub calendar sync note:", e);
+    console.debug("GitHub calendar note:", e);
   }
 }
 
 function setHeatmapYear(year) {
+  if (!heatmapByYear[year]) return;
   currentHeatmapYear = year;
-  const btn2026 = document.getElementById("btn-year-2026");
-  const btn2025 = document.getElementById("btn-year-2025");
-  if (btn2026 && btn2025) {
-    if (year === 2026) {
-      btn2026.className = "btn-year-active year-active px-2.5 py-1 rounded-lg bg-raised text-fg transition-colors";
-      btn2025.className = "btn-year-inactive year-inactive px-2.5 py-1 rounded-lg text-fg-2 hover:text-fg transition-colors";
-    } else {
-      btn2025.className = "btn-year-active year-active px-2.5 py-1 rounded-lg bg-raised text-fg transition-colors";
-      btn2026.className = "btn-year-inactive year-inactive px-2.5 py-1 rounded-lg text-fg-2 hover:text-fg transition-colors";
-    }
-  }
-  const targetDays = cachedHeatmapByYear[year] || cachedHeatmapData;
-  renderGitHubHeatmap(year, targetDays);
-  showToast(`Switched GitHub Contribution Heatmap to ${year}`);
+  renderHeatmapYearButtons();
+  renderGitHubHeatmap(year);
+}
+
+
+
+
+
+function syncLabel(iso) {
+  const t = Date.parse(iso);
+  if (!iso || Number.isNaN(t)) return "";
+  return "Last sync: " + new Date(t).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+function healthBadge(status) {
+  const st = String(status || "").toUpperCase();
+  if (!st) return "";
+  const ok = st === "HEALTHY" || st === "CONNECTED";
+  const dot = ok ? "bg-emerald-400" : (st === "DEGRADED" ? "bg-amber-400" : "bg-rose-400");
+  const label = ok ? "Connected" : st.charAt(0) + st.slice(1).toLowerCase();
+  return `<span class="inline-block w-1.5 h-1.5 rounded-full ${dot}"></span> ${label}`;
 }
 
 async function fetchDynamicIntegrations() {
@@ -702,42 +706,28 @@ async function fetchDynamicIntegrations() {
           setEl("gh-contributions-count", d.github.contributions ?? 0);
           setEl("gh-repos-count", d.github.repositories ?? 0);
           setEl("gh-prs-count", d.github.pullRequests ?? 0);
-          setEl("gh-stars-count", d.github.activeRepos ?? 0);
-          setEl("gh-last-sync", "Last sync: Live API");
-          setHtml("gh-health-status", "<span class=\"inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse\"></span> Connected");
-
-          if (Array.isArray(d.github.heatmap2026) && d.github.heatmap2026.length > 0) {
-            cachedHeatmapByYear[2026] = d.github.heatmap2026;
-          } else if (Array.isArray(d.github.heatmap) && d.github.heatmap.length > 0) {
-            cachedHeatmapByYear[2026] = d.github.heatmap;
+          setEl("gh-stars-count", d.github.activeRepos ?? "\u2014");
+          setEl("gh-last-sync", syncLabel(d.github.lastSync));
+          setHtml("gh-health-status", healthBadge(d.github.status));
+          if (d.github.heatmapByYear && typeof d.github.heatmapByYear === "object") {
+            setHeatmapData(d.github.heatmapByYear, d.github.contributionsByYear || {});
           }
-          if (Array.isArray(d.github.heatmap2025) && d.github.heatmap2025.length > 0) {
-            cachedHeatmapByYear[2025] = d.github.heatmap2025;
-          }
-          if (d.github.contributions2026 !== undefined) {
-            cachedContribCountByYear[2026] = d.github.contributions2026;
-          }
-          if (d.github.contributions2025 !== undefined) {
-            cachedContribCountByYear[2025] = d.github.contributions2025;
-          }
-          cachedHeatmapData = cachedHeatmapByYear[currentHeatmapYear] || d.github.heatmap || null;
-          renderGitHubHeatmap(currentHeatmapYear, cachedHeatmapData);
         }
         if (d.leetcode) {
           setEl("lc-solved-total", d.leetcode.solvedTotal ?? 0);
-          setEl("lc-streak-days", d.leetcode.streakDays || "Active");
+          setEl("lc-streak-days", d.leetcode.streakDays || "\u2014");
           setEl("lc-med-hard", `${d.leetcode.easySolved ?? 0} Easy · ${d.leetcode.mediumSolved ?? 0} Med · ${d.leetcode.hardSolved ?? 0} Hard`);
-          setEl("lc-ranking", d.leetcode.ranking || "Synced");
-          setEl("lc-last-sync", "Last sync: Live API");
-          setHtml("lc-health-status", "<span class=\"inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse\"></span> Connected");
+          setEl("lc-ranking", d.leetcode.ranking || "\u2014");
+          setEl("lc-last-sync", syncLabel(d.leetcode.lastSync));
+          setHtml("lc-health-status", healthBadge(d.leetcode.status));
         }
         if (d.gfg) {
           setEl("gfg-score", Number(d.gfg.score || 0).toLocaleString());
           setEl("gfg-problems", d.gfg.problems ?? 0);
           setEl("gfg-articles", d.gfg.articles || "0 Notes");
-          setEl("gfg-rank", d.gfg.rank || "Synced");
-          setEl("gfg-last-sync", "");
-          setHtml("gfg-health-status", "<span class=\"inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse\"></span> Connected");
+          setEl("gfg-rank", d.gfg.rank || "\u2014");
+          setEl("gfg-last-sync", syncLabel(d.gfg.lastSync));
+          setHtml("gfg-health-status", healthBadge(d.gfg.status));
         }
       }
     }

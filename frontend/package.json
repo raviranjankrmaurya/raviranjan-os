@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node server.js",
-    "build": "echo 'Static assets ready for deployment'",
+    "build": "node scripts/snapshot-cache.mjs || echo 'snapshot skipped'",
     "start": "node server.js"
   },
   "dependencies": {

@@ -2,11 +2,29 @@ package com.raviranjan.os.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.raviranjan.os.domain.entity.*;
-import com.raviranjan.os.repository.*;
+import com.raviranjan.os.ai.IntentClassifier.Classification;
+import com.raviranjan.os.ai.IntentClassifier.Topic;
+import com.raviranjan.os.ai.PortfolioFacts.ChunkFact;
+import com.raviranjan.os.domain.entity.AiConfiguration;
+import com.raviranjan.os.domain.entity.AiKnowledgeChunk;
+import com.raviranjan.os.domain.entity.Profile;
+import com.raviranjan.os.domain.entity.Project;
+import com.raviranjan.os.domain.entity.Skill;
+import com.raviranjan.os.domain.enums.ProjectStatus;
+import com.raviranjan.os.repository.AchievementRepository;
+import com.raviranjan.os.repository.CertificationRepository;
+import com.raviranjan.os.repository.ContributionStoryRepository;
+import com.raviranjan.os.repository.DsaProblemRepository;
+import com.raviranjan.os.repository.EducationRepository;
+import com.raviranjan.os.repository.ExperienceRepository;
+import com.raviranjan.os.repository.ProfileRepository;
+import com.raviranjan.os.repository.ProjectRepository;
+import com.raviranjan.os.repository.SkillRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -14,13 +32,24 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Produces the final answer for one visitor message.
+ *
+ * Pipeline: classify intent -> load ONLY the facts that topic needs -> build a short grounded answer
+ * (optionally rephrased by Gemini for open questions / explicit "in detail" requests) -> clean up.
+ * Nothing is answered from memory: if the portfolio has no data the standard "not in the portfolio" reply is returned.
+ */
 @Component
 public class AiChatEngine {
 
     private static final Logger log = LoggerFactory.getLogger(AiChatEngine.class);
+    private static final int MAX_CHUNK_CHARS = 600;
 
     private final ProjectRepository projectRepository;
     private final SkillRepository skillRepository;
@@ -30,6 +59,7 @@ public class AiChatEngine {
     private final CertificationRepository certificationRepository;
     private final DsaProblemRepository dsaProblemRepository;
     private final ContributionStoryRepository storyRepository;
+    private final ProfileRepository profileRepository;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
 
@@ -45,6 +75,7 @@ public class AiChatEngine {
             CertificationRepository certificationRepository,
             DsaProblemRepository dsaProblemRepository,
             ContributionStoryRepository storyRepository,
+            ProfileRepository profileRepository,
             ObjectMapper objectMapper
     ) {
         this.projectRepository = projectRepository;
@@ -55,367 +86,222 @@ public class AiChatEngine {
         this.certificationRepository = certificationRepository;
         this.dsaProblemRepository = dsaProblemRepository;
         this.storyRepository = storyRepository;
+        this.profileRepository = profileRepository;
         this.objectMapper = objectMapper;
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(6))
-                .build();
+        this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(6)).build();
     }
 
+    /** Label stored in the query log. */
     public String detectLanguageLabel(String query) {
-        if (query == null) return "ENGLISH";
-        String lower = query.toLowerCase();
-        if (lower.contains("[preferred language: hindi]") || lower.contains("in hindi") || lower.contains("hindi me")) {
-            for (char c : query.toCharArray()) {
-                if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.DEVANAGARI) {
-                    return "HINDI";
-                }
-            }
-            return "HINGLISH";
-        }
-        if (lower.contains("[preferred language: hinglish]") || lower.contains("in hinglish") || lower.contains("hinglish me")) {
-            return "HINGLISH";
-        }
-        if (lower.contains("[preferred language: english]") || lower.contains("in english") || lower.contains("english me")) {
-            return "ENGLISH";
-        }
-        for (char c : query.toCharArray()) {
-            if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.DEVANAGARI) {
-                return "HINDI";
-            }
-        }
-        if (isHindiOrHinglish(lower)) {
-            return "HINGLISH";
-        }
-        return "ENGLISH";
-    }
-
-    public String generateAnswer(String query, List<AiKnowledgeChunk> retrievedChunks, AiConfiguration config) {
-        if (query == null || query.isBlank()) {
-            return "Please ask a question about Raviranjan's projects, skills, or engineering background (in English, Hindi, or Hinglish).";
-        }
-
-        List<Project> allProjects = projectRepository.findAllByDeletedAtIsNull();
-        List<Skill> allSkills = skillRepository.findAll();
-        List<Experience> experiences = experienceRepository.findAll();
-        List<Education> educations = educationRepository.findAll();
-        List<Achievement> achievements = achievementRepository.findAll();
-        List<Certification> certifications = certificationRepository.findAll();
-        List<DsaProblem> dsaProblems = dsaProblemRepository.findAll();
-        List<ContributionStory> stories = storyRepository.findAll();
-
-        String geminiApiKey = (config != null && config.getApiKey() != null && !config.getApiKey().isBlank())
-                ? config.getApiKey()
-                : ((envGeminiKey != null && !envGeminiKey.isBlank()) ? envGeminiKey : null);
-
-        if (geminiApiKey != null && !geminiApiKey.isBlank() && !geminiApiKey.equals("YOUR_GEMINI_API_KEY")) {
-            String geminiAnswer = callGeminiApi(query, geminiApiKey, allProjects, allSkills, experiences, educations, achievements, certifications, dsaProblems, stories, retrievedChunks);
-            if (geminiAnswer != null && !geminiAnswer.isBlank()) {
-                return geminiAnswer;
-            }
-        }
-
-        return synthesizeDynamicMultiLingualAnswer(query, allProjects, allSkills, experiences, educations, achievements, certifications, dsaProblems, stories, retrievedChunks);
-    }
-
-    private String callGeminiApi(
-            String query,
-            String apiKey,
-            List<Project> projects,
-            List<Skill> skills,
-            List<Experience> experiences,
-            List<Education> educations,
-            List<Achievement> achievements,
-            List<Certification> certifications,
-            List<DsaProblem> dsaProblems,
-            List<ContributionStory> stories,
-            List<AiKnowledgeChunk> chunks
-    ) {
-        try {
-            StringBuilder context = new StringBuilder();
-            context.append("--- RAVIRANJAN'S REAL PROJECTS IN NEON DB ---\n");
-            for (Project p : projects) {
-                context.append(String.format("Project: %s (Slug: %s, Status: %s, Progress: %d%%)\n", p.getTitle(), p.getSlug(), p.getStatus(), p.getProgress()));
-                context.append("Summary: ").append(p.getShortSummary() != null ? p.getShortSummary() : "").append("\n");
-                context.append("Architecture: ").append(p.getArchitectureStyle() != null ? p.getArchitectureStyle() : "").append("\n");
-                context.append("Full Description: ").append(p.getFullDescription() != null ? p.getFullDescription() : "").append("\n\n");
-            }
-
-            context.append("--- TECHNICAL SKILLS ---\n");
-            context.append(skills.stream().map(Skill::getName).collect(Collectors.joining(", "))).append("\n\n");
-
-            context.append("--- EDUCATION & EXPERIENCE ---\n");
-            for (Education ed : educations) {
-                context.append("Education: ").append(ed.getDegree()).append(" at ").append(ed.getInstitution()).append(" (").append(ed.getDescription()).append(")\n");
-            }
-            for (Experience ex : experiences) {
-                context.append("Experience: ").append(ex.getRole()).append(" at ").append(ex.getCompany()).append(" — ").append(ex.getDescription()).append("\n");
-            }
-            for (Achievement ac : achievements) {
-                context.append("Achievement: ").append(ac.getTitle()).append(" (").append(ac.getOrganization()).append(")\n");
-            }
-            for (Certification ce : certifications) {
-                context.append("Certification: ").append(ce.getTitle()).append(" by ").append(ce.getIssuer()).append("\n");
-            }
-            for (DsaProblem dp : dsaProblems) {
-                context.append("DSA Solved: ").append(dp.getTitle()).append(" on ").append(dp.getPlatform()).append(" (").append(dp.getDifficulty()).append(")\n");
-            }
-
-            String systemPrompt = "You are 'Ask AI', the personal portfolio assistant for Raviranjan Kumar (BCA Student & Software Developer). " +
-                    "Explain Raviranjan's real projects, architecture, skills, education, experience, and achievements based on the provided portfolio context. " +
-                    "CRITICAL RULES:\n" +
-                    "1. CLICKABLE LINKS: When mentioning any project, ALWAYS embed a clickable markdown link: [Project Title](/projects/<slug>) or [GitHub Repo](<githubRepoUrl>).\n" +
-                    "2. PRIVACY & ARCHITECTURE: NEVER mention database names, storage details, PostgreSQL, or 'Neon DB' to visitors. Answer naturally and professionally as a developer portfolio assistant.\n" +
-                    "3. LANGUAGE: Respect the visitor's language (Hindi, Hinglish, or English) and respond in the same language.";
-
-            Map<String, Object> requestBody = Map.of(
-                    "system_instruction", Map.of(
-                            "parts", List.of(Map.of("text", systemPrompt))
-                    ),
-                    "contents", List.of(
-                            Map.of(
-                                    "role", "user",
-                                    "parts", List.of(Map.of("text", "Portfolio Information:\n" + context + "\n\nUser Query: " + query))
-                            )
-                    ),
-                    "generationConfig", Map.of(
-                            "temperature", 0.3,
-                            "maxOutputTokens", 800
-                    )
-            );
-
-            String jsonPayload = objectMapper.writeValueAsString(requestBody);
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
-
-            HttpRequest httpRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
-                    .timeout(Duration.ofSeconds(8))
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                JsonNode root = objectMapper.readTree(response.body());
-                JsonNode candidate = root.path("candidates").get(0);
-                if (candidate != null) {
-                    JsonNode textNode = candidate.path("content").path("parts").get(0).path("text");
-                    if (!textNode.isMissingNode()) {
-                        return textNode.asText().trim();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Gemini API fallback to built-in multi-lingual engine: {}", e.getMessage());
-        }
-        return null;
-    }
-
-    private String synthesizeDynamicMultiLingualAnswer(
-            String rawQuery,
-            List<Project> projects,
-            List<Skill> skills,
-            List<Experience> experiences,
-            List<Education> educations,
-            List<Achievement> achievements,
-            List<Certification> certifications,
-            List<DsaProblem> dsaProblems,
-            List<ContributionStory> stories,
-            List<AiKnowledgeChunk> retrievedChunks
-    ) {
-        String lang = detectLanguageLabel(rawQuery);
-        boolean isDevanagariHindi = "HINDI".equals(lang);
-        boolean isHinglish = "HINGLISH".equals(lang) || isDevanagariHindi;
-
-        String cleanQuery = rawQuery.replaceAll("(?i)\\[preferred language:[^\\]]+\\]", "").trim();
-        String lowerQuery = cleanQuery.toLowerCase();
-
-        if (lowerQuery.contains("admin") || lowerQuery.contains("cms") || lowerQuery.contains("login")) {
-            return isHinglish
-                    ? "🔐 **Admin OS Gateway:** Aap `Ctrl + Shift + A` daba kar ya `/admin` par jaakar Admin Panel unlock kar sakte hain."
-                    : "🔐 **Admin OS Gateway:** Press `Ctrl + Shift + A` or visit `/admin` to authenticate and open the Admin Operating System.";
-        }
-
-        // 1. Check if query asks about a specific project in Raviranjan's portfolio
-        for (Project p : projects) {
-            String slugLower = p.getSlug().toLowerCase();
-            String titleLower = p.getTitle().toLowerCase();
-            String firstToken = slugLower.contains("-") ? slugLower.split("-")[0] : slugLower;
-            if (lowerQuery.contains(slugLower) || lowerQuery.contains(firstToken) || lowerQuery.contains(titleLower)) {
-                String techList = (p.getTechnologies() != null && !p.getTechnologies().isEmpty())
-                        ? p.getTechnologies().stream().map(Skill::getName).collect(Collectors.joining(", "))
-                        : "Java 21, Spring Boot, PostgreSQL, Docker";
-                if (isDevanagariHindi) {
-                    return String.format(
-                            "**%s** रविरंजन द्वारा निर्मित एक प्रमुख प्रोजेक्ट है:\n" +
-                            "• **सारांश (Overview):** %s\n" +
-                            "• **आर्किटेक्चर (Architecture):** %s\n" +
-                            "• **टेक्नोलॉजी स्टैक:** %s\n" +
-                            "• **प्रोग्रेस और स्टेटस:** %s (%d%% पूरा)\n" +
-                            "• **विवरण:** %s",
-                            p.getTitle(),
-                            p.getShortSummary(),
-                            p.getArchitectureStyle() != null ? p.getArchitectureStyle() : "Modular Architecture",
-                            techList,
-                            p.getStatus(),
-                            p.getProgress(),
-                            p.getFullDescription() != null ? p.getFullDescription() : p.getShortSummary()
-                    );
-                } else if (isHinglish) {
-                    return String.format(
-                            "**%s** Raviranjan ka ek flagship engineering project hai :\n" +
-                            "• **Kya Karta Hai (Summary):** %s\n" +
-                            "• **System Architecture:** %s\n" +
-                            "• **Tech Stack:** %s\n" +
-                            "• **Status & Progress:** %s (%d%% completed)\n" +
-                            "• **Deep Details:** %s\n" +
-                            (p.getGithubRepoUrl() != null && !p.getGithubRepoUrl().isBlank() ? "• **GitHub Link:** [View Repository](" + p.getGithubRepoUrl() + ")" : ""),
-                            p.getTitle(),
-                            p.getShortSummary(),
-                            p.getArchitectureStyle() != null ? p.getArchitectureStyle() : "Modular Architecture",
-                            techList,
-                            p.getStatus(),
-                            p.getProgress(),
-                            p.getFullDescription() != null ? p.getFullDescription() : p.getShortSummary()
-                    );
-                } else {
-                    return String.format(
-                            "**%s** is a production architecture engineered by Raviranjan :\n" +
-                            "• **Overview:** %s\n" +
-                            "• **Architecture Style:** %s\n" +
-                            "• **Tech Stack:** %s\n" +
-                            "• **Status & Progress:** %s (%d%% complete)\n" +
-                            "• **Technical Details:** %s\n" +
-                            (p.getGithubRepoUrl() != null && !p.getGithubRepoUrl().isBlank() ? "• **GitHub:** [View Repository](" + p.getGithubRepoUrl() + ")" : ""),
-                            p.getTitle(),
-                            p.getShortSummary(),
-                            p.getArchitectureStyle() != null ? p.getArchitectureStyle() : "Modular Architecture",
-                            techList,
-                            p.getStatus(),
-                            p.getProgress(),
-                            p.getFullDescription() != null ? p.getFullDescription() : p.getShortSummary()
-                    );
-                }
-            }
-        }
-
-        // 2. General projects list
-        if (lowerQuery.contains("project") || lowerQuery.contains("kya banaya") || lowerQuery.contains("banaye") || lowerQuery.contains("built") || lowerQuery.contains("प्रोजेक्ट")) {
-            if (projects.isEmpty()) {
-                return isHinglish
-                        ? "Abhi koi project listed nahi hai."
-                        : "There are currently no published projects in Raviranjan's portfolio.";
-            }
-            StringBuilder sb = new StringBuilder();
-            if (isDevanagariHindi) {
-                sb.append("रविरंजन ने निम्नलिखित प्रोजेक्ट्स बनाए हैं :\n");
-                for (Project p : projects) {
-                    sb.append(String.format("• **%s** (%d%%, %s): %s\n", p.getTitle(), p.getProgress(), p.getStatus(), p.getShortSummary()));
-                }
-                sb.append("\nआप किसी भी प्रोजेक्ट का नाम लिखकर उसके आर्किटेक्चर के बारे में हिंदी, हिंग्लिश या इंग्लिश में पूछ सकते हैं!");
-            } else if (isHinglish) {
-                sb.append("Raviranjan ne ye प्रमुख projects banaye hain :\n");
-                for (Project p : projects) {
-                    sb.append(String.format("• **%s** (%d%%, %s): %s\n", p.getTitle(), p.getProgress(), p.getStatus(), p.getShortSummary()));
-                }
-                sb.append("\nAap kisi bhi project ka naam likhkar (jaise 'Explain RakshaGrid in Hinglish') uski puri detail pooch sakte hain!");
-            } else {
-                sb.append("Raviranjan has engineered the following projects :\n");
-                for (Project p : projects) {
-                    sb.append(String.format("• **%s** (%d%%, %s): %s\n", p.getTitle(), p.getProgress(), p.getStatus(), p.getShortSummary()));
-                }
-                sb.append("\nAsk about any specific project above to explore its architecture, tech stack, and design decisions!");
-            }
-            return sb.toString();
-        }
-
-        // 3. Skills / Tech Stack
-        if (lowerQuery.contains("skill") || lowerQuery.contains("tech") || lowerQuery.contains("stack") || lowerQuery.contains("aata hai") || lowerQuery.contains("know") || lowerQuery.contains("स्किल")) {
-            String skillStr = skills.isEmpty()
-                    ? "Java 21, Spring Boot, Python, FastAPI, React, PostgreSQL, Redis, Docker"
-                    : skills.stream().map(Skill::getName).collect(Collectors.joining(", "));
-            if (isDevanagariHindi) {
-                return "रविरंजन के प्रमुख टेक्निकल स्किल्स :\n• **टेक्नोलॉजीज:** " + skillStr + "\n• **मुख्य फोकस:** फुल-स्टैक डेवलपमेंट, स्केलेबल बैकएंड APIs, PostgreSQL डेटाबेस डिज़ाइन और AI/RAG एप्लीकेशन्स।";
-            } else if (isHinglish) {
-                return "Raviranjan ka core technical stack :\n• **Technologies:** " + skillStr + "\n• **Core Focus:** Backend engineering (Java 21 / Spring Boot / FastAPI), React full-stack apps, PostgreSQL database modeling, aur AI/LLM RAG pipelines.";
-            } else {
-                return "Raviranjan's verified technical stack :\n• **Technologies:** " + skillStr + "\n• **Core Focus:** Scalable backend architectures (Java 21, Spring Boot, FastAPI), PostgreSQL & Redis data engineering, modern React interfaces, and AI/RAG workflows.";
-            }
-        }
-
-        // 4. Education / Experience / Career / Achievements
-        if (lowerQuery.contains("education") || lowerQuery.contains("college") || lowerQuery.contains("degree") || lowerQuery.contains("bca") || lowerQuery.contains("experience") || lowerQuery.contains("career") || lowerQuery.contains("padhai") || lowerQuery.contains("achievement") || lowerQuery.contains("cert")) {
-            String eduStr = educations.isEmpty()
-                    ? "Bachelor of Computer Applications (BCA)"
-                    : educations.stream().map(e -> e.getDegree() + " (" + e.getInstitution() + ")").collect(Collectors.joining("; "));
-            String expStr = experiences.isEmpty()
-                    ? "Software Developer & Open-Source Builder"
-                    : experiences.stream().map(e -> e.getRole() + " at " + e.getCompany()).collect(Collectors.joining("; "));
-            if (isHinglish) {
-                return "Raviranjan ki Education aur Experience details :\n" +
-                        "• **Education:** " + eduStr + "\n" +
-                        "• **Experience:** " + expStr + "\n" +
-                        "• **Availability:** Internships aur Full-Time Software Developer roles ke liye available hain.";
-            } else {
-                return "Raviranjan's Education & Career Background :\n" +
-                        "• **Education:** " + eduStr + "\n" +
-                        "• **Experience:** " + expStr + "\n" +
-                        "• **Availability:** Open to Software Engineering Internships and Full-Time Developer roles.";
-            }
-        }
-
-        // 5. DSA / Coding / Contributions
-        if (lowerQuery.contains("dsa") || lowerQuery.contains("leetcode") || lowerQuery.contains("gfg") || lowerQuery.contains("coding") || lowerQuery.contains("contribution") || lowerQuery.contains("open source")) {
-            String dsaList = dsaProblems.isEmpty()
-                    ? "Two Sum, LRU Cache, Search in Rotated Sorted Array"
-                    : dsaProblems.stream().map(DsaProblem::getTitle).collect(Collectors.joining(", "));
-            String storyList = stories.isEmpty()
-                    ? "Spring Boot Virtual Threads & FastAPI StreamingResponse"
-                    : stories.stream().map(s -> s.getRepository() + " (" + s.getTitle() + ")").collect(Collectors.joining("; "));
-            if (isHinglish) {
-                return "Raviranjan ki Coding Journey aur Open-Source Contributions:\n" +
-                        "• **Authored DSA Notes:** " + dsaList + "\n" +
-                        "• **Open-Source Contributions:** " + storyList + "\n" +
-                        "• **Platforms:** GitHub, LeetCode, aur GeeksforGeeks connected hain.";
-            } else {
-                return "Raviranjan's Algorithmic Problem-Solving & Open-Source Contributions:\n" +
-                        "• **DSA Case Notes in Raviranjan's portfolio:** " + dsaList + "\n" +
-                        "• **Open-Source Contributions:** " + storyList;
-            }
-        }
-
-        // Fallback comprehensive portfolio overview in requested language
-        String projNames = projects.stream().map(Project::getTitle).collect(Collectors.joining(", "));
-        String skillNames = skills.stream().map(Skill::getName).limit(8).collect(Collectors.joining(", "));
-        if (isDevanagariHindi) {
-            return "नमस्ते! मैं रविरंजन कुमार का AI पोर्टफोलियो असिस्टेंट हूँ (Neon DB से जुड़ा हुआ)।\n" +
-                    "• **प्रोजेक्ट्स:** " + (projNames.isBlank() ? "RakshaGrid, Raviranjan.OS, Distributed Kafka Ingestion" : projNames) + "\n" +
-                    "• **टेक स्टैक:** " + (skillNames.isBlank() ? "Java 21, Spring Boot, Python, FastAPI, React, PostgreSQL" : skillNames) + "\n" +
-                    "आप किसी भी प्रोजेक्ट (जैसे 'RakshaGrid समझाओ'), स्किल्स, या एजुकेशन के बारे में हिंदी, हिंग्लिश या इंग्लिश में पूछ सकते हैं!";
-        } else if (isHinglish) {
-            return "Namaste! Main Raviranjan Kumar ka verified AI Portfolio Assistant hoon.\n\n" +
-                    "• **Projects:** " + (projNames.isBlank() ? "[RakshaGrid](/projects/rakshagrid), [Raviranjan.OS](/projects/raviranjan-os), [Kafka Engine](/projects/distributed-kafka)" : projNames) + "\n" +
-                    "• **Skills:** " + (skillNames.isBlank() ? "Java 21, Spring Boot, Python, FastAPI, React, PostgreSQL" : skillNames) + "\n\n" +
-                    "Aap mujhse kisi bhi project ka explanation (Hindi, Hinglish, ya English me), tech stack, DSA notes, ya career ke baare me pooch sakte hain!";
-        } else {
-            return "Hello! I am Raviranjan Kumar's portfolio AI assistant, connected live to Neon Cloud PostgreSQL.\n" +
-                    "• **Published Projects:** " + (projNames.isBlank() ? "RakshaGrid, Raviranjan.OS, Distributed Kafka Ingestion" : projNames) + "\n" +
-                    "• **Core Stack:** " + (skillNames.isBlank() ? "Java 21, Spring Boot, Python, FastAPI, React, PostgreSQL, Docker" : skillNames) + "\n" +
-                    "You can ask me to explain any project, architecture, skill, or experience in **English, Hindi (हिंदी), or Hinglish**!";
-        }
-    }
-
-    private boolean isHindiOrHinglish(String text) {
-        String[] hindiKeywords = {
-                "kya", "hai", "kaun", "batao", "samjhao", "kaise", "kaha", "kare", "karna", "baare",
-                "naam", "banaya", "banaye", "bana", "chahiye", "bhi", "nahi", "karo", "bataye",
-                "kaunse", "kisme", "sara", "chij", "dikhao", "hinglish", "hindi", "ke", "ka", "ki", "me", "mein"
+        return switch (IntentClassifier.classify(query).lang()) {
+            case HINDI -> "Hindi";
+            case HINGLISH -> "Hinglish";
+            default -> "English";
         };
-        for (String kw : hindiKeywords) {
-            if (text.matches(".*\\b" + kw + "\\b.*")) {
-                return true;
-            }
-        }
-        return false;
     }
+
+    public String generateAnswer(String query, List<AiKnowledgeChunk> chunks, AiConfiguration config) {
+        Classification c = IntentClassifier.classify(query);
+
+        // Safety net: the service already routes these without touching the engine.
+        switch (c.intent()) {
+            case GREETING: return AnswerBuilder.greeting(c.lang());
+            case ACKNOWLEDGEMENT: return AnswerBuilder.acknowledgement(c.lang());
+            case UNKNOWN: return AssistantIdentity.UNKNOWN_ANSWER;
+            default: break;
+        }
+
+        List<ChunkFact> chunkFacts = toChunkFacts(chunks);
+        PortfolioFacts facts = loadFacts(c.topic());
+        String local = AnswerBuilder.build(c, facts);
+        String apiKey = resolveApiKey(config);
+
+        if (local != null && !AssistantIdentity.UNKNOWN_ANSWER.equals(local)) {
+            // Structured topics (projects, stack, database, education ...) are answered deterministically; Gemini is
+            // only used to elaborate when the visitor explicitly asked for detail.
+            if (c.detailed() && apiKey != null) {
+                String rephrased = callGemini(apiKey, config, c, query, facts, chunkFacts);
+                if (rephrased != null) return rephrased;
+            }
+            return local;
+        }
+
+        if (chunkFacts.isEmpty()) {
+            return AssistantIdentity.UNKNOWN_ANSWER;      // clear topic but no data, or nothing relevant retrieved
+        }
+        if (apiKey != null) {
+            String generated = callGemini(apiKey, config, c, query, facts, chunkFacts);
+            if (generated != null) return generated;
+        }
+        return AnswerBuilder.fromChunks(chunkFacts, c.detailed());
+    }
+
+    // ------------------------------------------------------------------ facts (only what the topic needs)
+
+    private PortfolioFacts loadFacts(Topic topic) {
+        List<PortfolioFacts.ProjectFact> projects = List.of();
+        List<PortfolioFacts.SkillFact> skills = List.of();
+        List<PortfolioFacts.EducationFact> education = List.of();
+        List<PortfolioFacts.ExperienceFact> experience = List.of();
+        List<PortfolioFacts.AchievementFact> achievements = List.of();
+        List<PortfolioFacts.CertificationFact> certifications = List.of();
+        List<PortfolioFacts.DsaFact> dsa = List.of();
+        List<PortfolioFacts.StoryFact> stories = List.of();
+        PortfolioFacts.ProfileFact profile = null;
+
+        switch (topic) {
+            case PROJECTS, NONE -> projects = publishedProjects();
+            case TECH_STACK, DATABASE -> { skills = skills(); projects = publishedProjects(); }
+            case EDUCATION -> education = education();
+            case EXPERIENCE -> experience = experience();
+            case ACHIEVEMENTS -> { achievements = achievements(); certifications = certifications(); }
+            case CODING -> dsa = dsa();
+            case CONTRIBUTIONS -> stories = stories();
+            case ABOUT -> profile = profile();
+            default -> { }
+        }
+        return new PortfolioFacts(profile, projects, skills, education, experience, achievements, certifications, dsa, stories);
+    }
+
+    private List<PortfolioFacts.ProjectFact> publishedProjects() {
+        List<PortfolioFacts.ProjectFact> out = new ArrayList<>();
+        for (Project p : projectRepository.findByStatusAndDeletedAtIsNull(ProjectStatus.PUBLISHED, Pageable.unpaged()).getContent()) {
+            List<String> techs = p.getTechnologies() == null ? List.of()
+                    : p.getTechnologies().stream().map(Skill::getName).collect(Collectors.toList());
+            out.add(new PortfolioFacts.ProjectFact(p.getTitle(), p.getSlug(), p.getShortSummary(), p.getFullDescription(),
+                    notBlank(p.getSystemArchitecture()) ? p.getSystemArchitecture() : p.getArchitectureStyle(),
+                    p.getStatus() == null ? null : p.getStatus().name(), p.getProgress(), p.getGithubRepoUrl(), p.getLiveDemoUrl(), techs));
+        }
+        return out;
+    }
+
+    private List<PortfolioFacts.SkillFact> skills() {
+        return skillRepository.findAll().stream()
+                .map(s -> new PortfolioFacts.SkillFact(s.getName(), s.getCategory() == null ? null : s.getCategory().getName(), s.isFeatured(), s.getProficiency()))
+                .collect(Collectors.toList());
+    }
+
+    private List<PortfolioFacts.EducationFact> education() {
+        return educationRepository.findAllByOrderByStartDateDesc().stream()
+                .map(e -> new PortfolioFacts.EducationFact(e.getDegree(), e.getField(), e.getInstitution(), date(e.getStartDate()), date(e.getEndDate())))
+                .collect(Collectors.toList());
+    }
+
+    private List<PortfolioFacts.ExperienceFact> experience() {
+        return experienceRepository.findAllByOrderByStartDateDesc().stream()
+                .map(e -> new PortfolioFacts.ExperienceFact(e.getRole(), e.getCompany(), e.isCurrent(), date(e.getStartDate()), date(e.getEndDate())))
+                .collect(Collectors.toList());
+    }
+
+    private List<PortfolioFacts.AchievementFact> achievements() {
+        return achievementRepository.findAllByOrderByDateDesc().stream()
+                .map(a -> new PortfolioFacts.AchievementFact(a.getTitle(), a.getOrganization()))
+                .collect(Collectors.toList());
+    }
+
+    private List<PortfolioFacts.CertificationFact> certifications() {
+        return certificationRepository.findAllByOrderByIssueDateDesc().stream()
+                .map(c -> new PortfolioFacts.CertificationFact(c.getTitle(), c.getIssuer()))
+                .collect(Collectors.toList());
+    }
+
+    private List<PortfolioFacts.DsaFact> dsa() {
+        return dsaProblemRepository.findAll().stream()
+                .map(d -> new PortfolioFacts.DsaFact(d.getTitle(), d.getPlatform(), d.getDifficulty()))
+                .collect(Collectors.toList());
+    }
+
+    private List<PortfolioFacts.StoryFact> stories() {
+        return storyRepository.findAllByOrderByContributionDateDesc(PageRequest.of(0, 20)).getContent().stream()
+                .map(s -> new PortfolioFacts.StoryFact(s.getRepository(), s.getTitle(), s.getPrUrl()))
+                .collect(Collectors.toList());
+    }
+
+    private PortfolioFacts.ProfileFact profile() {
+        Profile p = profileRepository.findAll().stream().findFirst().orElse(null);
+        return p == null ? null : new PortfolioFacts.ProfileFact(p.getFullName(), p.getHeadline(), p.getBio());
+    }
+
+    // ------------------------------------------------------------------ Gemini (optional)
+
+    private String resolveApiKey(AiConfiguration config) {
+        if (config != null && notBlank(config.getApiKey())) return config.getApiKey().trim();
+        return notBlank(envGeminiKey) ? envGeminiKey.trim() : null;
+    }
+
+    private String callGemini(String apiKey, AiConfiguration config, Classification c, String query, PortfolioFacts facts, List<ChunkFact> chunks) {
+        try {
+            String model = config != null && notBlank(config.getModelName()) ? config.getModelName().trim() : "gemini-1.5-flash";
+            Map<String, Object> body = Map.of(
+                    "contents", List.of(Map.of("parts", List.of(Map.of("text", buildPrompt(config, c, query, facts, chunks))))),
+                    "generationConfig", Map.of("temperature", 0.2, "maxOutputTokens", 350));
+            HttpRequest request = HttpRequest.newBuilder(URI.create("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent"))
+                    .timeout(Duration.ofSeconds(12))
+                    .header("Content-Type", "application/json")
+                    .header("x-goog-api-key", apiKey)             // header, not ?key= (keeps the key out of URLs and logs)
+                    .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body)))
+                    .build();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                log.warn("Gemini responded with HTTP {}", response.statusCode());
+                return null;
+            }
+            JsonNode root = objectMapper.readTree(response.body());
+            String text = root.path("candidates").path(0).path("content").path("parts").path(0).path("text").asText("");
+            return ResponsePolicy.apply(text, c.detailed());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
+        } catch (Exception e) {
+            log.warn("Gemini call failed: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    private String buildPrompt(AiConfiguration config, Classification c, String query, PortfolioFacts facts, List<ChunkFact> chunks) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("You are \"").append(AssistantIdentity.NAME).append("\", the assistant on Raviranjan's portfolio website. ")
+          .append("You are NOT Raviranjan; refer to him as \"he\" or \"Raviranjan\". This name overrides any other name you were given.\n\n")
+          .append("RULES\n")
+          .append("1. Answer ONLY from the CONTEXT below. Never guess.\n")
+          .append("2. Give the exact answer first, in 1-3 short sentences").append(c.detailed() ? " (the visitor asked for detail: up to 8 sentences)" : "").append(". No greeting, no introduction, no closing line.\n")
+          .append("3. Use bullet points only for lists of three or more items.\n")
+          .append("4. Never repeat a fact or mention the same technology twice. Never summarise the whole portfolio.\n")
+          .append("5. Add a markdown link such as [GitHub](url) only when a URL appears in the CONTEXT and is relevant.\n")
+          .append("6. If the CONTEXT does not contain the answer, reply exactly: ").append(AssistantIdentity.UNKNOWN_ANSWER).append('\n')
+          .append("7. Never mention servers, databases or infrastructure of this website.\n")
+          .append("8. Reply in the visitor's language (English, Hindi or Hinglish).\n");
+        if (config != null && notBlank(config.getSystemPrompt())) {
+            String extra = config.getSystemPrompt().trim();
+            sb.append("\nOWNER NOTES (lower priority than the rules above): ").append(extra.length() > 800 ? extra.substring(0, 800) : extra).append('\n');
+        }
+        sb.append("\nCONTEXT\n");
+        for (ChunkFact ch : chunks) {
+            String content = ch.content() == null ? "" : ch.content();
+            sb.append("- ").append(ch.title()).append(": ").append(content.length() > MAX_CHUNK_CHARS ? content.substring(0, MAX_CHUNK_CHARS) : content);
+            if (ch.url() != null && ch.url().startsWith("http")) sb.append(" (").append(ch.url()).append(')');
+            sb.append('\n');
+        }
+        for (PortfolioFacts.ProjectFact p : facts.projects()) {
+            sb.append("- Project ").append(p.title()).append(": ").append(p.summary() == null ? "" : p.summary());
+            if (!p.technologies().isEmpty()) sb.append(" Technologies: ").append(String.join(", ", TechNames.unique(p.technologies()))).append('.');
+            if (p.githubUrl() != null) sb.append(" (").append(p.githubUrl()).append(')');
+            sb.append('\n');
+        }
+        sb.append("\nVISITOR QUESTION: ").append(query).append("\nANSWER:");
+        return sb.toString();
+    }
+
+    // ------------------------------------------------------------------ small helpers
+
+    private static List<ChunkFact> toChunkFacts(List<AiKnowledgeChunk> chunks) {
+        List<ChunkFact> out = new ArrayList<>();
+        if (chunks == null) return out;
+        for (AiKnowledgeChunk ch : chunks) out.add(new ChunkFact(ch.getTitle(), ch.getUrl(), ch.getContent()));
+        return out;
+    }
+
+    private static String date(LocalDate d) { return d == null ? null : d.toString(); }
+
+    private static boolean notBlank(String s) { return s != null && !s.isBlank(); }
 }
